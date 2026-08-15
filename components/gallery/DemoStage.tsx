@@ -8,10 +8,11 @@ type FrameState = { width: number; height: number; scale: number }
 
 type Props = {
   demo: Demo | null
-  onOpenNote?: (demo: Demo) => void
+  detailOpen?: boolean
+  onCloseDetail?: () => void
 }
 
-export function DemoStage({ demo, onOpenNote }: Props) {
+export function DemoStage({ demo, detailOpen = false, onCloseDetail }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [frame, setFrame] = useState<FrameState>({ width: 1, height: 1, scale: 1 })
   const [failedUrl, setFailedUrl] = useState<string | null>(null)
@@ -99,11 +100,37 @@ export function DemoStage({ demo, onOpenNote }: Props) {
         </div>
       ) : null}
 
-      {demo ? (
+      {demo && detailOpen ? (
         <div className="pointer-events-none absolute top-0 right-16 left-0 z-10 p-3 sm:right-4 sm:p-4">
-          <div className="pointer-events-auto max-w-md rounded-2xl bg-white/92 p-3 shadow-[0_2px_16px_rgb(0_0_0/0.08)] ring-1 ring-black/5 backdrop-blur-sm sm:p-4 dark:bg-[#1a1a1a]/92 dark:ring-white/10">
-            <p className="text-sm font-semibold text-[#111] dark:text-white">{demo.name}</p>
+          <div
+            role="dialog"
+            aria-label={`${demo.name} details`}
+            className="pointer-events-auto max-w-md rounded-2xl bg-white/92 p-3 shadow-[0_2px_16px_rgb(0_0_0/0.08)] ring-1 ring-black/5 backdrop-blur-sm sm:p-4 dark:bg-[#1a1a1a]/92 dark:ring-white/10"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-semibold text-[#111] dark:text-white">{demo.name}</p>
+              {onCloseDetail ? (
+                <button
+                  type="button"
+                  onClick={onCloseDetail}
+                  aria-label="Hide project details"
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[#777] transition-colors hover:bg-black/5 hover:text-[#111] dark:hover:bg-white/8 dark:hover:text-white"
+                >
+                  <svg viewBox="0 0 10 10" aria-hidden className="h-2.5 w-2.5">
+                    <path
+                      d="M2 2L8 8M8 2L2 8"
+                      stroke="currentColor"
+                      strokeWidth="1.25"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              ) : null}
+            </div>
             <p className="mt-1 text-[0.75rem] leading-snug text-[#666] dark:text-[#aaa]">{demo.blurb}</p>
+            {demo.note ? (
+              <p className="mt-2 text-[0.75rem] leading-relaxed text-[#555] dark:text-[#bbb]">{demo.note}</p>
+            ) : null}
             <div className="mt-2 flex flex-wrap gap-1">
               {demo.tags.map((tag) => (
                 <span
@@ -134,15 +161,6 @@ export function DemoStage({ demo, onOpenNote }: Props) {
                 >
                   GitHub
                 </a>
-              ) : null}
-              {demo.note && onOpenNote ? (
-                <button
-                  type="button"
-                  onClick={() => onOpenNote(demo)}
-                  className="rounded-full border border-black/10 px-3 py-1 text-[0.7rem] font-medium text-[#333] dark:border-white/10 dark:text-[#ddd]"
-                >
-                  Details
-                </button>
               ) : null}
             </div>
           </div>

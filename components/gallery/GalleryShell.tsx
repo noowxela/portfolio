@@ -5,7 +5,6 @@ import { Demo } from '@/data/demos'
 import { DemoSidebar } from './DemoSidebar'
 import { DemoStage } from './DemoStage'
 import { IdentityChip } from './IdentityChip'
-import { DemoNote } from './DemoNote'
 
 function subscribeMobile(onChange: () => void) {
   const mq = window.matchMedia('(max-width: 639px)')
@@ -25,12 +24,22 @@ export function GalleryShell({ demos }: { demos: Demo[] }) {
   const isMobile = useIsMobile()
   const [selected, setSelected] = useState<Demo>(demos[0])
   const [userCollapsed, setUserCollapsed] = useState<boolean | null>(null)
-  const [noteOpen, setNoteOpen] = useState(false)
+  const [detailOpen, setDetailOpen] = useState(false)
   const collapsed = userCollapsed ?? isMobile
 
   const handleSelect = (demo: Demo) => {
     setSelected(demo)
-    setNoteOpen(false)
+    setDetailOpen(false)
+    if (isMobile) setUserCollapsed(true)
+  }
+
+  const handleToggleDetail = (demo: Demo) => {
+    if (selected.name === demo.name) {
+      setDetailOpen((open) => !open)
+      return
+    }
+    setSelected(demo)
+    setDetailOpen(true)
     if (isMobile) setUserCollapsed(true)
   }
 
@@ -40,17 +49,19 @@ export function GalleryShell({ demos }: { demos: Demo[] }) {
         demos={demos}
         selected={selected}
         collapsed={collapsed}
+        detailOpen={detailOpen}
         onSelect={handleSelect}
+        onToggleDetail={handleToggleDetail}
         onToggle={() => setUserCollapsed(!(userCollapsed ?? isMobile))}
       />
       <main className="relative flex min-w-0 flex-1 items-center justify-center overflow-hidden p-4 sm:p-6">
         <DemoStage
           demo={selected}
-          onOpenNote={() => setNoteOpen(true)}
+          detailOpen={detailOpen}
+          onCloseDetail={() => setDetailOpen(false)}
         />
       </main>
       <IdentityChip />
-      <DemoNote demo={selected} open={noteOpen} onClose={() => setNoteOpen(false)} />
     </div>
   )
 }

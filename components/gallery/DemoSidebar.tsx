@@ -12,11 +12,21 @@ type Props = {
   demos: Demo[]
   selected: Demo
   collapsed: boolean
+  detailOpen: boolean
   onSelect: (demo: Demo) => void
+  onToggleDetail: (demo: Demo) => void
   onToggle: () => void
 }
 
-export function DemoSidebar({ demos, selected, collapsed, onSelect, onToggle }: Props) {
+export function DemoSidebar({
+  demos,
+  selected,
+  collapsed,
+  detailOpen,
+  onSelect,
+  onToggleDetail,
+  onToggle,
+}: Props) {
   const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map())
   const navRef = useRef<HTMLDivElement>(null)
   const [sidebarWidth, setSidebarWidth] = useState(200)
@@ -123,37 +133,55 @@ export function DemoSidebar({ demos, selected, collapsed, onSelect, onToggle }: 
               className="active:scale-[0.97]"
               style={{ transition: `transform 1078ms ${MOTION_CURVE}` }}
             >
-              <button
-                onClick={() => onSelect(d)}
-                aria-label={d.name}
-                aria-current={selected.name === d.name ? 'true' : undefined}
-                className="block w-full overflow-hidden rounded-[6px] bg-white text-left outline-2 outline-offset-2 outline-transparent transition-[outline-color,box-shadow] duration-200 hover:shadow-[0_2px_12px_rgb(0_0_0/0.1)] dark:bg-[#1a1a1a]"
+              <div
+                className="overflow-hidden rounded-[6px] bg-white outline-2 outline-offset-2 outline-transparent transition-[outline-color,box-shadow] duration-200 hover:shadow-[0_2px_12px_rgb(0_0_0/0.1)] dark:bg-[#1a1a1a]"
                 style={{
                   outlineColor: selected.name === d.name ? 'currentColor' : 'transparent',
                   outlineStyle: 'solid',
                 }}
               >
-                <div className="relative aspect-video w-full overflow-hidden">
-                  {d.isNew && (
-                    <span className="absolute top-1.5 right-1.5 z-[1] rounded-full bg-[#e8756a] px-[7px] py-0.5 text-[0.55rem] leading-[1.5] font-bold tracking-[0.06em] text-white uppercase">
-                      New
-                    </span>
-                  )}
-                  <Image
-                    src={d.thumb}
-                    alt=""
-                    fill
-                    sizes="(min-width: 640px) 227px, 175px"
-                    className="block h-full w-full object-cover"
-                  />
-                </div>
-                <div className="px-2 py-1.5">
+                <button
+                  type="button"
+                  onClick={() => onSelect(d)}
+                  aria-label={d.name}
+                  aria-current={selected.name === d.name ? 'true' : undefined}
+                  className="block w-full text-left"
+                >
+                  <div className="relative aspect-video w-full overflow-hidden">
+                    {d.isNew && (
+                      <span className="absolute top-1.5 right-1.5 z-[1] rounded-full bg-[#e8756a] px-[7px] py-0.5 text-[0.55rem] leading-[1.5] font-bold tracking-[0.06em] text-white uppercase">
+                        New
+                      </span>
+                    )}
+                    <Image
+                      src={d.thumb}
+                      alt=""
+                      fill
+                      sizes="(min-width: 640px) 227px, 175px"
+                      className="block h-full w-full object-cover"
+                    />
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onToggleDetail(d)}
+                  aria-expanded={detailOpen && selected.name === d.name}
+                  aria-label={
+                    detailOpen && selected.name === d.name
+                      ? `Hide ${d.name} details`
+                      : `Show ${d.name} details`
+                  }
+                  className="group relative block w-full px-2 py-1.5 text-left transition-colors hover:bg-black/4 dark:hover:bg-white/5"
+                >
                   <p className="truncate text-[0.7rem] font-medium text-[#111] dark:text-white">{d.name}</p>
                   <p className="truncate text-[0.6rem] text-[#888] dark:text-[#999]">
                     {d.tags.slice(0, 2).join(' · ')}
                   </p>
-                </div>
-              </button>
+                  <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 -translate-x-1/2 rounded bg-[#222] px-2 py-1 text-[0.65rem] whitespace-nowrap text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 dark:bg-[#eee] dark:text-black">
+                    {detailOpen && selected.name === d.name ? 'Hide details' : 'Show details'}
+                  </span>
+                </button>
+              </div>
             </li>
           ))}
         </ul>

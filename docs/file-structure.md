@@ -31,7 +31,6 @@ flowchart TD
   B --> E[DemoSidebar]
   B --> F[DemoStage]
   B --> G[IdentityChip]
-  B --> H[DemoNote]
   I[data/demos.ts] --> A
   J[data/headerNavLinks.ts] --> D
   K[data/site.ts] --> D
@@ -40,7 +39,7 @@ flowchart TD
 
 1. **`app/layout.tsx`** wraps every page with fonts, theme support, metadata, and the top-right nav pill.
 2. **`app/page.tsx`** loads the demo list and renders the gallery shell.
-3. **`GalleryShell`** holds client state (selected demo, sidebar collapsed, project notes) and lays out the gallery.
+3. **`GalleryShell`** holds client state (selected demo, sidebar collapsed, project details open) and lays out the gallery.
 4. **`app/about/page.tsx`** is a short bio and contact page — not a second homepage.
 
 ---
@@ -75,10 +74,9 @@ These files implement the gallery layout.
 
 | File | Role |
 |------|------|
-| `GalleryShell.tsx` | **Orchestrator.** Manages selected demo, sidebar collapse (defaults collapsed on small screens), and the project-notes overlay. |
-| `DemoSidebar.tsx` | Left column: thumbnail list with titles, selection outline, collapse animation, ⌘+[ shortcut. |
-| `DemoStage.tsx` | Center: iframe (or fallback card if embedding is blocked), scaled to fit, with name/blurb/Live/GitHub overlay. |
-| `DemoNote.tsx` | Slide-over with a short project note, stack tags, and links. |
+| `GalleryShell.tsx` | **Orchestrator.** Manages selected demo, sidebar collapse (defaults collapsed on small screens), and the project-details overlay. |
+| `DemoSidebar.tsx` | Left column: thumbnail list with titles, selection outline, collapse animation, ⌘+[ shortcut. Title row toggles the details card. |
+| `DemoStage.tsx` | Center: iframe (or fallback card if embedding is blocked), scaled to fit, with an optional name/blurb/Live/GitHub overlay. |
 | `NavPill.tsx` | Fixed top-right pill: Home / About, theme toggle, GitHub, LinkedIn, email. |
 | `IdentityChip.tsx` | Bottom-left chip with name and role; links to About. Collapses on small screens. |
 | `PillButton.tsx` | Reusable rounded button/link used by the sidebar toggle, nav pill, and identity chip. |

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { PillButton } from '@/components/gallery/PillButton'
 import ThemeSwitch from '@/components/ThemeSwitch'
+import { setThemeWithTransition } from '@/components/setThemeWithTransition'
 import headerNavLinks from '@/data/headerNavLinks'
 import { site } from '@/data/site'
 
@@ -162,7 +163,7 @@ function MobileThemeRow() {
         {themeOptions.map((opt) => (
           <button
             key={opt.value}
-            onClick={() => setTheme(opt.value)}
+            onClick={() => setThemeWithTransition(setTheme, opt.value)}
             className={`rounded-lg px-2 py-1 text-[0.7rem] font-medium transition-colors ${
               theme === opt.value
                 ? 'bg-black/8 text-[#111] dark:bg-white/12 dark:text-white'
