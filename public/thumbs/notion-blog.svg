@@ -1,0 +1,17 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#f8fafc"/>
+  <rect x="80" y="80" width="360" height="560" rx="16" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="112" y="112" width="200" height="24" rx="6" fill="#0f172a"/>
+  <rect x="112" y="168" width="296" height="14" rx="7" fill="#cbd5e1"/>
+  <rect x="112" y="196" width="248" height="14" rx="7" fill="#e2e8f0"/>
+  <rect x="112" y="248" width="296" height="120" rx="10" fill="#f1f5f9"/>
+  <rect x="112" y="388" width="296" height="120" rx="10" fill="#f1f5f9"/>
+  <rect x="480" y="80" width="720" height="560" rx="16" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="528" y="128" width="400" height="32" rx="8" fill="#0f172a"/>
+  <rect x="528" y="184" width="624" height="16" rx="8" fill="#cbd5e1"/>
+  <rect x="528" y="216" width="560" height="16" rx="8" fill="#e2e8f0"/>
+  <rect x="528" y="248" width="600" height="16" rx="8" fill="#e2e8f0"/>
+  <rect x="528" y="312" width="624" height="16" rx="8" fill="#e2e8f0"/>
+  <rect x="528" y="344" width="520" height="16" rx="8" fill="#e2e8f0"/>
+  <text x="80" y="680" fill="#334155" font-size="28" font-family="Inter, Arial, sans-serif" font-weight="600">Notion Blog</text>
+</svg>

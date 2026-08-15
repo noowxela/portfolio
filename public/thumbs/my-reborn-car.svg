@@ -1,0 +1,12 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#111827"/>
+  <ellipse cx="640" cy="520" rx="280" ry="36" fill="#000000" opacity="0.45"/>
+  <rect x="430" y="280" width="420" height="180" rx="24" fill="#374151"/>
+  <rect x="470" y="250" width="80" height="40" rx="8" fill="#6b7280"/>
+  <rect x="730" y="250" width="80" height="40" rx="8" fill="#6b7280"/>
+  <circle cx="520" cy="470" r="48" fill="#1f2937" stroke="#9ca3af" stroke-width="10"/>
+  <circle cx="760" cy="470" r="48" fill="#1f2937" stroke="#9ca3af" stroke-width="10"/>
+  <rect x="560" y="310" width="160" height="28" rx="6" fill="#f59e0b"/>
+  <text x="80" y="80" fill="#f3f4f6" font-size="32" font-family="Inter, Arial, sans-serif" font-weight="600">My Reborn Car</text>
+  <text x="80" y="120" fill="#9ca3af" font-size="20" font-family="Inter, Arial, sans-serif">Three.js</text>
+</svg>

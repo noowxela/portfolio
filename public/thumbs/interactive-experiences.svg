@@ -1,0 +1,10 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#042f2e"/>
+  <circle cx="360" cy="360" r="140" fill="#14b8a6" opacity="0.35"/>
+  <circle cx="640" cy="280" r="90" fill="#2dd4bf" opacity="0.5"/>
+  <circle cx="900" cy="400" r="160" fill="#0d9488" opacity="0.4"/>
+  <rect x="200" y="520" width="880" height="16" rx="8" fill="#99f6e4" opacity="0.4"/>
+  <rect x="320" y="556" width="640" height="12" rx="6" fill="#5eead4" opacity="0.35"/>
+  <text x="80" y="80" fill="#ccfbf1" font-size="32" font-family="Inter, Arial, sans-serif" font-weight="600">Interactive Experiences</text>
+  <text x="80" y="120" fill="#5eead4" font-size="20" font-family="Inter, Arial, sans-serif">Mini games</text>
+</svg>
