@@ -1,6 +1,7 @@
 'use client'
 
 import { Demo } from '@/data/demos'
+import { withBasePath } from '@/lib/withBasePath'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { PillButton } from './PillButton'
@@ -154,7 +155,7 @@ export function DemoSidebar({
                       </span>
                     )}
                     <Image
-                      src={d.thumb}
+                      src={withBasePath(d.thumb)}
                       alt=""
                       fill
                       sizes="(min-width: 640px) 227px, 175px"

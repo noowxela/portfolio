@@ -2,11 +2,15 @@ import type { NextConfig } from 'next'
 import path from 'path'
 
 const isGithubPages = process.env.GITHUB_PAGES === 'true'
+const basePath = isGithubPages ? '/portfolio' : ''
 
 const nextConfig: NextConfig = {
   output: 'export',
   trailingSlash: true,
-  ...(isGithubPages ? { basePath: '/portfolio' } : {}),
+  ...(basePath ? { basePath } : {}),
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
   reactStrictMode: false,
   transpilePackages: ['next-themes'],
   turbopack: {
