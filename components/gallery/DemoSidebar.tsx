@@ -123,7 +123,7 @@ export function DemoSidebar({
         }}
       >
         <ul className="m-0 flex list-none flex-col gap-3 p-4 pr-3">
-          {demos.map((d) => (
+          {demos.map((d, index) => (
             <li
               key={d.name}
               ref={(el) => {
@@ -158,6 +158,8 @@ export function DemoSidebar({
                       alt=""
                       fill
                       sizes="(min-width: 640px) 227px, 175px"
+                      priority={index === 0}
+                      loading={index === 0 ? 'eager' : 'lazy'}
                       className="block h-full w-full object-cover"
                     />
                   </div>

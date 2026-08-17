@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import path from 'path'
 
 const ContentSecurityPolicy = `
   default-src 'self';
@@ -20,6 +21,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  transpilePackages: ['next-themes'],
+  turbopack: {
+    // Must be this app, not a parent folder. `__dirname` in compiled next.config.ts
+    // can resolve to the workspace root and break `next-themes`.
+    root: path.resolve(process.cwd()),
+  },
   images: {
     remotePatterns: [
       {
