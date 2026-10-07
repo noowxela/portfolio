@@ -11,7 +11,7 @@ export function AboutHexGlow() {
   useEffect(() => {
     const glow = ref.current
     const page = glow?.closest('.about-page')
-    if (!glow || !page) return
+    if (!glow || !(page instanceof HTMLElement)) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const place = (event: PointerEvent) => {
