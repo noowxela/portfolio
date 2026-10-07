@@ -22,7 +22,7 @@ export default function OpenGraphImage() {
         }}
       >
         <div style={{ fontSize: 28, letterSpacing: 4, textTransform: 'uppercase', color: '#888' }}>
-          Demo gallery
+          Portfolio
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ fontSize: 80, fontWeight: 700, letterSpacing: -2 }}>{site.name}</div>

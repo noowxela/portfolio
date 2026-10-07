@@ -22,20 +22,20 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${site.name} — Demo Gallery`,
+    default: site.name,
     template: `%s · ${site.name}`,
   },
   description: site.description,
   authors: [{ name: site.fullName, url: site.github }],
   openGraph: {
-    title: `${site.name} — Demo Gallery`,
+    title: site.name,
     description: site.description,
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${site.name} — Demo Gallery`,
+    title: site.name,
     description: site.description,
   },
 }

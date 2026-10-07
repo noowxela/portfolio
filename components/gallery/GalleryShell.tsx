@@ -44,7 +44,7 @@ export function GalleryShell({ demos }: { demos: Demo[] }) {
   }
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-[#eeeeee] font-sans dark:bg-[#0d0d0d]">
+    <div className="box-border flex h-dvh overflow-hidden bg-[#eeeeee] pt-14 font-sans dark:bg-[#0d0d0d]">
       <DemoSidebar
         demos={demos}
         selected={selected}

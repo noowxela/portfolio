@@ -1,6 +1,6 @@
 # File Structure
 
-This project is a [Next.js](https://nextjs.org) App Router app: a sidebar of demo thumbnails, a live iframe preview, and a thin About/contact layer. Home is the gallery.
+This project is a [Next.js](https://nextjs.org) App Router app. Home is a scroll story. `/work` is the demo gallery (sidebar, live iframe). About is a short bio. See [architecture.md](./architecture.md) for the scroll setup.
 
 ## Directory overview
 
@@ -26,20 +26,22 @@ Generated folders like `.next/` and `node_modules/` are build artifacts — you 
 
 ```mermaid
 flowchart TD
-  A[app/page.tsx] -->|demos array| B[GalleryShell]
+  A[app/page.tsx] -->|featured demos| B[TronHome]
+  W[app/work/page.tsx] -->|demos array| Gallery[GalleryShell]
   C[app/layout.tsx] -->|wraps all pages| D[NavPill + ThemeProviders]
-  B --> E[DemoSidebar]
-  B --> F[DemoStage]
-  B --> G[IdentityChip]
+  Gallery --> E[DemoSidebar]
+  Gallery --> F[DemoStage]
+  Gallery --> Chip[IdentityChip]
   I[data/demos.ts] --> A
+  I --> W
   J[data/headerNavLinks.ts] --> D
   K[data/site.ts] --> D
   L[app/about/page.tsx] --> D
 ```
 
-1. **`app/layout.tsx`** wraps every page with fonts, theme support, metadata, and the top-right nav pill.
-2. **`app/page.tsx`** loads the demo list and renders the gallery shell.
-3. **`GalleryShell`** holds client state (selected demo, sidebar collapsed, project details open) and lays out the gallery.
+1. **`app/layout.tsx`** wraps every page with fonts, theme support, metadata, and the top header.
+2. **`app/page.tsx`** renders the Legacy-to-Ares scroll story.
+3. **`app/work/page.tsx`** renders `GalleryShell` (selected demo, sidebar, project details).
 4. **`app/about/page.tsx`** is a short bio and contact page — not a second homepage.
 
 ---
@@ -48,7 +50,8 @@ flowchart TD
 
 | File | Role |
 |------|------|
-| `page.tsx` | Home route (`/`). Server component that imports `demos` and passes them to `GalleryShell`. |
+| `page.tsx` | Home route (`/`). Scroll story. |
+| `work/page.tsx` | Gallery route (`/work`). Passes `demos` to `GalleryShell`. |
 | `about/page.tsx` | About route (`/about`). Bio, focus, and contact links. |
 | `layout.tsx` | Root HTML shell: Inter font, metadata, `ThemeProviders`, and `NavPill`. |
 | `theme-providers.tsx` | Client wrapper around `next-themes` for light / dark / system mode. |
@@ -66,7 +69,11 @@ Shared UI that is not tied to a specific route.
 
 | File | Role |
 |------|------|
-| `ThemeSwitch.tsx` | Sun/moon toggle button used inside the nav pill. |
+| `ThemeSwitch.tsx` | Sun/moon toggle button used inside the header. |
+
+### `components/home/`
+
+The `/` scroll story. `TronHome` lays out five scenes. `useHomeScroll` starts ScrollSmoother, the pins, and the `--tron` handoff. `tron.css` holds the grid, ribbon, and scene colors.
 
 ### `components/gallery/`
 
@@ -77,9 +84,9 @@ These files implement the gallery layout.
 | `GalleryShell.tsx` | **Orchestrator.** Manages selected demo, sidebar collapse (defaults collapsed on small screens), and the project-details overlay. |
 | `DemoSidebar.tsx` | Left column: thumbnail list with titles, selection outline, collapse animation, ⌘+[ shortcut. Title row toggles the details card. |
 | `DemoStage.tsx` | Center: iframe (or fallback card if embedding is blocked), scaled to fit, with an optional name/blurb/Live/GitHub overlay. |
-| `NavPill.tsx` | Fixed top-right pill: Home / About, theme toggle, GitHub, LinkedIn, email. |
+| `NavPill.tsx` | Fixed top header: alexW, Work, About, social icons, an Available status, and the local date and time. On `/` the bar is dark glass and its edge follows `--tron`. |
 | `IdentityChip.tsx` | Bottom-left chip with name and role; links to About. Collapses on small screens. |
-| `PillButton.tsx` | Reusable rounded button/link used by the sidebar toggle, nav pill, and identity chip. |
+| `PillButton.tsx` | Reusable rounded button/link used by the sidebar toggle, header icons, and identity chip. |
 
 **Client vs server:** files marked `'use client'` run in the browser (state, events, theme). `page.tsx` stays a server component and only passes data down.
 
@@ -93,7 +100,7 @@ Static content — no API calls. Edit these files to change what the gallery sho
 |------|------|
 | `demos.ts` | **Main content file.** Exports the `Demo` type, `demoLiveUrl()`, and the `demos` array. |
 | `site.ts` | Name, role, tagline, and contact URLs used by metadata, nav, identity chip, and About. |
-| `headerNavLinks.ts` | Nav items for the top pill (Home, About). |
+| `headerNavLinks.ts` | Nav items for the header (Home, Work, About). |
 
 ### `Demo` shape
 
@@ -131,7 +138,7 @@ Files here are served from the site root. Thumbnails live in `public/thumbs/`.
 | `tsconfig.json` | TypeScript config; `@/*` alias maps to the project root. |
 | `postcss.config.mjs` | Enables Tailwind CSS v4 via `@tailwindcss/postcss`. |
 | `eslint.config.mjs` | Lint rules for the project. |
-| `package.json` | Scripts: `dev`, `build`, `start`, `lint`. Key deps: `next`, `react`, `@headlessui/react`, `next-themes`. |
+| `package.json` | Scripts: `dev`, `build`, `start`, `lint`. Key deps: `next`, `react`, `gsap`, `@headlessui/react`, `next-themes`. |
 
 ---
 

@@ -8,7 +8,7 @@ export const site = {
     'Live gallery of games, 3D, and web apps by Alex Woon — a full stack developer based in Malaysia.',
   education:
     'B.Sc. Computer Science (Data Science), Multimedia University Malaysia',
-  email: 'noowxela@gmail.com',
+  email: 'alexwoon.jhb@gmail.com',
   github: 'https://github.com/noowxela',
   githubUser: 'noowxela',
   linkedin: 'https://www.linkedin.com/in/alex-woon-jun-rong-6813a5169',

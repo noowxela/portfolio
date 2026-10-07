@@ -67,7 +67,7 @@ export function DemoSidebar({
     <div
       ref={navRef}
       data-collapsed={collapsed || undefined}
-      className="group/sidebar relative z-10 h-dvh w-[200px] shrink-0 overflow-visible sm:w-[260px]"
+      className="group/sidebar relative z-10 h-full w-[200px] shrink-0 overflow-visible sm:w-[260px]"
       style={{
         marginInlineStart: collapsed ? `-${sidebarWidth}px` : '0',
         transition: `margin-inline-start 1078ms ${MOTION_CURVE}`,

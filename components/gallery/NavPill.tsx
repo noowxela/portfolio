@@ -1,16 +1,13 @@
 'use client'
 
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { PillButton } from '@/components/gallery/PillButton'
-import ThemeSwitch from '@/components/ThemeSwitch'
-import { setThemeWithTransition } from '@/components/setThemeWithTransition'
+import { useEffect, useRef, useState } from 'react'
 import headerNavLinks from '@/data/headerNavLinks'
 import { site } from '@/data/site'
 
-const NAV_LINKS = headerNavLinks
+const PAGE_LINKS = headerNavLinks.filter((link) => link.href !== '/')
 
 function GithubIcon({ className }: { className?: string }) {
   return (
@@ -47,6 +44,11 @@ function MailIcon({ className }: { className?: string }) {
   )
 }
 
+function normalizePath(pathname: string) {
+  if (pathname.length > 1 && pathname.endsWith('/')) return pathname.slice(0, -1)
+  return pathname || '/'
+}
+
 const iconLinks = [
   { href: site.github, Icon: GithubIcon, label: 'GitHub', fill: true },
   { href: site.linkedin, Icon: LinkedInIcon, label: 'LinkedIn', fill: true },
@@ -55,125 +57,192 @@ const iconLinks = [
 
 export function NavPill() {
   const pathname = usePathname()
+  const onHome = normalizePath(pathname) === '/'
 
   return (
     <nav
-      className="fixed top-3 left-[calc(100vw-0.75rem)] z-50 flex -translate-x-full items-center gap-px rounded-full bg-white p-1.5 shadow-[0_1px_6px_rgb(0_0_0/0.08)] ring-1 ring-black/5 sm:left-[calc(100vw-1.75rem)] dark:bg-[#1a1a1a] dark:shadow-[0_1px_6px_rgb(0_0_0/0.3)] dark:ring-white/10"
+      className={
+        onHome
+          ? 'site-nav fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--tron,#5ce1ff)_55%,transparent)] bg-[#07080c]/88 pr-4 text-[#d7f6ff] backdrop-blur-md sm:pr-6'
+          : 'site-nav fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-black/8 bg-white/92 pr-4 backdrop-blur-md sm:pr-6 dark:border-white/10 dark:bg-[#111]/92'
+      }
+      data-surface={onHome ? 'tron' : undefined}
       aria-label="Site navigation"
     >
-      {NAV_LINKS.map(({ href, title }) => {
-        const active = pathname === href
-        return (
-          <Link
-            key={href}
-            href={href}
-            aria-current={active ? 'page' : undefined}
-            className={`grid h-[1.8rem] place-items-center rounded-full px-3 text-[0.75rem] font-medium transition-colors duration-150 ${
-              active
-                ? 'bg-black/8 text-[#111] dark:bg-white/12 dark:text-white'
-                : 'text-[#555] hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white'
-            }`}
-          >
-            {title}
-          </Link>
-        )
-      })}
-
-      <span className="mx-0.5 hidden h-4 w-px bg-black/10 sm:block dark:bg-white/10" aria-hidden />
-
-      <div className="hidden items-center gap-px sm:flex">
-        <PillButton
-          tooltip="Theme"
-          className="grid h-[1.8rem] w-[1.8rem] place-items-center"
+      <div className="flex h-full min-w-0 items-center self-stretch">
+        <Link
+          href="/"
+          className={`grid h-full shrink-0 place-items-center px-4 text-[0.78rem] font-medium tracking-tight transition-colors duration-150 sm:px-6 ${
+            onHome
+              ? 'text-white hover:bg-[color-mix(in_srgb,var(--tron,#5ce1ff)_72%,transparent)] hover:text-[#041016] hover:shadow-[inset_0_0_14px_var(--tron,#5ce1ff),0_0_16px_color-mix(in_srgb,var(--tron,#5ce1ff)_75%,transparent)]'
+              : 'text-[#111] hover:bg-[color-mix(in_srgb,#5ce1ff_72%,transparent)] hover:text-[#041016] hover:shadow-[inset_0_0_14px_#5ce1ff,0_0_16px_color-mix(in_srgb,#5ce1ff_75%,transparent)] dark:text-white dark:hover:text-[#041016]'
+          }`}
         >
-          <ThemeSwitch />
-        </PillButton>
-
-        {iconLinks.map(({ href, Icon, label, fill }) => (
-          <PillButton
-            key={label}
-            tooltip={label}
-            href={href}
-            target={href.startsWith('mailto:') ? undefined : '_blank'}
-            rel={href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-            aria-label={label}
-            className="grid h-[1.8rem] w-[1.8rem] place-items-center"
-          >
-            <Icon className={`h-[0.95rem] w-[0.95rem] ${fill ? 'fill-current' : ''}`} />
-          </PillButton>
-        ))}
+          alexW
+        </Link>
+        <HeaderRule onHome={onHome} />
+        {PAGE_LINKS.map(({ href, title }) => {
+          const active = normalizePath(pathname) === normalizePath(href)
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={active ? 'page' : undefined}
+              className={`group grid h-full place-items-center px-2.5 text-[0.75rem] font-medium transition-colors duration-150 sm:px-3 ${
+                active
+                  ? onHome
+                    ? 'text-[var(--tron,#5ce1ff)] [text-shadow:0_0_12px_color-mix(in_srgb,var(--tron,#5ce1ff)_85%,transparent)]'
+                    : 'text-[#5ce1ff] [text-shadow:0_0_12px_color-mix(in_srgb,#5ce1ff_85%,transparent)]'
+                  : onHome
+                    ? 'text-[#b7e7f2] hover:text-white'
+                    : 'text-[#555] hover:text-[#111] dark:text-[#aaa] dark:hover:text-white'
+              }`}
+            >
+              <span className="inline-flex items-center">
+                <span
+                  aria-hidden
+                  className={`inline-block overflow-hidden transition-all duration-200 ease-out ${
+                    active
+                      ? 'max-w-4 pr-1.5 opacity-100'
+                      : 'max-w-0 opacity-0 group-hover:max-w-4 group-hover:pr-1.5 group-hover:opacity-100 group-focus-visible:max-w-4 group-focus-visible:pr-1.5 group-focus-visible:opacity-100'
+                  }`}
+                >
+                  [
+                </span>
+                {title}
+                <span
+                  aria-hidden
+                  className={`inline-block overflow-hidden transition-all duration-200 ease-out ${
+                    active
+                      ? 'max-w-4 pl-1.5 opacity-100'
+                      : 'max-w-0 opacity-0 group-hover:max-w-4 group-hover:pl-1.5 group-hover:opacity-100 group-focus-visible:max-w-4 group-focus-visible:pl-1.5 group-focus-visible:opacity-100'
+                  }`}
+                >
+                  ]
+                </span>
+              </span>
+            </Link>
+          )
+        })}
       </div>
 
-      <MobileMoreMenu />
+      <div className="flex h-full items-center self-stretch">
+        <HeaderRule onHome={onHome} />
+        <AvailableMenu onHome={onHome} />
+        <HeaderRule onHome={onHome} />
+        <HeaderClock onHome={onHome} />
+      </div>
     </nav>
   )
 }
 
-function MobileMoreMenu() {
+function HeaderRule({ onHome }: { onHome: boolean }) {
   return (
-    <Menu as="div" className="relative sm:hidden">
+    <span
+      className={`w-px self-stretch ${onHome ? 'bg-white/25' : 'bg-black/15 dark:bg-white/20'}`}
+      aria-hidden
+    />
+  )
+}
+
+function AvailableMenu({ onHome }: { onHome: boolean }) {
+  return (
+    <Menu as="div" className="relative flex h-full">
       <MenuButton
-        aria-label="More actions"
-        className="grid h-[1.8rem] w-[1.8rem] place-items-center rounded-full text-[#555] transition-colors duration-150 hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white"
+        className={`inline-flex h-full cursor-pointer items-center gap-2 px-4 text-[0.72rem] font-medium transition-colors duration-150 ${
+          onHome
+            ? 'text-[#b7e7f2] hover:bg-white/8 hover:text-white data-[open]:bg-white/8 data-[open]:text-white'
+            : 'text-[#555] hover:bg-black/5 hover:text-[#111] data-[open]:bg-black/5 data-[open]:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white dark:data-[open]:bg-white/8 dark:data-[open]:text-white'
+        }`}
       >
-        <svg viewBox="0 0 16 16" aria-hidden className="h-[0.95rem] w-[0.95rem] fill-current">
-          <circle cx="3" cy="8" r="1.25" />
-          <circle cx="8" cy="8" r="1.25" />
-          <circle cx="13" cy="8" r="1.25" />
-        </svg>
+        <span className="available-dot h-1.5 w-1.5 rounded-full bg-[#5ce1ff]" aria-hidden />
+        available
       </MenuButton>
-
-      <MenuItems className="absolute top-full right-0 z-[60] mt-2 min-w-[12rem] rounded-2xl bg-white p-2 shadow-[0_10px_30px_rgb(0_0_0/0.12)] ring-1 ring-black/5 focus:outline-none dark:bg-[#1a1a1a] dark:ring-white/10">
-        <div className="flex flex-col gap-1">
-          <MobileThemeRow />
-
-          <div className="my-1 h-px bg-black/10 dark:bg-white/10" />
-
-          {iconLinks.map(({ href, Icon, label, fill }) => (
-            <MenuItem key={label}>
-              <a
-                href={href}
-                target={href.startsWith('mailto:') ? undefined : '_blank'}
-                rel={href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                className="flex h-10 items-center rounded-xl px-3 text-[#555] transition-colors hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white"
-              >
-                <span className="text-[0.8rem] font-medium">{label}</span>
-                <Icon className={`ml-auto h-[0.95rem] w-[0.95rem] ${fill ? 'fill-current' : ''}`} />
-              </a>
-            </MenuItem>
-          ))}
-        </div>
+      <MenuItems
+        transition
+        className={`absolute top-full left-0 z-[60] w-44 origin-top p-1.5 transition duration-200 ease-out focus:outline-none data-[closed]:scale-y-0 data-[closed]:opacity-0 motion-reduce:transition-none motion-reduce:data-[closed]:scale-y-100 motion-reduce:data-[closed]:opacity-100 ${
+          onHome
+            ? 'bg-[#0c1014] text-[#d7f6ff] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--tron,#5ce1ff)_45%,transparent)]'
+            : 'bg-white shadow-[0_10px_30px_rgb(0_0_0/0.12)] ring-1 ring-black/5 dark:bg-[#1a1a1a] dark:ring-white/10'
+        }`}
+      >
+        {iconLinks.map(({ href, Icon, label, fill }) => (
+          <MenuItem key={label}>
+            <a
+              href={href}
+              target={href.startsWith('mailto:') ? undefined : '_blank'}
+              rel={href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+              className={`flex h-10 items-center rounded-lg px-3 transition-colors data-[focus]:outline-none ${
+                onHome
+                  ? 'text-[#b7e7f2] data-[focus]:bg-white/10 data-[focus]:text-white'
+                  : 'text-[#555] data-[focus]:bg-black/6 data-[focus]:text-[#111] dark:text-[#aaa] dark:data-[focus]:bg-white/8 dark:data-[focus]:text-white'
+              }`}
+            >
+              <Icon className={`h-[0.95rem] w-[0.95rem] ${fill ? 'fill-current' : ''}`} />
+              <span className="ml-2.5 text-[0.8rem] font-medium">{label}</span>
+            </a>
+          </MenuItem>
+        ))}
       </MenuItems>
     </Menu>
   )
 }
 
-const themeOptions = [
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-  { value: 'system', label: 'Auto' },
-] as const
+function HeaderClock({ onHome }: { onHome: boolean }) {
+  const [detailed, setDetailed] = useState(false)
+  const [stamp, setStamp] = useState<{ short: string; full: string; iso: string } | null>(null)
+  const clicks = useRef(0)
+  const clickTimer = useRef<number | null>(null)
 
-function MobileThemeRow() {
-  const { theme, setTheme } = useTheme()
+  useEffect(() => {
+    const format = (date: Date) => {
+      const weekdayRaw = date.toLocaleDateString('en-GB', { weekday: 'short' }).replace('.', '')
+      const weekday = weekdayRaw.charAt(0).toUpperCase() + weekdayRaw.slice(1).toLowerCase()
+      const day = String(date.getDate()).padStart(2, '0')
+      const month = date.toLocaleDateString('en-GB', { month: 'short' })
+      const hh = String(date.getHours()).padStart(2, '0')
+      const mm = String(date.getMinutes()).padStart(2, '0')
+      const ss = String(date.getSeconds()).padStart(2, '0')
+      return {
+        short: `${day} ${month} · ${hh}:${mm}`,
+        full: `${weekday} ${day} ${month} · ${hh}:${mm}:${ss}`,
+        iso: date.toISOString(),
+      }
+    }
+    const tick = () => setStamp(format(new Date()))
+    tick()
+    const id = window.setInterval(tick, 1000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (clickTimer.current) window.clearTimeout(clickTimer.current)
+    }
+  }, [])
+
+  const onClick = () => {
+    clicks.current += 1
+    if (clickTimer.current) window.clearTimeout(clickTimer.current)
+    if (clicks.current >= 3) {
+      clicks.current = 0
+      setDetailed((value) => !value)
+      return
+    }
+    clickTimer.current = window.setTimeout(() => {
+      clicks.current = 0
+    }, 600)
+  }
+
   return (
-    <div className="flex h-10 items-center rounded-xl px-3 text-[#555] dark:text-[#aaa]">
-      <span className="text-[0.8rem] font-medium">Theme</span>
-      <div className="ml-auto flex gap-1">
-        {themeOptions.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => setThemeWithTransition(setTheme, opt.value)}
-            className={`rounded-lg px-2 py-1 text-[0.7rem] font-medium transition-colors ${
-              theme === opt.value
-                ? 'bg-black/8 text-[#111] dark:bg-white/12 dark:text-white'
-                : 'text-[#999] hover:text-[#555] dark:text-[#666] dark:hover:text-[#aaa]'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`cursor-pointer border-0 bg-transparent p-0 pl-4 text-left text-[0.72rem] tabular-nums ${
+        onHome ? 'text-[#b7e7f2]' : 'text-[#555] dark:text-[#aaa]'
+      }`}
+    >
+      <time dateTime={stamp?.iso}>{stamp ? (detailed ? stamp.full : stamp.short) : '–– ––– · ––:––'}</time>
+    </button>
   )
 }

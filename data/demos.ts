@@ -10,6 +10,7 @@ export type Demo = {
   isNew?: boolean
   embeddable?: boolean
   note?: string
+  featured?: boolean
 }
 
 export function demoLiveUrl(demo: Demo) {
@@ -27,6 +28,7 @@ export const demos: Demo[] = [
     blurb: 'A collection of Phaser 2 and Phaser 3 games you can play in the browser.',
     tags: ['Phaser', 'Canvas', 'Games'],
     isNew: true,
+    featured: true,
     note: 'A growing set of browser games built with Phaser 2 and Phaser 3. The gallery is the easiest way to jump between titles without leaving the page. Start here if you want to see how I think about playable, self-contained experiments.',
   },
   {
@@ -37,6 +39,7 @@ export const demos: Demo[] = [
     repoUrl: 'https://github.com/noowxela/car',
     blurb: 'A Three.js car you can orbit, inspect, and drive around in the browser.',
     tags: ['Three.js', 'WebGL'],
+    featured: true,
     note: 'A small Three.js scene built around a car model — camera controls, lighting, and a sense of material rather than a full racing sim. It is a study in putting 3D on the web without a heavy engine.',
   },
   {
@@ -78,6 +81,7 @@ export const demos: Demo[] = [
     repoUrl: 'https://github.com/noowxela/interactiveExperiences',
     blurb: 'A handful of mini-games and interactive sketches in one place.',
     tags: ['Games', 'JavaScript'],
+    featured: true,
     note: 'Short interactive sketches and mini-games collected on one page. Built to try ideas quickly — input, timing, and small loops — without turning each sketch into a full product.',
   },
   {

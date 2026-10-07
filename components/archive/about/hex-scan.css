@@ -1,0 +1,39 @@
+/**
+ * About-page scan, archived. A wide white band travels from the bottom of
+ * the page up to the header over 10s and lights the hex bricks behind the
+ * type. It sat on `.about-scan` inside `.about-hex-field`, over the faint
+ * `.about-hex-grid` (same 56×48 tile). Not mounted.
+ */
+
+.about-scan {
+  position: absolute;
+  inset: -4rem;
+  background-image:
+    linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.2), transparent),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='48' viewBox='0 0 56 48'%3E%3Cpath d='M14 2 L28 10 L28 26 L14 34 L0 26 L0 10 Z' fill='none' stroke='%23ffffff' stroke-width='1.15'/%3E%3Cpath d='M42 26 L56 34 L56 50 L42 58 L28 50 L28 34 Z' fill='none' stroke='%23ffffff' stroke-width='1.15'/%3E%3C/svg%3E");
+  background-size:
+    100% 100%,
+    56px 48px;
+  background-repeat: no-repeat, repeat;
+  opacity: 0.72;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 28%, #000 72%, transparent 100%);
+  mask-size: 100% 20rem;
+  mask-repeat: no-repeat;
+  animation: about-scan 10s linear infinite;
+}
+
+@keyframes about-scan {
+  from {
+    mask-position: 0 calc(100% + 10rem);
+  }
+  to {
+    mask-position: 0 -10rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-scan {
+    animation: none;
+    opacity: 0;
+  }
+}

@@ -79,3 +79,26 @@ button:hover {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@keyframes status-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  55%,
+  100% {
+    opacity: 0.2;
+  }
+}
+
+button:hover .available-dot,
+button[data-open] .available-dot {
+  animation: status-blink 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:hover .available-dot,
+  button[data-open] .available-dot {
+    animation: none;
+  }
+}
