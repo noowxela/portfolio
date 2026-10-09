@@ -779,3 +779,62 @@ html.tron-home body {
     transform: none;
   }
 }
+
+/* Hero mosaic: pixel name you can turn around (HeroMosaic + mosaicScene). */
+.hero-mosaic {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(58vw, 620px);
+  transform: translate(-50%, -50%);
+}
+
+@keyframes mosaic-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.hero-mosaic-stage {
+  position: relative;
+  width: 100%;
+  height: clamp(112px, 16vw, 190px);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--tron) 45%, transparent));
+  animation: mosaic-float 4.5s ease-in-out infinite;
+}
+
+.hero-mosaic-stage[data-dragging='true'] {
+  cursor: grabbing;
+  animation-play-state: paused;
+}
+
+.hero-mosaic-stage[data-mosaic='fallback']::after {
+  content: 'alex woon';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: clamp(2.4rem, 10vw, 6.5rem);
+  letter-spacing: 0.08em;
+  color: #f4feff;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--tron) 75%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mosaic-stage {
+    animation: none;
+  }
+}

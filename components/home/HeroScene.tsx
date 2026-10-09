@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import { site } from '@/data/site'
 import { DiscV2 } from './discs'
+import { HeroMosaic } from './HeroMosaic'
 
 const mistPieces = [
   { left: '8%', from: '3%', to: '34%', w: '20%', h: '7%', dur: '18s', delay: '-4s', drift: '-5%', depth: 'far' },
@@ -50,6 +51,7 @@ export function HeroScene() {
         </div>
       </div>
       <h1 className="hero-name-hidden">{site.name}</h1>
+      <HeroMosaic front={site.name.toLowerCase()} back={site.githubUser} />
       <div className="scroll-stack">
         <div className="scroll-meter" aria-hidden>
           <span data-hero="meter" />

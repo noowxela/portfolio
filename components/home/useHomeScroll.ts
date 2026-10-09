@@ -54,6 +54,7 @@ export function useHomeScroll(
 
         const hero = q('[data-scene="hero"]')
         const floor = q('[data-hero="floor"]')
+        const mosaic = q('[data-hero="mosaic"]')
         const name = q('[data-hero="name"]')
         const ribbon = q('[data-hero="ribbon"]')
         const meter = q('[data-hero="meter"]')
@@ -67,6 +68,7 @@ export function useHomeScroll(
               end: '+=180%',
               pin: true,
               scrub: 0.8,
+              invalidateOnRefresh: true,
             },
           })
           heroTl.fromTo(
@@ -75,6 +77,24 @@ export function useHomeScroll(
             { yPercent: -16, scale: 1.5, rotationX: 80, transformPerspective: 520, ease: 'none' },
             0,
           )
+          if (mosaic) {
+            // The floor's top edge is the far end of the lane. yPercent 8 → -16
+            // moves that edge up by 24% of the floor height. The name follows it
+            // and shrinks, so it reads as farther away. x/yPercent keep the CSS centering.
+            heroTl.fromTo(
+              mosaic,
+              { x: 0, y: 0, xPercent: -50, yPercent: -50, scale: 1 },
+              {
+                x: 0,
+                xPercent: -50,
+                yPercent: -50,
+                y: () => -0.24 * floor.offsetHeight,
+                scale: 0.62,
+                ease: 'none',
+              },
+              0,
+            )
+          }
           if (name) heroTl.fromTo(name, { y: 16 }, { y: -8, ease: 'none' }, 0)
           if (ribbon) {
             heroTl.fromTo(

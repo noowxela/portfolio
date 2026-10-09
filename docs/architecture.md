@@ -30,7 +30,7 @@ About is written up the same way in [tron-about.md](./pages/tron-about.md). ф╕нц
 Desktop (`min-width: 768px` and no reduced motion):
 
 1. `ScrollSmoother` with `effects: true` reads `data-speed` (parallax) and `data-lag` (trailing).
-2. A pinned scrub on the hero moves the cyan grid and the corner disc.
+2. A pinned scrub on the hero moves the cyan grid and the corner disc, and carries the mosaic name up with the horizon while scaling it from 1 to 0.62.
 3. A pinned scrub on the handoff writes `--tron` from Legacy cyan `#5ce1ff` to Ares red `#ff2b2b`.
 4. A pinned scrub moves the featured-project track sideways.
 
