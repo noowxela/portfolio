@@ -18,4 +18,27 @@ export const site = {
     'Three.js and interactive WebGL',
     'Next.js apps, UI kits, and small tools',
   ],
+  toolkit: [
+    {
+      label: 'Languages',
+      items: ['JavaScript', 'TypeScript', 'PHP', 'Python', 'Dart'],
+    },
+    {
+      label: 'Frontend',
+      items: ['Vue.js', 'Nuxt.js', 'React.js', 'Next.js', 'React Native', 'Expo'],
+    },
+    {
+      label: 'Backend',
+      items: ['Laravel', 'Express.js', 'NestJS'],
+    },
+    {
+      label: 'Database',
+      items: ['SQL Server', 'MySQL', 'Oracle', 'MongoDB'],
+    },
+    {
+      label: 'Tools & Platforms',
+      items: ['Git', 'Selenium', 'Playwright', 'Flutter', 'Electron', 'Windows IIS', 'Cursor'],
+    },
+  ],
+  hobbies: ['Badminton', 'Billiard', 'PickleBall', 'Hiking', 'Anime', 'Movie', 'Food and Drink'],
 } as const

@@ -17,12 +17,14 @@ flowchart TD
   role[角色]
   bio[简介]
   focus[Focus]
+  toolkit[Toolkit]
+  hobbies[Hobbies]
   footer[页脚]
   page --> field
   field --> grid
   field --> glow
   page --> article
-  article --> name --> role --> bio --> focus
+  article --> name --> role --> bio --> focus --> toolkit --> hobbies
   page --> footer
 ```
 
@@ -107,7 +109,29 @@ flowchart TD
 
 每一行前面有一颗 `#888` 的 4px 圆点。
 
-## 5. 页脚
+## 5. Toolkit
+
+在 Focus 之后、页脚之前。数据是 `site.toolkit`。
+
+眉题是 `What I work in`，和 Focus 同一套拉开字距的小标题。标题是 `Toolkit`，Oxanium，`clamp(1.8rem, 4vw, 2.4rem)`。浅色 `#111`，深色 `#f4feff`。
+
+五组。每一组是一行：拉开字距的标签（`Languages`，没有编号）在左边，占 `9.5rem`，小标签在右边换行。行与行之间有一条细线（浅色 `border-black/10`，深色 `border-white/10`）。小标签是 `span`，1px 边框，`0.8rem`。它们不是链接。
+
+| | 组 | 内容 |
+| --- | --- | --- |
+| 01 | Languages | JavaScript, TypeScript, PHP, Python, Dart |
+| 02 | Frontend | Vue.js, Nuxt.js, React.js, Next.js, React Native, Expo |
+| 03 | Backend | Laravel, Express.js, NestJS |
+| 04 | Database | SQL Server, MySQL, Oracle, MongoDB |
+| 05 | Tools & Platforms | Git, Selenium, Playwright, Flutter, Electron, Windows IIS, Cursor |
+
+## 6. Hobbies
+
+在 Toolkit 之后、页脚之前。数据是 `site.hobbies`。
+
+没有 `Hobbies` 标题。滚动带本身就是这一节。它是简介栏下面的兄弟元素，上方留 `4rem`，抵消页面左右内边距，铺满页面宽度。上下各有一条细线（浅色 `border-black/10`，深色 `border-white/10`），上下内边距 `1.25rem`，字不贴线。名字是 Badminton、Billiard、PickleBall、Hiking、Anime、Movie、Food and Drink，Oxanium，`1.15rem`，正文色（浅色 `#333`，深色 `#ddd`）。名字之间是 `#888` 的 `/`，左右各 `1.1rem`。名单画两遍，循环才没有空档。第二遍是 `aria-hidden`。左右 14% 保持透明，到 22% 才实，切到的字母读不出来。走完一圈约 28 秒。指针停在带子上时滚动暂停，名字颜色不变。`prefers-reduced-motion` 时动画停掉，淡出取消，第二遍隐藏，名字就地换行，最后一个名字后面不再有 `/`。
+
+## 7. 页脚
 
 一条顶部分隔线，然后三列。浅色线是 `border-black/10`，深色是 `border-white/10`。列标题和 Focus 同一套字距。
 

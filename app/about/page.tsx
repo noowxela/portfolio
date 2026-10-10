@@ -72,9 +72,48 @@ export default function AboutPage() {
             </li>
           ))}
         </ul>
+
+        <h2 className="mt-16 text-[0.7rem] font-semibold tracking-[0.2em] text-[#888] uppercase">
+          What I work in
+        </h2>
+        <p className="about-toolkit-title">Toolkit</p>
+        <ol className="mt-8">
+          {site.toolkit.map((group) => (
+            <li
+              key={group.label}
+              className="mt-4 flex items-start gap-4 border-t border-black/10 pt-4 first:mt-0 dark:border-white/10"
+            >
+              <p className="w-[9.5rem] shrink-0 text-[0.7rem] font-semibold tracking-[0.16em] text-[#888] uppercase">
+                {group.label}
+              </p>
+              <ul className="flex flex-1 flex-wrap gap-2">
+                {group.items.map((item) => (
+                  <li key={item}>
+                    <span className="inline-block border border-black/20 px-2 py-1 text-[0.8rem] text-[#333] dark:border-white/25 dark:text-[#ddd]">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
       </article>
 
-      <footer className="relative z-10 mx-auto mt-24 w-full max-w-2xl border-t border-black/10 py-12 dark:border-white/10">
+      <div className={`${display.variable} about-marquee`}>
+        <ul className="about-marquee-track">
+          {site.hobbies.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+          {site.hobbies.map((item) => (
+            <li key={`${item}-copy`} aria-hidden>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <footer className="relative z-10 mx-auto mt-16 w-full max-w-2xl border-t border-black/10 py-12 dark:border-white/10">
         <div className="grid grid-cols-3 gap-8">
           {columns.map((column) => (
             <div key={column.title}>

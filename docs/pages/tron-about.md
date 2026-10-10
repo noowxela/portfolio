@@ -17,12 +17,14 @@ flowchart TD
   role[Role]
   bio[Bio]
   focus[Focus]
+  toolkit[Toolkit]
+  hobbies[Hobbies]
   footer[Footer]
   page --> field
   field --> grid
   field --> glow
   page --> article
-  article --> name --> role --> bio --> focus
+  article --> name --> role --> bio --> focus --> toolkit --> hobbies
   page --> footer
 ```
 
@@ -107,7 +109,29 @@ The heading is the small tracked label `Focus`. The list is `site.highlights`:
 
 Each row has a 4px dot in `#888`.
 
-## 5. Footer
+## 5. Toolkit
+
+After Focus, before the footer. The data is `site.toolkit`.
+
+The eyebrow is `What I work in`, the same tracked label as Focus. The title is `Toolkit`, Oxanium, `clamp(1.8rem, 4vw, 2.4rem)`, `#111` in light mode and `#f4feff` in dark mode.
+
+Five groups. Each one is a row: the tracked label (`Languages`, no number) in a `9.5rem` column on the left, chips wrapping on the right. A hairline (`border-black/10`, `border-white/10` in dark) separates the rows. A chip is a `span` with a 1px border and `0.8rem` type. Chips are not links.
+
+| | Group | Items |
+| --- | --- | --- |
+| 01 | Languages | JavaScript, TypeScript, PHP, Python, Dart |
+| 02 | Frontend | Vue.js, Nuxt.js, React.js, Next.js, React Native, Expo |
+| 03 | Backend | Laravel, Express.js, NestJS |
+| 04 | Database | SQL Server, MySQL, Oracle, MongoDB |
+| 05 | Tools & Platforms | Git, Selenium, Playwright, Flutter, Electron, Windows IIS, Cursor |
+
+## 6. Hobbies
+
+After the Toolkit, before the footer. The data is `site.hobbies`.
+
+There is no Hobbies label. The scrolling band is the section. It is a sibling under the article, with `4rem` of space above it, and it runs the full width of the page, cancelling the page's side padding. It has a hairline on the top and the bottom (`border-black/10`, `border-white/10` in dark) and `1.25rem` of padding so the type sits off the rules. The names are Badminton, Billiard, PickleBall, Hiking, Anime, Movie, Food and Drink, set in Oxanium at `1.15rem`, in the body color (`#333`, `#ddd` in dark). A `/` in `#888` sits between them, with `1.1rem` on either side. The list is rendered twice so the loop has no gap. The second copy is `aria-hidden`. The edges stay transparent through 14% and are solid by 22%, so a cut letter is not readable. The travel is 28 seconds. While the pointer is over the band the scroll pauses and the names keep their color. `prefers-reduced-motion` stops the animation, drops the fade, hides the second copy, lets the names wrap in place, and drops the slash after the last name.
+
+## 7. Footer
 
 A top rule, then three columns. The rule is `border-black/10` in light mode and `border-white/10` in dark mode. Column labels use the same tracked style as Focus.
 

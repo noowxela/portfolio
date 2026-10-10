@@ -419,6 +419,107 @@ html.tron-home body {
     0 0 64px color-mix(in srgb, var(--tron) 32%, transparent);
 }
 
+.about-toolkit-title {
+  margin-top: 0.75rem;
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  letter-spacing: 0.03em;
+  color: #111;
+}
+
+.dark .about-toolkit-title {
+  color: #f4feff;
+}
+
+.about-marquee {
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+  margin-top: 4rem;
+  margin-inline: -1.5rem;
+  border-block: 1px solid color-mix(in srgb, black 10%, transparent);
+  padding-block: 1.25rem;
+  mask-image: linear-gradient(to right, transparent 14%, #000 22%, #000 78%, transparent 86%);
+}
+
+@media (min-width: 640px) {
+  .about-marquee {
+    margin-inline: -2.5rem;
+  }
+}
+
+.dark .about-marquee {
+  border-color: color-mix(in srgb, white 10%, transparent);
+}
+
+.about-marquee-track {
+  display: flex;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: about-marquee 28s linear infinite;
+}
+
+.about-marquee:hover .about-marquee-track {
+  animation-play-state: paused;
+}
+
+.about-marquee-track li {
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  font-size: 1.15rem;
+  white-space: nowrap;
+  color: #333;
+}
+
+.about-marquee-track li::after {
+  content: '/';
+  margin-inline: 1.1rem;
+  color: #888;
+}
+
+.dark .about-marquee-track li {
+  color: #ddd;
+}
+
+@keyframes about-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-marquee {
+    padding-inline: 1.5rem;
+    mask-image: none;
+  }
+
+  .about-marquee-track {
+    width: auto;
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+    animation: none;
+  }
+
+  .about-marquee-track li[aria-hidden] {
+    display: none;
+  }
+
+  .about-marquee-track li:nth-child(7)::after {
+    content: none;
+  }
+}
+
+@media (min-width: 640px) and (prefers-reduced-motion: reduce) {
+  .about-marquee {
+    padding-inline: 2.5rem;
+  }
+}
+
 .scroll-stack {
   position: absolute;
   bottom: 0.85rem;

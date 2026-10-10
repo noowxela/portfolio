@@ -99,7 +99,7 @@ Static content — no API calls. Edit these files to change what the gallery sho
 | File | Role |
 |------|------|
 | `demos.ts` | **Main content file.** Exports the `Demo` type, `demoLiveUrl()`, and the `demos` array. |
-| `site.ts` | Name, role, tagline, and contact URLs used by metadata, nav, identity chip, and About. |
+| `site.ts` | Name, role, tagline, contact URLs, highlights, the About toolkit, and hobbies. |
 | `headerNavLinks.ts` | Nav items for the header (Home, Work, About). |
 
 ### `Demo` shape
