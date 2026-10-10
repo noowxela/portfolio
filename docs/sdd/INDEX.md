@@ -12,3 +12,4 @@
 | [008-hobbies-marquee.md](./008-hobbies-marquee.md) | implemented | About hobbies marquee |
 | [009-marquee-full-width.md](./009-marquee-full-width.md) | implemented | Full-width hobbies marquee |
 | [010-marquee-clean.md](./010-marquee-clean.md) | implemented | Cleaner hobbies marquee |
+| [011-crt-open.md](./011-crt-open.md) | discarded | CRT open on first home load |
