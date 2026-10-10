@@ -38,7 +38,7 @@ export function useHomeScroll(
       gsap.registerPlugin(ScrollTrigger, ScrollSmoother)
 
       const mm = gsap.matchMedia()
-      const q = (selector: string) => root.querySelector(selector)
+      const q = (selector: string) => root.querySelector<HTMLElement>(selector)
 
       mm.add(DESKTOP, () => {
         ScrollSmoother.get()?.kill()
