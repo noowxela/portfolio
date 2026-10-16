@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { Demo, demoLiveUrl } from '@/data/demos'
+import { Demo, demoLiveUrl, demoThumb } from '@/data/demos'
 import { withBasePath } from '@/lib/withBasePath'
 
 type FrameState = { width: number; height: number; scale: number }
@@ -74,7 +74,7 @@ export function DemoStage({ demo, detailOpen = false, onCloseDetail }: Props) {
           <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_rgb(0_0_0/0.16)] ring-1 ring-black/5 dark:bg-[#1a1a1a] dark:ring-white/10">
             <div className="relative aspect-video w-full bg-[#eee] dark:bg-[#111]">
               <Image
-                src={withBasePath(demo.thumb)}
+                src={withBasePath(demoThumb(demo))}
                 alt=""
                 fill
                 sizes="448px"

@@ -1,7 +1,10 @@
 export type Demo = {
   name: string
   slug: string
+  /** Illustrated SVG fallback. */
   thumb: string
+  /** Real 1440x900 screenshot from scripts/shoot-thumbs.mjs. */
+  shot?: string
   embedUrl: string
   liveUrl?: string
   repoUrl?: string
@@ -17,11 +20,17 @@ export function demoLiveUrl(demo: Demo) {
   return demo.liveUrl ?? demo.embedUrl
 }
 
+/** Best preview image: the real screenshot when there is one, else the SVG. Pass through withBasePath. */
+export function demoThumb(demo: Demo) {
+  return demo.shot ?? demo.thumb
+}
+
 export const demos: Demo[] = [
   {
     name: 'Phaser Examples',
     slug: 'phaser-examples',
     thumb: '/thumbs/phaser-examples.svg',
+    shot: '/thumbs/phaser-examples.webp',
     embedUrl: 'https://noowxela.github.io/phaser-examples/games/index.html',
     liveUrl: 'https://noowxela.github.io/phaser-examples/',
     repoUrl: 'https://github.com/noowxela/phaser-examples',
@@ -35,6 +44,7 @@ export const demos: Demo[] = [
     name: 'My Reborn Car',
     slug: 'my-reborn-car',
     thumb: '/thumbs/my-reborn-car.svg',
+    shot: '/thumbs/my-reborn-car.webp',
     embedUrl: 'https://noowxela.github.io/car/',
     repoUrl: 'https://github.com/noowxela/car',
     blurb: 'A Three.js car you can orbit, inspect, and drive around in the browser.',
@@ -46,6 +56,7 @@ export const demos: Demo[] = [
     name: 'HackerNews Next',
     slug: 'hackernews-next',
     thumb: '/thumbs/hackernews-next.svg',
+    shot: '/thumbs/hackernews-next.webp',
     embedUrl: 'https://hackernews-next-kappa.vercel.app/',
     repoUrl: 'https://github.com/noowxela/hackernews-next',
     blurb: 'A Hacker News reader rebuilt with Next.js and the public HN API.',
@@ -56,6 +67,7 @@ export const demos: Demo[] = [
     name: 'Notion Blog',
     slug: 'notion-blog',
     thumb: '/thumbs/notion-blog.svg',
+    shot: '/thumbs/notion-blog.webp',
     embedUrl: 'https://notion-blog-mu-peach.vercel.app/',
     repoUrl: 'https://github.com/noowxela/notion-blog',
     blurb: 'A Next.js blog backed by the Notion public API.',
@@ -78,6 +90,7 @@ export const demos: Demo[] = [
     name: 'Interactive Experiences',
     slug: 'interactive-experiences',
     thumb: '/thumbs/interactive-experiences.svg',
+    shot: '/thumbs/interactive-experiences.webp',
     embedUrl: 'https://noowxela.github.io/interactiveExperiences/',
     repoUrl: 'https://github.com/noowxela/interactiveExperiences',
     blurb: 'A handful of mini-games and interactive sketches in one place.',
@@ -89,6 +102,7 @@ export const demos: Demo[] = [
     name: 'UI Component Library',
     slug: 'ui-component-library',
     thumb: '/thumbs/ui-component-library.svg',
+    shot: '/thumbs/ui-component-library.webp',
     embedUrl: 'https://noowxela.github.io/ui-component-library/?path=/docs/configure-your-project--docs',
     liveUrl: 'https://noowxela.github.io/ui-component-library/',
     repoUrl: 'https://github.com/noowxela/ui-component-library',
