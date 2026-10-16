@@ -2,37 +2,41 @@
 
 import { useSyncExternalStore } from 'react'
 import { Demo } from '@/data/demos'
-import { UI_PREVIEW } from '@/lib/uiPreview'
 import { CoverflowStage } from './CoverflowStage'
 import { GalleryShell } from './GalleryShell'
-import { CrateView } from './albums/CrateView'
 import { GridView } from './albums/GridView'
 import { ShelfView } from './albums/ShelfView'
 
-const VERSIONS = [
-  { id: '0', label: 'V0 Coverflow' },
-  { id: '1', label: 'V1 Shelf' },
-  { id: '2', label: 'V2 Grid' },
-  { id: '3', label: 'V3 Crate' },
+const VIEWS = [
+  { id: 'coverflow', label: 'Coverflow' },
+  { id: 'shelf', label: 'Shelf' },
+  { id: 'grid', label: 'Grid' },
   { id: 'list', label: 'List' },
 ] as const
-type Version = (typeof VERSIONS)[number]['id']
+type View = (typeof VIEWS)[number]['id']
 
-const DEFAULT: Version = '1'
-const STORAGE_KEY = 'work-preview-version'
-const EVENT = 'work-preview-version'
+const DEFAULT: View = 'shelf'
+const STORAGE_KEY = 'work-view'
+const LEGACY_STORAGE_KEY = 'work-preview-version'
+const EVENT = 'work-view-change'
 
-function isVersion(v: string | null): v is Version {
-  return VERSIONS.some((x) => x.id === v)
+/** Values from the old preview row (?v=0..3); the Crate view (3) was removed, so it falls back to Shelf. */
+const LEGACY: Record<string, View> = { '0': 'coverflow', '1': 'shelf', '2': 'grid', '3': 'shelf' }
+
+function toView(v: string | null): View | null {
+  if (!v) return null
+  if (VIEWS.some((x) => x.id === v)) return v as View
+  return LEGACY[v] ?? null
 }
 
-/** URL `?v=` wins, then localStorage, then V1. */
-function readVersion(): Version {
-  if (!UI_PREVIEW) return DEFAULT
-  const fromUrl = new URLSearchParams(window.location.search).get('v')
-  if (isVersion(fromUrl)) return fromUrl
-  const stored = window.localStorage.getItem(STORAGE_KEY)
-  return isVersion(stored) ? stored : DEFAULT
+/** URL `?v=` wins, then localStorage (new key, then the old preview key), then Shelf. */
+function readView(): View {
+  return (
+    toView(new URLSearchParams(window.location.search).get('v')) ??
+    toView(window.localStorage.getItem(STORAGE_KEY)) ??
+    toView(window.localStorage.getItem(LEGACY_STORAGE_KEY)) ??
+    DEFAULT
+  )
 }
 
 function subscribe(onChange: () => void) {
@@ -44,33 +48,34 @@ function subscribe(onChange: () => void) {
   }
 }
 
-function setVersion(v: Version) {
+function setView(v: View) {
   window.localStorage.setItem(STORAGE_KEY, v)
+  window.localStorage.removeItem(LEGACY_STORAGE_KEY)
   const url = new URL(window.location.href)
   url.searchParams.set('v', v)
   window.history.replaceState(window.history.state, '', url)
   window.dispatchEvent(new Event(EVENT))
 }
 
-/** Dev-only row under the site header for switching Work layouts. */
-function PreviewRow({ version }: { version: Version }) {
+/** View switcher: slim monospace row under the site header, with the PREVIEW tag (kept by request). */
+function ViewSwitcher({ view }: { view: View }) {
   return (
     <div
       role="toolbar"
-      aria-label="Work layout preview"
+      aria-label="Work layout"
       className="fixed inset-x-0 top-14 z-40 flex h-8 items-center gap-1 overflow-x-auto border-b border-dashed border-[#e8756a]/60 bg-[#fff8f6]/95 px-3 font-mono text-[0.62rem] whitespace-nowrap text-[#555] backdrop-blur-sm dark:bg-[#1a1210]/95 dark:text-[#bbb]"
     >
-      <span className="mr-1 rounded bg-[#e8756a] px-1.5 py-px text-[0.55rem] font-bold tracking-[0.12em] text-white">
+      <span aria-hidden className="mr-1 rounded bg-[#e8756a] px-1.5 py-px text-[0.55rem] font-bold tracking-[0.12em] text-white">
         PREVIEW
       </span>
-      {VERSIONS.map((v) => (
+      {VIEWS.map((v) => (
         <button
           key={v.id}
           type="button"
-          aria-pressed={version === v.id}
-          onClick={() => setVersion(v.id)}
+          aria-pressed={view === v.id}
+          onClick={() => setView(v.id)}
           className={`h-6 cursor-pointer rounded px-2 transition-colors ${
-            version === v.id
+            view === v.id
               ? 'bg-[#111] text-white dark:bg-white dark:text-[#111]'
               : 'hover:bg-black/6 hover:text-[#111] dark:hover:bg-white/8 dark:hover:text-white'
           }`}
@@ -83,17 +88,16 @@ function PreviewRow({ version }: { version: Version }) {
 }
 
 export function WorkView({ demos }: { demos: Demo[] }) {
-  const version = useSyncExternalStore(subscribe, readVersion, () => DEFAULT)
+  const view = useSyncExternalStore(subscribe, readView, () => DEFAULT)
 
   return (
-    // --work-top: header (3.5rem) plus the preview row (2rem) when it is shown.
-    <div style={{ ['--work-top' as string]: UI_PREVIEW ? '5.5rem' : '3.5rem' }}>
-      {UI_PREVIEW ? <PreviewRow version={version} /> : null}
-      {version === '0' ? <CoverflowStage demos={demos} /> : null}
-      {version === '1' ? <ShelfView demos={demos} /> : null}
-      {version === '2' ? <GridView demos={demos} /> : null}
-      {version === '3' ? <CrateView demos={demos} /> : null}
-      {version === 'list' ? <GalleryShell demos={demos} /> : null}
+    // --work-top: site header (3.5rem) plus the switcher row (2rem). Every layout pads by it.
+    <div style={{ ['--work-top' as string]: '5.5rem' }}>
+      <ViewSwitcher view={view} />
+      {view === 'coverflow' ? <CoverflowStage demos={demos} /> : null}
+      {view === 'shelf' ? <ShelfView demos={demos} /> : null}
+      {view === 'grid' ? <GridView demos={demos} /> : null}
+      {view === 'list' ? <GalleryShell demos={demos} /> : null}
     </div>
   )
 }

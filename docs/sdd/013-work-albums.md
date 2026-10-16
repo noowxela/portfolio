@@ -1,7 +1,7 @@
 # SDD: Work as a record collection
 
 - **Repo:** `01_project/o000o_active/portfolio`
-- **Status:** `implemented` (preview)
+- **Status:** `implemented`
 - **Date:** 2026-10-16
 - **Related:** [012-work-coverflow.md](./012-work-coverflow.md)
 
@@ -15,16 +15,16 @@
 
 **Non-goals:**
 
-- Choosing the final variant here. Three are built for preview.
+- Picking one layout. The visitor chooses.
 - New demos or data fields.
 
 ## 3. Questions asked and answers
 
 | Question | Answer |
 | --- | --- |
-| Which idea? | Build all three: Shelf, Grid, Crate. |
-| How to compare? | A temporary version row under the header: V0 Coverflow, V1 Shelf, V2 Grid, V3 Crate, List. |
-| Default? | V1. The choice lives in `?v=` and localStorage. |
+| Which idea? | Shelf and Grid. Crate was built, then removed. |
+| How to switch? | A permanent row under the header: Coverflow, Shelf, Grid, List. It keeps the PREVIEW tag and monospace style. |
+| Default? | Shelf. The choice lives in `?v=` and localStorage. |
 
 ## 4. Approach
 
@@ -38,35 +38,30 @@ Shared, in `components/gallery/albums/`:
 
 Variants:
 
-- **V1 Shelf** (`ShelfView`): a horizontal row of sleeves with a floor reflection. Wheel in either axis, or a horizontal swipe, moves it. The nearest sleeve lifts forward (translateZ). Its disc slides out to the right and turns with scroll progress, so it spins faster as you scroll faster. ← → move one album. Click or Enter on the centre album opens it; clicking a side album centres it.
-- **V2 Grid** (`GridView`): a native vertical scroll inside the page box. Every sleeve has a disc peeking out of the top, and the disc rises on hover or focus. Discs idle-spin slowly, speed up with scroll velocity, and ease back. Each row lags by a different depth (velocity parallax). Arrow keys move in 2D (up/down by one row).
-- **V3 Crate** (`CrateView`): records stand in a crate in perspective, with a front panel and an `01 / 08` counter. Wheel or vertical swipe flips records one by one: the front record tilts forward and drops away. The current disc slides up out of its sleeve and turns with progress. Arrow keys flip one at a time.
+- **Shelf** (`ShelfView`): a horizontal row of 16:10 sleeves, the same size as the Coverflow card: 82vw on phones, `min(64vw, 880px)` on desktop. The size is capped by viewport height so the raised disc and the caption always fit. There is a floor reflection. Wheel in either axis, or a horizontal swipe, moves the row. The nearest sleeve lifts, and side sleeves shrink and turn. Its disc (80% of the sleeve height) slides up out of the **top** of the sleeve by 35% of its diameter. It turns with scroll progress, so it spins faster as you scroll faster. The stage reserves that rise as top margin, so the disc clears the header and switcher. ← → move one album. Click or Enter on the centre album opens it; clicking a side album centres it.
+- **Grid** (`GridView`): a native vertical scroll inside the page box. Every sleeve has a disc peeking out of the top, and the disc rises on hover or focus. Discs idle-spin slowly, speed up with scroll velocity, and ease back. Each row lags by a different depth (velocity parallax). Arrow keys move in 2D (up/down by one row).
 
 Phones (`< 640px`): touch swipe through `Observer`, less rotation, depth and disc travel, and a slower grid spin and parallax. Reduced motion: no disc spin, no flip tilt, no smoothing (instant steps), no grid parallax.
 
-### Version switcher
+### View switcher (permanent)
 
-- `lib/uiPreview.ts` exports `UI_PREVIEW`. It is on unless `NEXT_PUBLIC_UI_PREVIEW=false`.
-- `components/gallery/WorkView.tsx` reads the version (URL `?v=` first, then `localStorage['work-preview-version']`, then `1`) and renders `PreviewRow`. This is a fixed `top-14`, `h-8` monospace bar with a `PREVIEW` tag and a dashed coral border. It sets `--work-top` (5.5rem with the row, 3.5rem without), and every Work layout pads by that.
-- The old bottom-right Coverflow / List toggle is gone.
+The switcher is a production feature. It started as a temporary dev preview, and the `NEXT_PUBLIC_UI_PREVIEW` flag and `lib/uiPreview.ts` are gone.
 
-**How to remove the switcher later:**
+- `components/gallery/WorkView.tsx` renders `ViewSwitcher`: a fixed `top-14`, `h-8` monospace row with the `PREVIEW` tag and dashed coral border. Alex likes that look, so it stays.
+- Options: Coverflow, Shelf, Grid, List. Shelf is the default.
+- The view is read from URL `?v=` first, then `localStorage['work-view']`, then the old `localStorage['work-preview-version']`, then Shelf. Choosing a view writes `?v=<id>` and `work-view`, and drops the old key.
+- Old values still map: `0` → coverflow, `1` → shelf, `2` → grid, `3` (Crate, removed) → shelf, `list` → list. Unknown values fall back to Shelf.
+- The wrapper sets `--work-top: 5.5rem` (header plus row), and every Work layout pads by it.
 
-1. Pick the winning variant and render it directly in `app/work/page.tsx` (or make `WorkView` return only that variant).
-2. Delete `PreviewRow`, `VERSIONS`, `readVersion` / `setVersion` / `subscribe` from `WorkView.tsx`, and delete `lib/uiPreview.ts`.
-3. Drop the `--work-top` wrapper. The layouts fall back to `3.5rem` through `pt-[var(--work-top,3.5rem)]`.
-4. Optionally delete the losing variants, plus `CoverflowStage.tsx` and `swiper` if V0 loses.
-
-Until then, you can hide it without code changes by building with `NEXT_PUBLIC_UI_PREVIEW=false`. The page then always shows V1.
-
-**Rejected alternatives:** Using ScrollTrigger with window scroll for Shelf and Crate. The page is one screen tall, so `Observer` on the stage is simpler and keeps page scroll at zero.
+**Rejected alternatives:** Using ScrollTrigger with window scroll for Shelf. The page is one screen tall, so `Observer` on the stage is simpler and keeps page scroll at zero.
 
 ## 5. Acceptance criteria and verification
 
 - [x] `npm run lint`, `GITHUB_PAGES=true npm run build`
-- [x] All five versions render from `?v=`. No `?v` gives V1. A click updates the URL and localStorage, and a reload keeps the choice.
+- [x] Every switcher option renders its layout, updates `?v=` and localStorage, and has no page overflow. Old `?v=0..3` and the old storage key map correctly.
 - [x] No console errors and no page overflow (scrollWidth / scrollHeight equal the viewport) at 1440x900 and 390x844, light and dark
 - [x] Wheel input changes transforms mid-animation. With reduced motion it steps without easing.
+- [x] Shelf sleeve is 880x550 at 1440x900 (Coverflow card 880x550) and 323x202 at 390x844 (Coverflow 320x200, the extra is the lift). With the disc out, its top is at 154px, below the 88px switcher bottom.
 - [x] ArrowRight moves focus to the next album. Enter opens the overlay with one iframe. Esc closes it.
 
 Verified with headless Chrome against `next dev` on port 3000.
@@ -77,3 +72,4 @@ Verified with headless Chrome against `next dev` on port 3000.
 | --- | --- | --- |
 | 2026-10-16 | approved | Build V1–V3 with a preview row |
 | 2026-10-16 | implemented | Preview row on by default, V1 default |
+| 2026-10-16 | implemented | Crate removed. The switcher is permanent (PREVIEW style kept, user-facing labels). Shelf sleeves match the Coverflow size, and the disc slides out of the top |

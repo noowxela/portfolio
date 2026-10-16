@@ -14,4 +14,4 @@
 | [010-marquee-clean.md](./010-marquee-clean.md) | implemented | Cleaner hobbies marquee |
 | [011-crt-open.md](./011-crt-open.md) | discarded | CRT open on first home load |
 | [012-work-coverflow.md](./012-work-coverflow.md) | implemented | Work coverflow |
-| [013-work-albums.md](./013-work-albums.md) | implemented | Work as a record collection (preview) |
+| [013-work-albums.md](./013-work-albums.md) | implemented | Work as a record collection, with a view switcher |
