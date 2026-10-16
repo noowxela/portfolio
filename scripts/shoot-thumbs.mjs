@@ -39,7 +39,7 @@ for (const demo of targets) {
   const webp = path.join(root, `public/thumbs/${demo.slug}.webp`)
   try {
     await page.goto(demo.embedUrl, { waitUntil: 'networkidle', timeout: 30_000 }).catch(() => {})
-    await page.waitForTimeout(2500) // let canvases / WebGL settle
+    await page.waitForTimeout(Number(process.env.SHOT_WAIT ?? 2500)) // let canvases / WebGL settle; heavy WebGL sites need SHOT_WAIT=8000+
     const png = await page.screenshot()
     await writeFile(webp, await toWebp(encoder, png))
     console.log('ok  ', demo.slug)

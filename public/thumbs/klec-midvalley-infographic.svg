@@ -1,0 +1,6 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#111827"/>
+  <rect x="360" y="300" width="80" height="260" fill="#6366f1"/><rect x="470" y="220" width="90" height="340" fill="#818cf8"/><rect x="600" y="360" width="260" height="200" fill="#4b5563"/><rect x="900" y="280" width="70" height="280" fill="#a5b4fc"/><path d="M200 600 Q640 520 1080 610" stroke="#38bdf8" stroke-width="10" fill="none"/>
+  <text x="80" y="80" fill="#fafaf9" font-size="32" font-family="Inter, Arial, sans-serif" font-weight="600">KL Eco City – Mid Valley</text>
+  <text x="80" y="120" fill="#a8a29e" font-size="20" font-family="Inter, Arial, sans-serif">Three.js · Infographic</text>
+</svg>

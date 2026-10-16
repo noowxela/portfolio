@@ -1,0 +1,6 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#0f172a"/>
+  <path d="M180 600 L520 260 L640 340 L800 180 L1100 600 Z" fill="#334155"/><path d="M300 560 Q520 420 640 380 T800 200" stroke="#f97316" stroke-width="6" fill="none"/><circle cx="800" cy="200" r="12" fill="#fb923c"/>
+  <text x="80" y="80" fill="#fafaf9" font-size="32" font-family="Inter, Arial, sans-serif" font-weight="600">Mount Replay</text>
+  <text x="80" y="120" fill="#a8a29e" font-size="20" font-family="Inter, Arial, sans-serif">Three.js · 3D terrain</text>
+</svg>
