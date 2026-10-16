@@ -12,7 +12,7 @@ export function AlbumCover({ demo, priority, className }: { demo: Demo; priority
         src={withBasePath(demoThumb(demo))}
         alt=""
         fill
-        sizes="(min-width: 640px) 320px, 60vw"
+        sizes="(min-width: 640px) 880px, 82vw"
         priority={priority}
         draggable={false}
         className="pointer-events-none object-cover object-left-top select-none"
