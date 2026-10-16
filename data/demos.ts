@@ -65,6 +65,7 @@ export const demos: Demo[] = [
   {
     name: 'Movies App',
     slug: 'movies-app',
+    embeddable: false,
     thumb: '/thumbs/movies-app.svg',
     embedUrl: 'https://movies-one-pi.vercel.app/?category=Popular&page=1',
     liveUrl: 'https://movies-one-pi.vercel.app/',
@@ -98,6 +99,7 @@ export const demos: Demo[] = [
   {
     name: 'Teppan Catch',
     slug: 'teppan-catch',
+    embeddable: false,
     thumb: '/thumbs/teppan-catch.svg',
     embedUrl: 'https://noowxela.github.io/Teppan-Catch/',
     repoUrl: 'https://github.com/noowxela/Teppan-Catch',
