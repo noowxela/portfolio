@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { GalleryShell } from '@/components/gallery/GalleryShell'
+import { WorkView } from '@/components/gallery/WorkView'
 import { demos } from '@/data/demos'
 import { site } from '@/data/site'
 
@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 }
 
 export default function WorkPage() {
-  return <GalleryShell demos={demos} />
+  return <WorkView demos={demos} />
 }

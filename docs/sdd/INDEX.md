@@ -13,3 +13,4 @@
 | [009-marquee-full-width.md](./009-marquee-full-width.md) | implemented | Full-width hobbies marquee |
 | [010-marquee-clean.md](./010-marquee-clean.md) | implemented | Cleaner hobbies marquee |
 | [011-crt-open.md](./011-crt-open.md) | discarded | CRT open on first home load |
+| [012-work-coverflow.md](./012-work-coverflow.md) | implemented | Work coverflow |
