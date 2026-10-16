@@ -15,3 +15,15 @@
 | [011-crt-open.md](./011-crt-open.md) | discarded | CRT open on first home load |
 | [012-work-coverflow.md](./012-work-coverflow.md) | implemented | Work coverflow |
 | [013-work-albums.md](./013-work-albums.md) | implemented | Work as a record collection, with a view switcher |
+| [014-home-score.md](./014-home-score.md) | discarded | Original home score |
+| [015-shelf-neon.md](./015-shelf-neon.md) | implemented | Shelf neon bar |
+| [016-grid-disc.md](./016-grid-disc.md) | implemented | Grid disc background |
+| [017-grid-disc-neon.md](./017-grid-disc-neon.md) | discarded | Grid disc neon |
+| [019-grid-side-discs.md](./019-grid-side-discs.md) | implemented | Grid side discs |
+| [020-grid-disc-depth.md](./020-grid-disc-depth.md) | implemented | Grid discs with depth |
+| [021-grid-disc-three.md](./021-grid-disc-three.md) | discarded | Grid discs in Three.js |
+| [022-identity-disc.md](./022-identity-disc.md) | discarded | Identity disc |
+| [023-disc-versions.md](./023-disc-versions.md) | implemented | Disc versions page |
+| [024-centered-disc-v2.md](./024-centered-disc-v2.md) | implemented | Centered disc v2 |
+| [025-side-disc-v2.md](./025-side-disc-v2.md) | implemented | Side disc v2 |
+| [018-grid-card-ratio.md](./018-grid-card-ratio.md) | implemented | Grid cards at 16:9 |

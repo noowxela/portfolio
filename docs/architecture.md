@@ -5,6 +5,7 @@ Next.js App Router static export. Home is a GSAP scroll story. The demo gallery 
 ## Stack
 
 - Next.js 16, React 19, Tailwind CSS v4
+- Three.js for the home mosaic
 - GSAP `ScrollTrigger` and `ScrollSmoother` on `/` only
 - `next-themes` for light, dark, and system on the gallery and About
 - Static export (`output: 'export'`). GitHub Pages sets `GITHUB_PAGES=true`, which adds `basePath: /portfolio`
@@ -16,6 +17,7 @@ Next.js App Router static export. Home is a GSAP scroll story. The demo gallery 
 | `/` | Legacy-to-Ares scroll story (`components/home/`) |
 | `/work` | `GalleryShell`: sidebar, live iframe, project details |
 | `/about` | Bio and contact |
+| `/discs` | Temporary board of the disc versions |
 
 `app/layout.tsx` wraps every route with Inter, metadata, `ThemeProviders`, and the fixed header (`NavPill`). The smoother wrapper exists only inside the home page, so the header stays `position: fixed` outside it.
 
@@ -42,7 +44,7 @@ Phones and `prefers-reduced-motion` do not create the smoother or any pin. Scene
 
 - `data/site.ts` — name, role, tagline, contact
 - `data/demos.ts` — gallery items. `featured: true` picks the three cards on the home track
-- `data/headerNavLinks.ts` — Home, Work, About
+- `data/headerNavLinks.ts` — Home, Work, About, Discs. Discs stays out of the header until the clock is clicked three times in a row, and the next three clicks hide it again.
 
 ## Theme
 

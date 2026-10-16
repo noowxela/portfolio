@@ -58,6 +58,8 @@ const iconLinks = [
 export function NavPill() {
   const pathname = usePathname()
   const onHome = normalizePath(pathname) === '/'
+  const [discsOpen, setDiscsOpen] = useState(false)
+  const links = discsOpen ? PAGE_LINKS : PAGE_LINKS.filter((link) => link.href !== '/discs')
 
   return (
     <nav
@@ -81,7 +83,7 @@ export function NavPill() {
           alexW
         </Link>
         <HeaderRule onHome={onHome} />
-        {PAGE_LINKS.map(({ href, title }) => {
+        {links.map(({ href, title }) => {
           const active = normalizePath(pathname) === normalizePath(href)
           return (
             <Link
@@ -130,7 +132,7 @@ export function NavPill() {
         <HeaderRule onHome={onHome} />
         <AvailableMenu onHome={onHome} />
         <HeaderRule onHome={onHome} />
-        <HeaderClock onHome={onHome} />
+        <HeaderClock onHome={onHome} onReveal={() => setDiscsOpen((open) => !open)} />
       </div>
     </nav>
   )
@@ -188,7 +190,7 @@ function AvailableMenu({ onHome }: { onHome: boolean }) {
   )
 }
 
-function HeaderClock({ onHome }: { onHome: boolean }) {
+function HeaderClock({ onHome, onReveal }: { onHome: boolean; onReveal: () => void }) {
   const [detailed, setDetailed] = useState(false)
   const [stamp, setStamp] = useState<{ short: string; full: string; iso: string } | null>(null)
   const clicks = useRef(0)
@@ -227,6 +229,7 @@ function HeaderClock({ onHome }: { onHome: boolean }) {
     if (clicks.current >= 3) {
       clicks.current = 0
       setDetailed((value) => !value)
+      onReveal()
       return
     }
     clickTimer.current = window.setTimeout(() => {

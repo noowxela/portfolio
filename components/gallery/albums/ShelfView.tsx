@@ -79,8 +79,12 @@ export function ShelfView({ demos }: { demos: Demo[] }) {
         onKeyDown={onKeyDown}
         className="relative flex min-h-0 flex-1 touch-none items-center justify-center overflow-hidden [perspective:1400px]"
       >
+        <div aria-hidden className="shelf-neon pointer-events-none absolute inset-x-0 top-1/2 z-0 h-28 -translate-y-1/2">
+          <div className="absolute inset-x-0 top-1/2 h-16 -translate-y-1/2 bg-[#5ce1ff]/40 blur-2xl" />
+          <div className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 bg-[#5ce1ff] shadow-[0_0_8px_2px_#5ce1ff,0_0_32px_8px_rgba(92,225,255,0.8)]" />
+        </div>
         <div
-          className="relative [--shelf-max-w:82vw] sm:[--shelf-max-w:64vw] [transform-style:preserve-3d]"
+          className="relative z-10 [--shelf-max-w:82vw] sm:[--shelf-max-w:64vw] [transform-style:preserve-3d]"
           style={{ width: SLEEVE_WIDTH, marginTop: `calc(${SLEEVE_WIDTH} * ${RISE})` }}
         >
           <div className="aspect-[16/10]" />

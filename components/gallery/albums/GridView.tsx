@@ -7,6 +7,7 @@ import { useMediaQuery } from '../useMediaQuery'
 import { AlbumCover } from './AlbumCover'
 import { AlbumOverlay } from './AlbumOverlay'
 import { Disc } from './Disc'
+import { GridDisc } from './GridDisc'
 import { useAlbumMotion } from './useAlbumMotion'
 
 const ROW_DEPTH = [0.6, 1.3, 0.9]
@@ -69,7 +70,8 @@ export function GridView({ demos }: { demos: Demo[] }) {
       ref={scroller}
       className="box-border h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#eeeeee] pt-[var(--work-top,3.5rem)] font-sans dark:bg-[#0d0d0d]"
     >
-      <div className="mx-auto w-full max-w-6xl px-4 pt-8 pb-28 sm:px-8 sm:pt-12">
+      <GridDisc />
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-8 pb-28 sm:px-8 sm:pt-12">
         <header className="mb-10 sm:mb-14">
           <p className="text-[0.6rem] font-semibold tracking-[0.16em] text-[#999] uppercase">Collection</p>
           <h1 className="mt-1 text-xl font-semibold text-[#111] sm:text-2xl dark:text-white">Records</h1>
@@ -88,8 +90,8 @@ export function GridView({ demos }: { demos: Demo[] }) {
                 {row.map((d) => {
                   const i = demos.indexOf(d)
                   return (
-                    <div key={d.slug} className="group relative pt-[22%]">
-                      <div className="absolute top-0 left-[8%] w-[84%] transition-transform duration-300 ease-out group-focus-within:-translate-y-[10%] group-hover:-translate-y-[10%] motion-reduce:transition-none">
+                    <div key={d.slug} className="group relative pt-[18%]">
+                      <div className="absolute top-0 left-[23%] w-[54%] transition-transform duration-300 ease-out group-focus-within:-translate-y-[10%] group-hover:-translate-y-[10%] motion-reduce:transition-none">
                         <Disc demo={d} discRef={(el) => { discs.current[i] = el }} />
                       </div>
                       <button
@@ -100,7 +102,7 @@ export function GridView({ demos }: { demos: Demo[] }) {
                         aria-label={`${d.name}, open details`}
                         className="relative block w-full cursor-pointer rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#111] dark:focus-visible:outline-white"
                       >
-                        <AlbumCover demo={d} priority={i < cols} />
+                        <AlbumCover demo={d} priority={i < cols} className="!aspect-[16/9]" />
                       </button>
                     </div>
                   )
