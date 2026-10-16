@@ -12,6 +12,7 @@ const src = await readFile(path.join(root, 'data/demos.ts'), 'utf8')
 const demos = [...src.matchAll(/\{\s*name:[\s\S]*?\n {2}\}/g)].map(([block]) => ({
   slug: block.match(/slug: '([^']+)'/)?.[1],
   embedUrl: block.match(/embedUrl: '([^']+)'/)?.[1],
+  shotUrl: block.match(/shotUrl: '([^']+)'/)?.[1],
   embeddable: !/embeddable: false/.test(block),
 }))
 
@@ -38,7 +39,7 @@ const encoder = await browser.newPage()
 for (const demo of targets) {
   const webp = path.join(root, `public/thumbs/${demo.slug}.webp`)
   try {
-    await page.goto(demo.embedUrl, { waitUntil: 'networkidle', timeout: 30_000 }).catch(() => {})
+    await page.goto(demo.shotUrl ?? demo.embedUrl, { waitUntil: 'networkidle', timeout: 30_000 }).catch(() => {})
     await page.waitForTimeout(Number(process.env.SHOT_WAIT ?? 2500)) // let canvases / WebGL settle; heavy WebGL sites need SHOT_WAIT=8000+
     const png = await page.screenshot()
     await writeFile(webp, await toWebp(encoder, png))

@@ -5,6 +5,8 @@ export type Demo = {
   thumb: string
   /** Real 1440x900 screenshot from scripts/shoot-thumbs.mjs. */
   shot?: string
+  /** Page to capture for `shot` when it differs from embedUrl (scripts/shoot-thumbs.mjs). */
+  shotUrl?: string
   embedUrl: string
   liveUrl?: string
   repoUrl?: string
@@ -78,7 +80,9 @@ export const demos: Demo[] = [
     slug: 'japan-trip',
     thumb: '/thumbs/japan-trip.svg',
     shot: '/thumbs/japan-trip.webp',
-    embedUrl: 'https://japan-trip-pi-indol.vercel.app/',
+    embedUrl: 'https://japan-trip-pi-indol.vercel.app/schedule',
+    liveUrl: 'https://japan-trip-pi-indol.vercel.app/',
+    shotUrl: 'https://japan-trip-pi-indol.vercel.app/schedule?day=3cbb5fd4-cdf7-8174-863b-e28a86c1c109',
     repoUrl: 'https://github.com/noowxela/japan-trip',
     blurb: 'A mobile-first trip itinerary app with Notion as the source of truth.',
     tags: ['Next.js', 'Notion'],
