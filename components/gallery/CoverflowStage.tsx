@@ -107,7 +107,7 @@ export function CoverflowStage({ demos }: { demos: Demo[] }) {
   const ready = Boolean(prevEl && nextEl && paginationEl)
 
   return (
-    <div className="box-border flex h-dvh flex-col overflow-hidden bg-[#eeeeee] pt-14 font-sans dark:bg-[#0d0d0d]">
+    <div className="box-border flex h-dvh flex-col overflow-hidden bg-[#eeeeee] pt-[var(--work-top,3.5rem)] font-sans dark:bg-[#0d0d0d]">
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {`Project ${active + 1} of ${demos.length}: ${demo.name}`}
       </p>
