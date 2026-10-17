@@ -9,6 +9,7 @@ import {
   WebGLRenderer,
 } from 'three'
 import { BEATS, END_Z, cameraAt, range, smoothstep, type Vec3 } from './path'
+import { createCity } from './scene/city'
 import { createDesk } from './scene/desk'
 import { createName } from './scene/name'
 import { createEnvironment } from './scene/environment'
@@ -26,7 +27,7 @@ export type JourneyScene = {
 /** Fog density along the ride: clear room, thicker Grid, clear again at home. */
 function fogAt(p: number) {
   const inGrid = smoothstep(0.2, 0.3, p) * (1 - smoothstep(0.88, 0.97, p))
-  return 0.022 + inGrid * 0.016
+  return 0.022 + inGrid * 0.008
 }
 
 export function createJourney(container: HTMLElement, opts: JourneyOptions): JourneyScene | null {
@@ -65,6 +66,18 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
   const name = createName(opts.name, opts.fontFamily, camera)
   homeSet.add(desk.group, name.group)
   scene.add(homeSet)
+
+  // Act 2: the city rises out of the grid, then sinks back as the portal opens.
+  const city = createCity(fog, camera, opts.small)
+  scene.add(city.group)
+  parts.push({
+    update(p, time) {
+      const rise = range(p, [0.22, 0.32]) * (1 - range(p, [0.76, 0.84]))
+      const on = range(p, [0.21, 0.28]) * (1 - range(p, [0.8, 0.86]))
+      city.update(rise, on, time)
+    },
+    dispose: () => city.dispose(),
+  })
   parts.push({
     update(p, time) {
       const landing = p >= 0.5
