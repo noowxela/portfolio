@@ -38,7 +38,7 @@ const BEVEL = THICK / 2
 const HOLLOW = HOLLOW_R / BODY_R
 const FOV = 35
 const CAM_Z = 10
-const TILT = (50 * Math.PI) / 180
+const TILT = (30 * Math.PI) / 180
 const HOVER_TILT = (16 * Math.PI) / 180
 const IDLE_SPIN = (Math.PI * 2) / 24
 /** The SVG's own ring spin (64 s one way, 92 s back), on top of the disc's turn. */
@@ -250,7 +250,7 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
     }
     paint()
 
-    // Layout: match the SVG version (min(78vmin, 760px) discs half off each edge, tilted ±50°).
+    // Layout: match the SVG size (min(78vmin, 760px) discs half off each edge). 02 v3 rests at ±30°.
     let width = 1
     let height = 1
     const resize = () => {
@@ -372,7 +372,7 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
           moving = true
         } else d.hover = goal
         // The SVG discs each get their own perspective; here one camera sees them off-axis,
-        // so take the viewing angle back out to keep the same apparent ±50° tilt.
+        // so take the viewing angle back out to keep the apparent ±30° tilt.
         const view = Math.atan2(Math.abs(d.rig.position.x), CAM_Z)
         d.rig.rotation.set(pitch, side * (TILT + HOVER_TILT * d.hover - view) + yaw, 0)
         d.spinner.scale.setScalar(1 + 0.04 * d.hover)
