@@ -1,14 +1,18 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import dynamic from 'next/dynamic'
 import { gsap } from 'gsap'
 import { Demo } from '@/data/demos'
 import { useMediaQuery } from '../useMediaQuery'
 import { AlbumCover } from './AlbumCover'
 import { AlbumOverlay } from './AlbumOverlay'
 import { Disc } from './Disc'
-import { GridDisc } from './GridDisc'
 import { useAlbumMotion } from './useAlbumMotion'
+
+// The 02 v3 three.js side discs behind the grid, client only. One canvas for both discs;
+// Disc3D falls back to the SVG GridDisc itself when WebGL is unavailable.
+const Disc3D = dynamic(() => import('@/components/discs/Disc3D').then((m) => m.Disc3D), { ssr: false })
 
 const ROW_DEPTH = [0.6, 1.3, 0.9]
 
@@ -70,7 +74,7 @@ export function GridView({ demos }: { demos: Demo[] }) {
       ref={scroller}
       className="box-border h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#eeeeee] pt-[var(--work-top,3.5rem)] font-sans dark:bg-[#0d0d0d]"
     >
-      <GridDisc />
+      <Disc3D />
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-8 pb-28 sm:px-8 sm:pt-12">
         <header className="mb-10 sm:mb-14">
           <p className="text-[0.6rem] font-semibold tracking-[0.16em] text-[#999] uppercase">Collection</p>
