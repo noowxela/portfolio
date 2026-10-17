@@ -33,7 +33,7 @@ export const BEATS = {
   /** Camera passes through the hollow. */
   portalPass: 0.855,
   /** Floor lines gather into the desk wireframe. */
-  gather: [0.86, 0.95] as const,
+  gather: [0.855, 0.945] as const,
   /** Wireframe resolves into the solid desk. */
   solid: [0.93, 0.995] as const,
   /** Work CTA. */

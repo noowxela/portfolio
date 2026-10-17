@@ -38,6 +38,11 @@ function rng(seed: number) {
   }
 }
 
+function smooth(a: number, b: number, x: number) {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
+  return t * t * (3 - 2 * t)
+}
+
 // --- Towers -----------------------------------------------------------------
 
 const TOWER_VERT = /* glsl */ `
@@ -309,8 +314,9 @@ function createCycles(fog: FogUniforms, small: boolean) {
   const rand = rng(7)
   const n = small ? 6 : 12
   const cycles: Cycle[] = Array.from({ length: n }, (_, i) => ({
-    lane: [-1.15, 0.8, -0.8, 1.15][i % 4],
-    speed: 11 + rand() * 16,
+    lane: [-1.3, 1.0, -1.0, 1.3][i % 4],
+    // Speed relative to the camera: every bike pulls away from it.
+    speed: 3 + rand() * 9,
     phase: rand() * 400,
   }))
   const bikeGeo = new BoxGeometry(0.16, 0.16, 0.62)
@@ -341,28 +347,43 @@ function createCycles(fog: FogUniforms, small: boolean) {
   bikes.frustumCulled = false
   trails.frustumCulled = false
   const o = new Object3D()
-  const span = ROAD_START - ROAD_END - 20
+  const tmp = new Color()
+  /**
+   * Bikes live in a window ahead of the camera: they fade in at MIN units ahead
+   * (their trail tail still well clear), pull away, and fade out into the haze
+   * at MAX before wrapping. They also fade out before the end of the road.
+   */
+  const MIN = 14
+  const MAX = 110
   return {
     group: [bikes, trails],
-    update(time: number, on: number) {
+    update(time: number, on: number, camZ: number) {
       trailMat.uniforms.uOn.value = on
       for (let i = 0; i < n; i++) {
         const c = cycles[i]
-        const z = ROAD_START - 8 - ((c.phase + time * c.speed) % span)
+        const ahead = MIN + ((c.phase + time * c.speed) % (MAX - MIN))
+        const z = Math.min(ROAD_START, camZ - ahead)
+        const fade =
+          smooth(MIN, MIN + 10, ahead) * (1 - smooth(MAX - 22, MAX, ahead)) * smooth(ROAD_END + 6, ROAD_END + 30, z)
         const x = roadX(z)
-        const ahead = roadX(z - 0.6) - x
-        const yaw = Math.atan2(-ahead, 0.6)
+        const dx = roadX(z - 0.6) - x
+        const yaw = Math.atan2(-dx, 0.6)
         const nx = Math.cos(yaw)
         const nz = -Math.sin(yaw)
         o.position.set(x + nx * c.lane, 0, z + nz * c.lane)
         o.rotation.set(0, yaw, 0)
-        o.scale.setScalar(on > 0.01 ? 1 : 0.0001)
+        o.scale.setScalar(on > 0.01 && fade > 0.002 ? 1 : 0.0001)
         o.updateMatrix()
         bikes.setMatrixAt(i, o.matrix)
         trails.setMatrixAt(i, o.matrix)
+        const base = colors[i % colors.length]
+        bikes.setColorAt(i, tmp.copy(base).multiplyScalar(1.6 * fade))
+        trails.setColorAt(i, tmp.copy(base).multiplyScalar(fade))
       }
       bikes.instanceMatrix.needsUpdate = true
       trails.instanceMatrix.needsUpdate = true
+      if (bikes.instanceColor) bikes.instanceColor.needsUpdate = true
+      if (trails.instanceColor) trails.instanceColor.needsUpdate = true
     },
     dispose() {
       bikeGeo.dispose()
@@ -438,7 +459,7 @@ export function createCity(fog: FogUniforms, camera: PerspectiveCamera, small: b
       towers.mesh.visible = rise > 0.002
       road.mat.uniforms.uTime.value = time
       road.mat.uniforms.uOn.value = on
-      cycles.update(time, on)
+      cycles.update(time, on, camera.position.z)
       gates.mat.opacity = rise * 0.9
       gates.mesh.visible = rise > 0.002
     },

@@ -113,7 +113,9 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
       } else {
         const solid = range(p, BEATS.solid)
         const wire = range(p, [0.84, 0.87]) * (1 - 0.82 * solid)
-        desk.set(solid, wire, range(p, BEATS.gather), 0, time)
+        // White-hot and wider while the lines gather, cooling to the opening's faint edges.
+        const hot = range(p, [0.84, 0.87]) * (1 - range(p, [0.93, 0.985]))
+        desk.set(solid, wire, range(p, BEATS.gather), 0, time, hot)
         name.update(range(p, [0.9, 0.985]), time)
       }
     },
@@ -129,10 +131,18 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
   const look: Vec3 = [0, 0, 0]
   const start = performance.now()
 
+  // Narrow portrait screens: dolly the opening/closing pose back along the view
+  // so the whole desk fits. Same offset at both ends, so the loop still closes.
+  let back = 0
+  const BACK_DIR: Vec3 = [0, 0.0266, 1]
   const place = (p: number) => {
     cameraAt(p, pos, look)
-    camera.position.set(pos[0], pos[1], pos[2])
-    camera.lookAt(look[0], look[1], look[2])
+    const w = back * (1 - smoothstep(0.03, 0.14, p) + smoothstep(0.9, 0.985, p))
+    const ox = BACK_DIR[0] * w
+    const oy = BACK_DIR[1] * w
+    const oz = BACK_DIR[2] * w
+    camera.position.set(pos[0] + ox, pos[1] + oy, pos[2] + oz)
+    camera.lookAt(look[0] + ox, look[1] + oy, look[2] + oz)
   }
 
   const resize = () => {
@@ -143,6 +153,10 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
     // Portrait screens widen the lens so the desk still fits.
     camera.fov = camera.aspect < 0.8 ? 64 : camera.aspect < 1.2 ? 56 : 48
     camera.updateProjectionMatrix()
+    // Desk front corners sit 2.88 in front of the start pose and ±0.95 wide; keep ~15% margin.
+    const tanH = Math.tan((camera.fov * Math.PI) / 360) * camera.aspect
+    back = Math.min(2.5, Math.max(0, 1.12 / tanH - 2.88))
+    desk.setViewport(camera.fov, h)
   }
   resize()
   const ro = new ResizeObserver(resize)
@@ -193,9 +207,13 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
       progress = Math.min(1, Math.max(0, p))
     },
     flash(p) {
-      const screen = (p - BEATS.screen) / 0.018
-      const ring = (p - BEATS.portalPass) / 0.012
-      return Math.exp(-screen * screen) * 0.95 + Math.exp(-ring * ring) * 0.55
+      // Short and asymmetric: a quick rise just before the crossing, a slightly
+      // longer fade after it, so the cut is hidden without a white-out.
+      const pulse = (at: number, before: number, after: number) => {
+        const d = (p - at) / (p < at ? before : after)
+        return Math.exp(-d * d)
+      }
+      return pulse(BEATS.screen, 0.0045, 0.009) * 0.72 + pulse(BEATS.portalPass, 0.006, 0.009) * 0.38
     },
     dispose() {
       stopLoop()

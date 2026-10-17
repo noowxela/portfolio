@@ -7,9 +7,9 @@ import {
   Color,
   CylinderGeometry,
   DirectionalLight,
+  DoubleSide,
   EdgesGeometry,
   Group,
-  LineSegments,
   Matrix4,
   Mesh,
   MeshBasicMaterial,
@@ -80,7 +80,7 @@ void main() {
   vec3 col = vec3(0.008, 0.016, 0.024);
   // Horizon glow (the hero dome).
   float glow = exp(-abs(uv.y - horizon) * 9.0);
-  col += uColor * glow * (0.3 + uPush * 0.5);
+  col += uColor * glow * (0.3 + uPush * 0.2);
   if (uv.y < horizon) {
     float depth = 0.16 / max(horizon - uv.y, 0.002);
     float z = depth + uTime * (0.25 + uPush * 3.5);
@@ -98,27 +98,52 @@ void main() {
   col *= 0.86 + 0.14 * sin(uv.y * 420.0);
   // Close up, the centre burns white: the way in.
   float d = length((uv - 0.5) * vec2(1.6, 1.0));
-  col += mix(uColor, vec3(1.0), 0.6) * smoothstep(0.75, 1.0, uPush) * (1.2 - d);
+  // Kept cyan and partial so the grid on the glass still reads in the last frames.
+  col += mix(uColor, vec3(1.0), 0.3) * smoothstep(0.8, 1.0, uPush) * max(0.0, 1.0 - d) * 0.55;
   float vignette = smoothstep(0.85, 0.35, d);
   col *= mix(0.55, 1.0, vignette);
   gl_FragColor = vec4(col, uOpacity);
 }
 `
 
+/**
+ * Wire edges are camera-facing ribbons a few pixels wide (WebGL lines are
+ * 1px), so the gathering wireframe reads against the floor grid. Each ribbon
+ * runs from its floor start (aFA..aFB, on a grid line) to the desk edge
+ * (position..aB). Lines start white-hot on the floor and cool to cyan as they land.
+ */
 const WIRE_VERT = /* glsl */ `
-attribute vec3 aFrom;
+attribute vec3 aB;
+attribute vec3 aFA;
+attribute vec3 aFB;
+attribute vec2 aCorner;
 attribute float aDelay;
 uniform float uGather;
+uniform float uWidthPx;
+uniform float uPx;
 varying float vLift;
+varying float vSide;
 varying vec3 vWorld;
 void main() {
   float t = clamp((uGather - aDelay) / (1.0 - 0.45), 0.0, 1.0);
   t = t * t * (3.0 - 2.0 * t);
-  vec3 p = mix(aFrom, position, t);
+  vec3 a = (modelMatrix * vec4(mix(aFA, position, t), 1.0)).xyz;
+  vec3 b = (modelMatrix * vec4(mix(aFB, aB, t), 1.0)).xyz;
+  vec3 dir = b - a;
+  float len = max(length(dir), 1e-5);
+  dir /= len;
+  vec3 p = mix(a, b, aCorner.x);
+  vec3 view = normalize(p - cameraPosition);
+  vec3 side = cross(dir, view);
+  float sl = length(side);
+  side = sl > 1e-4 ? side / sl : vec3(0.0, 1.0, 0.0);
+  float dist = length(p - cameraPosition);
+  float w = uWidthPx * uPx * dist * 0.5;
+  p += side * aCorner.y * w + dir * (aCorner.x * 2.0 - 1.0) * w * 0.5;
   vLift = t;
-  vec4 world = modelMatrix * vec4(p, 1.0);
-  vWorld = world.xyz;
-  gl_Position = projectionMatrix * viewMatrix * world;
+  vSide = aCorner.y;
+  vWorld = p;
+  gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
 }
 `
 
@@ -126,12 +151,19 @@ const WIRE_FRAG = /* glsl */ `
 ${FOG_GLSL}
 uniform vec3 uColor;
 uniform float uAlpha;
+uniform float uHot;
 varying float vLift;
+varying float vSide;
 varying vec3 vWorld;
 void main() {
+  float s = abs(vSide);
+  float core = 1.0 - smoothstep(0.18, 0.42, s);
+  float glow = exp(-s * 4.0) * 0.55;
+  float a = core + glow;
+  float hot = uHot * (1.0 - 0.7 * vLift);
+  vec3 col = mix(uColor, vec3(1.0), hot) * (1.0 + 0.6 * uHot);
   float dist = length(vWorld - cameraPosition);
-  vec3 col = uColor * (0.8 + 0.6 * vLift);
-  gl_FragColor = vec4(col * (1.0 - fogAmount(dist)), uAlpha);
+  gl_FragColor = vec4(col * (1.0 - fogAmount(dist)), uAlpha * a);
 }
 `
 
@@ -140,7 +172,7 @@ function hash(n: number) {
   return s - Math.floor(s)
 }
 
-/** Edge wireframe of every part with a start position on a floor grid line per segment. */
+/** Edge ribbons of every part, each with a start segment lying on a floor grid line. */
 function wireGeometry(specs: PartSpec[]) {
   const positions: number[] = []
   const m = new Matrix4()
@@ -153,27 +185,50 @@ function wireGeometry(specs: PartSpec[]) {
     for (let i = 0; i < arr.length; i++) positions.push(arr[i])
     edges.dispose()
   }
-  const count = positions.length / 3
-  const from = new Float32Array(count * 3)
-  const delay = new Float32Array(count)
-  for (let s = 0; s < count; s += 2) {
-    const ax = positions[s * 3]
-    const az = positions[s * 3 + 2]
-    const bz = positions[(s + 1) * 3 + 2]
+  const segs = positions.length / 6
+  const vA = new Float32Array(segs * 4 * 3)
+  const vB = new Float32Array(segs * 4 * 3)
+  const fA = new Float32Array(segs * 4 * 3)
+  const fB = new Float32Array(segs * 4 * 3)
+  const corner = new Float32Array(segs * 4 * 2)
+  const delay = new Float32Array(segs * 4)
+  const index: number[] = []
+  const corners = [
+    [0, -1],
+    [0, 1],
+    [1, -1],
+    [1, 1],
+  ]
+  for (let s = 0; s < segs; s++) {
+    const a = positions.slice(s * 6, s * 6 + 3)
+    const b = positions.slice(s * 6 + 3, s * 6 + 6)
     // Both ends start on the same floor line (x = whole cell), spread out along it.
-    const lineX = Math.round(ax + (hash(s) - 0.5) * 9)
-    const slide = (hash(s + 7) - 0.5) * 14
-    const along = Math.abs(bz - az) + 0.6 + hash(s + 3) * 1.2
-    from.set([lineX, 0.004, az + slide], s * 3)
-    from.set([lineX, 0.004, az + slide - along], (s + 1) * 3)
-    const d = hash(s + 11) * 0.45
-    delay[s] = d
-    delay[s + 1] = d
+    const lineX = Math.round(a[0] + (hash(s * 2) - 0.5) * 9)
+    const slide = (hash(s * 2 + 7) - 0.5) * 14
+    const along = Math.abs(b[2] - a[2]) + 0.6 + hash(s * 2 + 3) * 1.2
+    const fa = [lineX, 0.006, a[2] + slide]
+    const fb = [lineX, 0.006, a[2] + slide - along]
+    const d = hash(s * 2 + 11) * 0.45
+    for (let k = 0; k < 4; k++) {
+      const v = s * 4 + k
+      vA.set(a, v * 3)
+      vB.set(b, v * 3)
+      fA.set(fa, v * 3)
+      fB.set(fb, v * 3)
+      corner.set(corners[k], v * 2)
+      delay[v] = d
+    }
+    const o = s * 4
+    index.push(o, o + 1, o + 2, o + 2, o + 1, o + 3)
   }
   const geo = new BufferGeometry()
-  geo.setAttribute('position', new BufferAttribute(new Float32Array(positions), 3))
-  geo.setAttribute('aFrom', new BufferAttribute(from, 3))
+  geo.setAttribute('position', new BufferAttribute(vA, 3))
+  geo.setAttribute('aB', new BufferAttribute(vB, 3))
+  geo.setAttribute('aFA', new BufferAttribute(fA, 3))
+  geo.setAttribute('aFB', new BufferAttribute(fB, 3))
+  geo.setAttribute('aCorner', new BufferAttribute(corner, 2))
   geo.setAttribute('aDelay', new BufferAttribute(delay, 1))
+  geo.setIndex(index)
   return geo
 }
 
@@ -221,12 +276,17 @@ export function createDesk(fog: FogUniforms) {
       uColor: { value: tron.clone() },
       uGather: { value: 1 },
       uAlpha: { value: 0.2 },
+      uHot: { value: 0 },
+      uWidthPx: { value: 2.5 },
+      uPx: { value: 0.001 },
     },
     transparent: true,
     depthWrite: false,
     blending: AdditiveBlending,
+    // Ribbon winding flips with the view side; draw both faces.
+    side: DoubleSide,
   })
-  const wire = new LineSegments(wireGeo, wireMat)
+  const wire = new Mesh(wireGeo, wireMat)
   wire.frustumCulled = false
   wire.renderOrder = 3
   group.add(wire)
@@ -252,7 +312,12 @@ export function createDesk(fog: FogUniforms) {
      * solid: 0..1 opacity of the real desk; wire: wireframe alpha;
      * gather: 0 = lines on the floor, 1 = lines on the desk; push: monitor zoom-in glow.
      */
-    set(solid: number, wireAlpha: number, gather: number, push: number, time: number) {
+    /** World units per CSS pixel at distance 1, so ribbons keep a pixel width. */
+    setViewport(fovDeg: number, heightPx: number) {
+      wireMat.uniforms.uPx.value = (2 * Math.tan((fovDeg * Math.PI) / 360)) / Math.max(1, heightPx)
+    },
+    /** hot: 0..1 emphasis while the lines gather (brighter, wider, white-hot). */
+    set(solid: number, wireAlpha: number, gather: number, push: number, time: number, hot = 0) {
       if (solid !== lastOpacity) {
         const transparent = solid < 0.999
         for (const m of solidMats) {
@@ -272,6 +337,8 @@ export function createDesk(fog: FogUniforms) {
       screenMat.uniforms.uTime.value = time
       wireMat.uniforms.uAlpha.value = wireAlpha
       wireMat.uniforms.uGather.value = gather
+      wireMat.uniforms.uHot.value = hot
+      wireMat.uniforms.uWidthPx.value = 2.5 + hot * 3.5
       wire.visible = wireAlpha > 0.003
       glow.intensity = 1.6 * solid + push * 2
       ambient.intensity = 0.35 * solid
