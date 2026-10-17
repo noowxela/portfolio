@@ -1,0 +1,202 @@
+/* /journey preview. Reuses the Legacy hero tokens and classes from tron.css. */
+
+.journey-root {
+  --tron: #5ce1ff;
+  --ember: #b8f4ff;
+}
+
+.journey-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--void);
+}
+
+.journey-stage .journey-fallback {
+  position: absolute;
+  inset: 0;
+}
+
+.journey-canvas {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.journey-root[data-ready='true'] .journey-canvas {
+  opacity: 1;
+}
+
+.journey-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.journey-flash {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    color-mix(in srgb, var(--ember) 92%, white) 0%,
+    color-mix(in srgb, var(--tron) 70%, transparent) 38%,
+    color-mix(in srgb, var(--tron) 18%, transparent) 72%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+}
+
+/* About 30 s of scrolling: the track is what the page scrolls. */
+.journey-track {
+  position: relative;
+  height: 1100vh;
+  pointer-events: none;
+}
+
+.journey-hud {
+  pointer-events: none;
+  position: fixed;
+  top: 4.6rem;
+  left: 1.25rem;
+  z-index: 8;
+}
+
+.journey-act {
+  display: inline-block;
+  opacity: 0.85;
+  text-shadow: 0 0 10px color-mix(in srgb, var(--tron) 70%, transparent);
+}
+
+.journey-meter {
+  position: fixed;
+  pointer-events: none;
+}
+
+.journey-meter .disc-v2 {
+  transform: rotate(-10deg);
+}
+
+.journey-skip {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 9;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--tron) 55%, transparent);
+  background: color-mix(in srgb, var(--void) 70%, transparent);
+  color: var(--tron);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    opacity 0.3s ease,
+    visibility 0.3s;
+}
+
+.journey-skip:hover,
+.journey-skip:focus-visible {
+  background: color-mix(in srgb, var(--tron) 80%, transparent);
+  color: #041016;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--tron) 70%, transparent);
+  outline: none;
+}
+
+.journey-root[data-cta='true'] .journey-skip {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.journey-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding: 0.85rem 1.4rem;
+  border: 1px solid var(--tron);
+  background: color-mix(in srgb, var(--tron) 10%, var(--void));
+  color: #e7fbff;
+  font-family: var(--font-hud), ui-monospace, monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  box-shadow:
+    inset 0 0 18px color-mix(in srgb, var(--tron) 22%, transparent),
+    0 0 22px color-mix(in srgb, var(--tron) 35%, transparent);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.journey-cta:hover,
+.journey-cta:focus-visible {
+  background: color-mix(in srgb, var(--tron) 85%, transparent);
+  color: #041016;
+  box-shadow:
+    inset 0 0 14px var(--tron),
+    0 0 26px color-mix(in srgb, var(--tron) 80%, transparent);
+  outline: none;
+}
+
+.journey-cta-end {
+  position: fixed;
+  bottom: 7.5rem;
+  left: 50%;
+  z-index: 9;
+  margin: 0;
+  translate: -50% 12px;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.5s ease,
+    translate 0.5s ease,
+    visibility 0.5s,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.journey-root[data-cta='true'] .journey-cta-end {
+  visibility: visible;
+  opacity: 1;
+  translate: -50% 0;
+}
+
+/* The poster (and fallback) is the Legacy hero, set as a static still. */
+.journey-fallback .grid-floor {
+  transform: perspective(520px) rotateX(80deg) scale(1.05);
+}
+
+.journey-fallback .hero-copy {
+  position: absolute;
+  inset: 0;
+}
+
+.journey-fallback.is-poster .hero-copy {
+  justify-content: center;
+}
+
+.journey-root.is-fallback .journey-fallback {
+  height: 100dvh;
+}
+
+@media (max-width: 767px) {
+  .journey-hud {
+    top: 4.2rem;
+    left: 0.9rem;
+  }
+
+  .journey-skip {
+    right: 0.9rem;
+    bottom: 0.9rem;
+  }
+
+  .journey-cta-end {
+    bottom: 6.5rem;
+    white-space: nowrap;
+  }
+}
