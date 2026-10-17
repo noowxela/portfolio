@@ -18,6 +18,7 @@ Next.js App Router static export. Home is a GSAP scroll story. The demo gallery 
 | `/work` | `GalleryShell`: sidebar, live iframe, project details |
 | `/about` | Bio and contact |
 | `/discs` | Temporary board of the disc versions |
+| `/journey` | Preview: scroll-driven 3D ride, desk → Grid → neon city → disc portal → desk (`components/journey/`, [SDD 028](./sdd/028-journey-home.md)) |
 
 `app/layout.tsx` wraps every route with Inter, metadata, `ThemeProviders`, and the fixed header (`NavPill`). The smoother wrapper exists only inside the home page, so the header stays `position: fixed` outside it.
 
