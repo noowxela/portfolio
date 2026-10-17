@@ -82,7 +82,12 @@ export function Journey({ className }: { className?: string }) {
         // Fall back to whatever font is there.
       }
       if (cancelled) return
-      const scene = createJourney(stage, { small, fontFamily, name: site.name.toLowerCase() })
+      const scene = createJourney(stage, {
+        small,
+        fontFamily,
+        name: site.name.toLowerCase(),
+        onLost: () => setMode('fallback'),
+      })
       if (!scene) {
         setMode('fallback')
         return

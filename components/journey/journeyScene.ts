@@ -16,7 +16,13 @@ import { createPortal } from './scene/portal'
 import { createEnvironment } from './scene/environment'
 import { VOID, createFog, type Part } from './scene/shared'
 
-export type JourneyOptions = { small: boolean; fontFamily: string; name: string }
+export type JourneyOptions = {
+  small: boolean
+  fontFamily: string
+  name: string
+  /** Called if the GPU drops the context; the page then shows the 2D hero. */
+  onLost?: () => void
+}
 
 export type JourneyScene = {
   setProgress: (p: number) => void
@@ -50,6 +56,11 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
   const canvas = renderer.domElement
   canvas.setAttribute('aria-hidden', 'true')
   container.appendChild(canvas)
+  const onLost = (e: Event) => {
+    e.preventDefault()
+    opts.onLost?.()
+  }
+  canvas.addEventListener('webglcontextlost', onLost)
 
   const scene = new Scene()
   scene.background = new Color(VOID)
@@ -188,6 +199,7 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
     },
     dispose() {
       stopLoop()
+      canvas.removeEventListener('webglcontextlost', onLost)
       document.removeEventListener('visibilitychange', onVisibility)
       ro.disconnect()
       for (const part of parts) part.dispose()
