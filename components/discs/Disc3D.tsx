@@ -2,44 +2,32 @@
 
 import { useEffect, useRef, useState } from 'react'
 import {
-  AdditiveBlending,
-  BackSide,
-  BufferGeometry,
-  CylinderGeometry,
   DirectionalLight,
   DoubleSide,
   Group,
+  InstancedMesh,
   LatheGeometry,
+  Matrix4,
   Mesh,
   MeshPhysicalMaterial,
-  MeshBasicMaterial,
-  MeshStandardMaterial,
   NeutralToneMapping,
-  PlaneGeometry,
   PerspectiveCamera,
   PMREMGenerator,
+  Quaternion,
   Raycaster,
   RingGeometry,
   Scene,
+  SphereGeometry,
   SRGBColorSpace,
   Vector2,
+  Vector3,
   WebGLRenderer,
-  type Texture,
+  type BufferGeometry,
 } from 'three'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { GridDisc } from '@/components/gallery/albums/GridDisc'
-import {
-  BODY_R,
-  HALO_R,
-  HOLE_R,
-  LABEL_R,
-  createLabel,
-  faceTextures,
-  grooveTextures,
-  haloTexture,
-  palette,
-  type Tone,
-} from '@/components/discs/discTextures'
+import { createNeon, neonLook, type NeonStrips } from '@/components/discs/discNeon'
+import { BODY_R, HOLLOW_R, bodyTexture, grooveTextures, palette, type Tone } from '@/components/discs/discTextures'
 import { type Dot, type Live, mix, signal as signalFrame } from '@/components/discs/signalFrames'
 
 /** Same props as GridDisc, so it can stand in for the SVG discs. */
@@ -47,14 +35,27 @@ export type Disc3DProps = { contained?: boolean; signal?: boolean }
 
 const THICK = 0.03
 const BEVEL = THICK / 2
-const HOLE = HOLE_R / BODY_R
-const LABEL = LABEL_R / BODY_R
+const HOLLOW = HOLLOW_R / BODY_R
 const FOV = 35
 const CAM_Z = 10
 const TILT = (50 * Math.PI) / 180
 const HOVER_TILT = (16 * Math.PI) / 180
 const IDLE_SPIN = (Math.PI * 2) / 24
+/** The SVG's own ring spin (64 s one way, 92 s back), on top of the disc's turn. */
+const OUTER_SPIN = (Math.PI * 2) / 64
+const INNER_SPIN = (Math.PI * 2) / 92
+const MAX_DOTS = 32
 const DISC_PX = (w: number, h: number) => Math.min(Math.min(w, h) * 0.78, 760)
+
+const SPARKS: Dot[] = [
+  { x: 100, y: 104, r: 0.9 },
+  { x: 91, y: 96, r: 0.45 },
+  { x: 112, y: 98, r: 0.4 },
+  { x: 106, y: 116, r: 0.3 },
+  { x: 88, y: 112, r: 0.28 },
+  { x: 116, y: 110, r: 0.22 },
+  { x: 97, y: 88, r: 0.25 },
+]
 
 /** Planar UVs over the unit disc, so every ring samples the same face texture. */
 function planarUV(geo: BufferGeometry) {
@@ -65,23 +66,15 @@ function planarUV(geo: BufferGeometry) {
   return geo
 }
 
-function labelUV(geo: BufferGeometry) {
-  const pos = geo.attributes.position
-  const uv = geo.attributes.uv
-  for (let i = 0; i < pos.count; i++) {
-    uv.setXY(i, (pos.getX(i) / LABEL) * 0.5 + 0.5, (pos.getY(i) / LABEL) * 0.5 + 0.5)
-  }
-  uv.needsUpdate = true
-  return geo
-}
-
-function edgeGeometry() {
+/** Rounded edge, outward at the rim (dir 1) or inward round the hollow (dir -1). */
+function edgeGeometry(radius: number, dir: 1 | -1) {
   const pts: Vector2[] = []
   const steps = 10
   for (let i = 0; i <= steps; i++) {
     const a = Math.PI / 2 - (i / steps) * Math.PI
-    pts.push(new Vector2(1 - BEVEL + BEVEL * Math.cos(a), (THICK / 2) * Math.sin(a)))
+    pts.push(new Vector2(radius - dir * BEVEL + dir * BEVEL * Math.cos(a), (THICK / 2) * Math.sin(a)))
   }
+  if (dir === -1) pts.reverse()
   const geo = new LatheGeometry(pts, 192)
   geo.rotateX(Math.PI / 2)
   return geo
@@ -94,10 +87,9 @@ type DiscParts = {
   face: MeshPhysicalMaterial
   back: MeshPhysicalMaterial
   edge: MeshPhysicalMaterial
-  label: MeshPhysicalMaterial
+  neon: NeonStrips
+  dots: InstancedMesh
   hit: Mesh
-  drawLabel: (tone: Tone, dark: boolean, signal: boolean, dots: Live[]) => void
-  textures: Texture[]
   hover: number
   from: Dot[]
   to: Dot[]
@@ -106,10 +98,29 @@ type DiscParts = {
   phaseStart: number
 }
 
+const m4 = new Matrix4()
+const q = new Quaternion()
+const p3 = new Vector3()
+const s3 = new Vector3()
+
+/** Signal dots float in the hollow core as small lit points, in SVG units. */
+function placeDots(mesh: InstancedMesh, dots: Live[]) {
+  const n = Math.min(dots.length, MAX_DOTS)
+  for (let i = 0; i < n; i++) {
+    const d = dots[i]
+    const r = Math.max(d.r * 1.5, 0.55) * d.opacity
+    p3.set((d.x - 100) / BODY_R, (100 - d.y) / BODY_R, 0)
+    s3.setScalar(r / BODY_R)
+    mesh.setMatrixAt(i, m4.compose(p3, q, s3))
+  }
+  mesh.count = n
+  mesh.instanceMatrix.needsUpdate = true
+}
+
 /**
  * Three.js version of the 02 v2 side discs: two thin vinyl discs with bevelled
- * edges, grooves, the SVG art as the face, the signal core as the centre label
- * and a spindle hole. One canvas, dpr ≤ 2, and it stops when offscreen.
+ * edges and grooves, a hollow core, and the SVG line art as raised neon strips
+ * with a soft glow. One canvas, dpr ≤ 2, and it stops when offscreen.
  */
 export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
   const ref = useRef<HTMLDivElement>(null)
@@ -159,32 +170,19 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
     camera.position.set(0, 0, CAM_Z)
 
     const grooves = grooveTextures(1024, maxAniso)
+    // A real cut-out: the faces are rings from the hollow to the rim, joined by rounded walls.
     const geos = {
-      face: planarUV(new RingGeometry(LABEL, 1 - BEVEL, 256, 1)),
-      back: planarUV(new RingGeometry(HOLE, 1 - BEVEL, 256, 1)),
-      label: labelUV(new RingGeometry(HOLE, LABEL, 128, 1)),
-      edge: edgeGeometry(),
-      hole: new CylinderGeometry(HOLE, HOLE, THICK, 48, 1, true),
-      halo: new PlaneGeometry((HALO_R / BODY_R) * 2, (HALO_R / BODY_R) * 2),
+      face: planarUV(new RingGeometry(HOLLOW + BEVEL, 1 - BEVEL, 256, 1)),
+      back: planarUV(new RingGeometry(HOLLOW + BEVEL, 1 - BEVEL, 256, 1)),
+      rim: edgeGeometry(1, 1),
+      core: edgeGeometry(HOLLOW, -1),
+      dot: new SphereGeometry(1, 10, 8),
     }
     geos.back.rotateY(Math.PI)
     geos.back.translate(0, 0, -THICK / 2)
     geos.face.translate(0, 0, THICK / 2)
-    geos.label.translate(0, 0, THICK / 2)
-    geos.hole.rotateX(Math.PI / 2)
-    geos.halo.translate(0, 0, THICK / 2 + 0.004)
-    const halo = haloTexture(512)
-    const haloMat = new MeshBasicMaterial({
-      map: halo,
-      transparent: true,
-      blending: AdditiveBlending,
-      depthWrite: false,
-      toneMapped: false,
-      opacity: 0.55,
-    })
-    const holeMat = new MeshStandardMaterial({ color: 0x050505, roughness: 0.9, side: BackSide })
 
-    const vinyl = (extra: Partial<ConstructorParameters<typeof MeshPhysicalMaterial>[0]> = {}) =>
+    const vinyl = () =>
       new MeshPhysicalMaterial({
         roughness: 1,
         roughnessMap: grooves.roughness,
@@ -196,8 +194,6 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
         anisotropyMap: grooves.anisotropy,
         clearcoat: 0.35,
         clearcoatRoughness: 0.22,
-        emissive: 0xffffff,
-        ...extra,
       })
 
     const isDark = () => document.documentElement.classList.contains('dark')
@@ -208,27 +204,19 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
       const spinner = new Group()
       rig.add(spinner)
       const face = vinyl()
-      const back = vinyl({ emissiveIntensity: 0 })
+      const back = vinyl()
       const edge = new MeshPhysicalMaterial({ roughness: 0.28, clearcoat: 0.5, side: DoubleSide })
-      const lab = createLabel(1024, maxAniso)
-      const label = new MeshPhysicalMaterial({
-        map: lab.map,
-        emissiveMap: lab.emissive,
-        emissive: 0xffffff,
-        roughness: 0.5,
-        clearcoat: 0.2,
-      })
+      const neon = createNeon(tone, THICK / 2)
+      const dots = new InstancedMesh(geos.dot, neon.material, MAX_DOTS)
+      dots.frustumCulled = false
       const hit = new Mesh(geos.face, face)
-      spinner.add(hit, new Mesh(geos.back, back), new Mesh(geos.label, label), new Mesh(geos.edge, edge), new Mesh(geos.hole, holeMat))
+      spinner.add(hit, new Mesh(geos.back, back), new Mesh(geos.rim, edge), new Mesh(geos.core, edge), neon.group, dots)
       // Start the two discs at different angles, like the SVG signal offsets.
       spinner.rotation.z = tone === 'neon' ? 1.9 : 0.4
-      if (tone === 'neon') {
-        const glow = new Mesh(geos.halo, haloMat)
-        glow.renderOrder = 2
-        spinner.add(glow)
-      }
       scene.add(rig)
       const offset = tone === 'neon' ? 3 : 0
+      const from = signal ? signalFrame(offset) : SPARKS
+      placeDots(dots, from.map((d) => ({ ...d, opacity: 1 })))
       return {
         tone,
         rig,
@@ -236,12 +224,11 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
         face,
         back,
         edge,
-        label,
+        neon,
+        dots,
         hit,
-        drawLabel: lab.draw,
-        textures: [lab.map, lab.emissive],
         hover: 0,
-        from: signalFrame(offset),
+        from,
         to: signalFrame(offset + 1),
         next: offset + 1,
         phase: 'hold' as const,
@@ -249,23 +236,16 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
       }
     })
 
-    const live = (d: Dot[]): Live[] => d.map((dot) => ({ ...dot, opacity: 1 }))
-
     const paint = () => {
       for (const d of discs) {
-        for (const t of [d.face.map, d.face.emissiveMap, d.back.map]) t?.dispose()
-        const tex = faceTextures(d.tone, dark, 2048, maxAniso)
-        const p = palette(d.tone, dark)
-        const neon = d.tone === 'neon'
-        d.face.map = tex.map
-        d.face.emissiveMap = tex.emissive
-        d.face.emissiveIntensity = neon ? 1.15 : dark ? 0.55 : 0
-        d.back.map = tex.back
-        d.edge.color.set(p.rim)
-        d.label.emissiveIntensity = neon ? 1.3 : signal ? 0.9 : dark ? 0.5 : 0
+        d.face.map?.dispose()
+        const map = bodyTexture(d.tone, dark, 1024, maxAniso)
+        d.face.map = map
+        d.back.map = map
+        d.edge.color.set(palette(d.tone, dark).rim)
+        d.neon.setLook(neonLook(d.tone, dark))
         d.face.needsUpdate = true
         d.back.needsUpdate = true
-        d.drawLabel(d.tone, dark, signal, live(d.from))
       }
     }
     paint()
@@ -366,7 +346,6 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
 
     let frames = 0
     let last = performance.now()
-    let lastLabel = 0
     const tick = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
@@ -398,16 +377,21 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
         d.rig.rotation.set(pitch, side * (TILT + HOVER_TILT * d.hover - view) + yaw, 0)
         d.spinner.scale.setScalar(1 + 0.04 * d.hover)
         // Clockwise, like the SVG rings.
-        d.spinner.rotation.z -= spin * dt * (d.hover ? 1 + 1.8 * d.hover : 1)
+        d.spinner.rotation.z -= spin * dt * (1 + 1.8 * d.hover)
+        if (!reduced) {
+          // Dotted rings keep their own counter-rotation, as in the SVG.
+          d.neon.outer.rotation.z -= OUTER_SPIN * dt
+          d.neon.inner.rotation.z += (spin + INNER_SPIN) * dt
+        }
 
         if (signal && !reduced) {
           if (d.phase === 'hold' && now - d.phaseStart >= 800) {
             d.phase = 'morph'
             d.phaseStart = now
           }
-          if (d.phase === 'morph' && now - lastLabel > 33) {
+          if (d.phase === 'morph') {
             const t = Math.min(1, (now - d.phaseStart) / 1700)
-            d.drawLabel(d.tone, dark, true, mix(d.from, d.to, t))
+            placeDots(d.dots, mix(d.from, d.to, t))
             if (t >= 1) {
               d.from = d.to
               d.next += 1
@@ -419,7 +403,6 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
           }
         }
       }
-      if (signal && !reduced && now - lastLabel > 33) lastLabel = now
 
       if (!moving && !dirty) return
       dirty = false
@@ -473,15 +456,13 @@ export function Disc3D({ contained = false, signal = false }: Disc3DProps) {
       canvas.removeEventListener('webglcontextlost', onLost)
       window.removeEventListener('scroll', onScroll)
       for (const d of discs) {
-        for (const t of [d.face.map, d.face.emissiveMap, d.back.map, ...d.textures]) t?.dispose()
+        d.face.map?.dispose()
         d.face.dispose()
         d.back.dispose()
         d.edge.dispose()
-        d.label.dispose()
+        d.neon.dispose()
+        d.dots.dispose()
       }
-      holeMat.dispose()
-      haloMat.dispose()
-      halo.dispose()
       Object.values(grooves).forEach((t) => t.dispose())
       Object.values(geos).forEach((g) => g.dispose())
       envMap.dispose()
