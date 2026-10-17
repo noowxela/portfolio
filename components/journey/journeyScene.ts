@@ -1,17 +1,20 @@
 import {
   Color,
   FogExp2,
+  Group,
   NeutralToneMapping,
   PerspectiveCamera,
   Scene,
   SRGBColorSpace,
   WebGLRenderer,
 } from 'three'
-import { BEATS, cameraAt, range, smoothstep, type Vec3 } from './path'
+import { BEATS, END_Z, cameraAt, range, smoothstep, type Vec3 } from './path'
+import { createDesk } from './scene/desk'
+import { createName } from './scene/name'
 import { createEnvironment } from './scene/environment'
 import { VOID, createFog, type Part } from './scene/shared'
 
-export type JourneyOptions = { small: boolean }
+export type JourneyOptions = { small: boolean; fontFamily: string; name: string }
 
 export type JourneyScene = {
   setProgress: (p: number) => void
@@ -55,6 +58,35 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
   const env = createEnvironment(scene, camera, fog)
   const parts: Part[] = []
 
+  // The room: desk, monitor and the mosaic name. It opens the ride at the
+  // origin and is moved to END_Z for the landing, so the loop closes on the same view.
+  const homeSet = new Group()
+  const desk = createDesk(fog)
+  const name = createName(opts.name, opts.fontFamily, camera)
+  homeSet.add(desk.group, name.group)
+  scene.add(homeSet)
+  parts.push({
+    update(p, time) {
+      const landing = p >= 0.5
+      homeSet.position.z = landing ? END_Z : 0
+      homeSet.visible = p < 0.32 || p > 0.8
+      if (!homeSet.visible) return
+      if (!landing) {
+        desk.set(1, 0.18, 1, range(p, [0.05, BEATS.screen]), time)
+        name.update(1 - range(p, [0.15, 0.2]), time)
+      } else {
+        const solid = range(p, BEATS.solid)
+        const wire = range(p, [0.84, 0.87]) * (1 - 0.82 * solid)
+        desk.set(solid, wire, range(p, BEATS.gather), 0, time)
+        name.update(range(p, [0.9, 0.985]), time)
+      }
+    },
+    dispose() {
+      desk.dispose()
+      name.dispose()
+    },
+  })
+
   // --- State ---------------------------------------------------------------
   let progress = 0
   const pos: Vec3 = [0, 0, 0]
@@ -96,6 +128,7 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
     env.floorUniforms.uPulse.value = grid * 0.9
     env.skyUniforms.uHorizon.value = 0.55 + grid * 0.6
     env.skyUniforms.uDomeStrength.value = 1 - grid
+    env.floorUniforms.uHaze.value = env.skyUniforms.uHorizon.value * 0.2
     env.update(time)
 
     for (const part of parts) part.update(p, time)

@@ -29,6 +29,7 @@ uniform float uGlow;
 uniform float uCell;
 uniform float uPulse;
 uniform float uTime;
+uniform float uHaze;
 varying vec3 vWorld;
 void main() {
   vec2 g = vWorld.xz / uCell;
@@ -47,7 +48,7 @@ void main() {
   float lit = line * uIntensity * mix(0.25, 1.0, far) + glow * far + ring * line;
   vec3 col = uColor * lit;
   col += uColor * 0.018 * uIntensity;
-  col = mix(col, uFogColor, fogAmount(dist));
+  col = mix(col, uFogColor + uColor * uHaze, fogAmount(dist));
   gl_FragColor = vec4(col, 1.0);
 }
 `
@@ -92,6 +93,7 @@ export function createEnvironment(scene: Scene, camera: PerspectiveCamera, fog: 
       uCell: { value: 1 },
       uPulse: { value: 0 },
       uTime: { value: 0 },
+      uHaze: { value: 0.1 },
     },
   })
   const floor = new Mesh(floorGeo, floorMat)

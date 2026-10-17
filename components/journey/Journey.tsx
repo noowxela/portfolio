@@ -75,7 +75,14 @@ export function Journey({ className }: { className?: string }) {
       gsap.registerPlugin(ScrollTrigger)
 
       const small = window.matchMedia(SMALL).matches
-      const scene = createJourney(stage, { small })
+      const fontFamily = getComputedStyle(root).fontFamily || 'sans-serif'
+      try {
+        await document.fonts.load(`600 100px ${fontFamily}`)
+      } catch {
+        // Fall back to whatever font is there.
+      }
+      if (cancelled) return
+      const scene = createJourney(stage, { small, fontFamily, name: site.name.toLowerCase() })
       if (!scene) {
         setMode('fallback')
         return
@@ -123,7 +130,7 @@ export function Journey({ className }: { className?: string }) {
         st.getTween()?.progress(1)
         tween.progress(1)
         apply(1)
-        requestAnimationFrame(() => ctaRef.current?.focus({ preventScroll: true }))
+        window.setTimeout(() => ctaRef.current?.focus({ preventScroll: true }), 60)
       }
 
       const refresh = () => ScrollTrigger.refresh()
