@@ -67,6 +67,13 @@
 | Loaded city / desk models | Weight and load time; procedural boxes carry the look. |
 | Free-roam camera | Approved plan is a fixed path. |
 
+### Polish pass (2026-10-17)
+
+- **Flashes:** both are short, asymmetric pulses (quick rise, slightly longer fade). Screen crossing peaks at 0.72 (was 0.95, σ 0.018 → 0.0045 before / 0.009 after); the portal pass peaks at 0.38 (was 0.55). The monitor's close-up burn is cyan and partial instead of white, so the frame at `p` 0.2 shows the glass, not a white-out (mean luminance 204 → 100, near-white pixels 10.4% → 0%).
+- **Portrait framing:** on narrow screens the opening and closing poses dolly back along the view (`back = 1.12 / tan(hfov/2) − 2.88`, ≈1 unit at 390×844, 0 on landscape) and blend into the path by `p` 0.14 / from 0.9, so the whole desk fits and the two frames still match.
+- **Light cycles:** they now ride in a window 14–110 units ahead of the camera, fading in and out at its ends and before the road ends, in lanes ±1.0 / ±1.3; none come near the camera path.
+- **Gathering wireframe:** the desk edges are camera-facing ribbons (2.5 px, 6 px with a glow while gathering) instead of 1 px lines, white-hot on the floor and cooling to cyan as they land; gather starts at 0.855. At rest they drop back to the faint edge glow, the same at both ends.
+
 ## 5. Acceptance criteria and verification
 
 - [x] `/journey` renders the three acts on scroll; `/`, `/work`, `/about`, `/discs` still load.
@@ -81,3 +88,4 @@
 | Date | Status | Note |
 | --- | --- | --- |
 | 2026-10-17 | implemented | Preview at `/journey`, built act by act. |
+| 2026-10-17 | implemented | Polish: softer flashes, portrait framing, light cycles kept clear of the camera, readable gathering wireframe. |
