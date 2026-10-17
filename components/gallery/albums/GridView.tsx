@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import dynamic from 'next/dynamic'
 import { gsap } from 'gsap'
 import { Demo } from '@/data/demos'
 import { useMediaQuery } from '../useMediaQuery'
@@ -8,11 +9,19 @@ import { AlbumCover } from './AlbumCover'
 import { AlbumOverlay } from './AlbumOverlay'
 import { Disc } from './Disc'
 import { GridDisc } from './GridDisc'
+import type { GridDiscDriver } from './GridDiscs3D'
 import { useAlbumMotion } from './useAlbumMotion'
+
+// three.js loads with the Grid only, on the client.
+const GridDiscs3D = dynamic(() => import('./GridDiscs3D').then((m) => m.GridDiscs3D), { ssr: false })
 
 const ROW_DEPTH = [0.6, 1.3, 0.9]
 
-/** V2 Grid: a wall of sleeves, each with a disc peeking out. Discs spin with scroll velocity; rows drift with parallax. */
+/**
+ * V2 Grid: a wall of sleeves, each with a disc peeking out. Discs spin with scroll velocity; rows drift with parallax.
+ * The discs are the 02 v3 three.js disc, all drawn by one shared canvas (GridDiscs3D) into empty slots;
+ * the SVG Disc comes back if WebGL is unavailable.
+ */
 export function GridView({ demos }: { demos: Demo[] }) {
   const { isMobile, reduceMotion } = useAlbumMotion()
   const wide = useMediaQuery('(min-width: 1024px)')
@@ -22,6 +31,14 @@ export function GridView({ demos }: { demos: Demo[] }) {
   const rows = useRef<(HTMLDivElement | null)[]>([])
   const discs = useRef<(HTMLDivElement | null)[]>([])
   const buttons = useRef<(HTMLButtonElement | null)[]>([])
+  const slots = useRef<(HTMLDivElement | null)[]>([])
+  const content = useRef<HTMLDivElement>(null)
+  const driver = useRef<GridDiscDriver | null>(null)
+  const [webgl, setWebgl] = useState(true)
+  const noWebgl = useCallback(() => setWebgl(false), [])
+  const onDriver = useCallback((fn: GridDiscDriver | null) => {
+    driver.current = fn
+  }, [])
 
   useEffect(() => {
     const el = scroller.current
@@ -43,6 +60,8 @@ export function GridView({ demos }: { demos: Demo[] }) {
         const y = Math.max(-48, Math.min(48, -velocity * ROW_DEPTH[r % 3] * 2.2 * k))
         row.style.transform = `translateY(${y}px)`
       })
+      // After the rows move, so the 3D discs are drawn where their sleeves are this frame.
+      driver.current?.(angle)
     }
     gsap.ticker.add(tick)
     return () => gsap.ticker.remove(tick)
@@ -71,7 +90,18 @@ export function GridView({ demos }: { demos: Demo[] }) {
       className="box-border h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#eeeeee] pt-[var(--work-top,3.5rem)] font-sans dark:bg-[#0d0d0d]"
     >
       <GridDisc />
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-8 pb-28 sm:px-8 sm:pt-12">
+      <div ref={content} className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-8 pb-28 sm:px-8 sm:pt-12">
+        {webgl ? (
+          <GridDiscs3D
+            demos={demos}
+            slots={slots}
+            scroller={scroller}
+            content={content}
+            onDriver={onDriver}
+            reduceMotion={reduceMotion}
+            onFail={noWebgl}
+          />
+        ) : null}
         <header className="mb-10 sm:mb-14">
           <p className="text-[0.6rem] font-semibold tracking-[0.16em] text-[#999] uppercase">Collection</p>
           <h1 className="mt-1 text-xl font-semibold text-[#111] sm:text-2xl dark:text-white">Records</h1>
@@ -92,7 +122,11 @@ export function GridView({ demos }: { demos: Demo[] }) {
                   return (
                     <div key={d.slug} className="group relative pt-[18%]">
                       <div className="absolute top-0 left-[23%] w-[54%] transition-transform duration-300 ease-out group-focus-within:-translate-y-[10%] group-hover:-translate-y-[10%] motion-reduce:transition-none">
-                        <Disc demo={d} discRef={(el) => { discs.current[i] = el }} />
+                        {webgl ? (
+                          <div ref={(el) => { slots.current[i] = el }} aria-hidden className="aspect-square" />
+                        ) : (
+                          <Disc demo={d} discRef={(el) => { discs.current[i] = el }} />
+                        )}
                       </div>
                       <button
                         ref={(el) => { buttons.current[i] = el }}

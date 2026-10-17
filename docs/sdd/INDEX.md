@@ -28,3 +28,4 @@
 | [025-side-disc-v2.md](./025-side-disc-v2.md) | implemented | Side disc v2 |
 | [026-disc-tilt-70.md](./026-disc-tilt-70.md) | implemented | Disc tilt 70 degrees |
 | [018-grid-card-ratio.md](./018-grid-card-ratio.md) | implemented | Grid cards at 16:9 |
+| [027-grid-discs-3d.md](./027-grid-discs-3d.md) | implemented | Grid discs in 3D |
