@@ -12,6 +12,7 @@ import { BEATS, END_Z, cameraAt, range, smoothstep, type Vec3 } from './path'
 import { createCity } from './scene/city'
 import { createDesk } from './scene/desk'
 import { createName } from './scene/name'
+import { createPortal } from './scene/portal'
 import { createEnvironment } from './scene/environment'
 import { VOID, createFog, type Part } from './scene/shared'
 
@@ -77,6 +78,17 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
       city.update(rise, on, time)
     },
     dispose: () => city.dispose(),
+  })
+
+  // Act 3: the disc portal opens at the end of the road.
+  const portal = createPortal(renderer)
+  scene.add(portal.group)
+  parts.push({
+    update(p, time) {
+      const open = p < 0.68 || p > 0.875 ? 0 : range(p, BEATS.portalOpen)
+      portal.update(open, range(p, [0.82, BEATS.portalPass]), time)
+    },
+    dispose: () => portal.dispose(),
   })
   parts.push({
     update(p, time) {
@@ -170,8 +182,9 @@ export function createJourney(container: HTMLElement, opts: JourneyOptions): Jou
       progress = Math.min(1, Math.max(0, p))
     },
     flash(p) {
-      const d = (p - BEATS.screen) / 0.018
-      return Math.exp(-d * d) * 0.95
+      const screen = (p - BEATS.screen) / 0.018
+      const ring = (p - BEATS.portalPass) / 0.012
+      return Math.exp(-screen * screen) * 0.95 + Math.exp(-ring * ring) * 0.55
     },
     dispose() {
       stopLoop()
