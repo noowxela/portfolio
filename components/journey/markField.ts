@@ -45,6 +45,8 @@ const OPACITY = 0.78
 const FADE_IN_S = 0.7
 const IDLE_FRAME_MS = 33
 /** Gap (px) between the top of the stage and the top of the years' ink. */
+/** Size of the years relative to the original full-size mark (Alex: "too big"). */
+const MARK_SCALE = 0.57
 const MARK_TOP = 12
 const MARK_TOP_SMALL = 10
 
@@ -55,6 +57,7 @@ const vertex = /* glsl */ `
   uniform vec2 uRes;
   uniform vec2 uOrigin;
   uniform float uCell;
+  uniform float uScale;
   uniform float uMix;
   uniform float uTime;
   uniform float uSpread;
@@ -68,15 +71,15 @@ const vertex = /* glsl */ `
     k = k * k * (3.0 - 2.0 * k);
     float fly = sin(3.14159265 * k);
     vec2 p = mix(aFrom.xy, aTo.xy, k);
-    p += vec2(cos(aSeed * 91.0), sin(aSeed * 57.0)) * fly * (18.0 + 30.0 * fract(aSeed * 5.3));
+    p += vec2(cos(aSeed * 91.0), sin(aSeed * 57.0)) * fly * (18.0 + 30.0 * fract(aSeed * 5.3)) * uScale;
     p += vec2(sin(uTime * 1.3 + aSeed * 40.0), cos(uTime * 1.1 + aSeed * 23.0)) * 0.6;
-    p += vec2(sin(aSeed * 271.0), cos(aSeed * 613.0)) * (12.0 + 46.0 * fract(aSeed * 7.13)) * uSpread;
+    p += vec2(sin(aSeed * 271.0), cos(aSeed * 613.0)) * (12.0 + 46.0 * fract(aSeed * 7.13)) * uSpread * uScale;
     vec2 world = uOrigin + p;
     vec2 d = world - uPointer;
     float dist = length(d);
-    float fall = 1.0 - smoothstep(0.0, 140.0, dist);
+    float fall = 1.0 - smoothstep(0.0, 140.0 * (0.4 + 0.6 * uScale), dist);
     fall *= fall;
-    world += d / max(dist, 18.0) * fall * uPush * (16.0 + 30.0 * fract(aSeed * 3.7));
+    world += d / max(dist, 18.0) * fall * uPush * (16.0 + 30.0 * fract(aSeed * 3.7)) * (0.4 + 0.6 * uScale);
     vHot = clamp(fall * uPush * 1.6 + fly * 0.5, 0.0, 1.0);
     vAlpha = mix(aFrom.z, aTo.z, k);
     vec2 size = vec2(uCell * 0.86, uCell * 0.38) * (1.0 + 0.5 * fly);
@@ -117,8 +120,10 @@ function sampleMarks(marks: string[], fontFamily: string, width: number, height:
   probe.font = `600 ${fontPx}px ${fontFamily}`
   const widest = Math.max(...marks.map((m) => probe.measureText(m).width), 1)
   if (widest > width * 0.92) fontPx *= (width * 0.92) / widest
-  fontPx = Math.max(48, Math.min(fontPx, height * 0.62))
-  const cell = Math.max(3, Math.round(fontPx / (small ? 34 : 44)))
+  fontPx = Math.max(48, Math.min(fontPx, height * 0.62)) * MARK_SCALE
+  fontPx = Math.max(28, fontPx)
+  // Finer cells for the smaller mark, so it still reads as a crisp dashed outline.
+  const cell = Math.max(2, Math.round(fontPx / (small ? 28 : 38)))
   const font = `600 ${fontPx}px ${fontFamily}`
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d', { willReadFrequently: true })
@@ -200,6 +205,7 @@ export function createMarkField(container: HTMLElement, opts: MarkFieldOptions):
     uRes: { value: [1, 1] },
     uOrigin: { value: [0, 0] },
     uCell: { value: 4 },
+    uScale: { value: 1 },
     uMix: { value: 1 },
     uTime: { value: 0 },
     uSpread: { value: 0 },
@@ -252,6 +258,8 @@ export function createMarkField(container: HTMLElement, opts: MarkFieldOptions):
     // Top-anchored: the years sit in the band just under the bar, behind the panels' top edge.
     uniforms.uOrigin.value = [width / 2, (opts.small ? MARK_TOP_SMALL : MARK_TOP) - sampled.inkTop]
     uniforms.uCell.value = sampled.cell
+    // Morph fly-out, scatter and cursor push shrink with the mark (1 at the old 250 px).
+    uniforms.uScale.value = Math.min(1, Math.max(0.35, sampled.fontPx / 250))
     const budget = opts.small ? 2600 : 6500
     n = Math.min(budget, Math.max(...sampled.cells.map((c) => c.length / 2), 1))
     targets = buildTargets(sampled.cells, n)

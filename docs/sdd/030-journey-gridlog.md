@@ -89,3 +89,10 @@ Alex's review of the first build:
 Not changed, though orange: the `edu` branch colour (the dashed `edu` lane and the `edu` chip in the MMU panel). It marks the branch, not the year; easy to switch to cyan if wanted.
 
 Verification of these changes (same harness; shots, rail close-ups and a desktop video under `/workspace/portfolio/shots/journey-cv2/`): tsc, eslint and the `GITHUB_PAGES=true` build clean; desktop and mobile row tests, reduced motion, no WebGL, and Home → Journey all pass as in section 5; no console errors or warnings apart from the known prefetch preloads. Rail labels do not overlap at 390 px. Sound: no `AudioContext` before a gesture (wheel alone stays silent), none on load or on a fresh deep link; node click / tap and keys play the expected pitch; fast keys across two steps give one blip; toggle off silences it and survives a reload; leaving the page closes the context. Frame timing unchanged (Home → Journey, three runs: every phase median 16.7, max 16.8 ms).
+
+### Follow-up: smaller years (2026-10-18)
+
+Alex: the background year was too big. `MARK_SCALE = 0.57` in `markField.ts`: at 1440×900 the font goes from 245 px to 140 px (ink height of `2021–23` 169 → 96 px, width 991 → 565 px); at 390×844 from 94 px to 53 px (ink 65 → 37 px). Same top line (12 px under the bar, 10 px on phones). Cells are finer for the smaller mark (font / 38, phones font / 28, min 2 px), so the dashes stay crisp; the morph fly-out, wheel scatter and cursor push are scaled with the size (`uScale`, 1 at the old 250 px). The static fallback uses the same factor (`clamp(2.6rem, 9.7vw, 8.85rem)`, phones `13.7vw`).
+
+The years now end at the panel frame (desktop ink 98–194 px, frame at 195 px; phone ink 96–133 px, frame at 129 px, so only the frame line touches) and no longer sit behind the title, so the current panel's background went back from 58 % to the original 38 %.
+
