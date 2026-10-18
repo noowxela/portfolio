@@ -749,6 +749,8 @@ html.gridlog-page body {
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: none;
+    /* A scroller resets the inherited touch-action; keep horizontal swipes for the row. */
+    touch-action: pan-y;
   }
 
   .gl-body[data-more] {
