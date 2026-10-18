@@ -751,6 +751,10 @@ html.gridlog-page body {
     scrollbar-width: none;
   }
 
+  .gl-body[data-more] {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+  }
+
   .gl-title {
     font-size: 1.6rem;
   }

@@ -33,6 +33,7 @@ const SNAP_MS = 450
 const KEY_REPEAT_MS = 220
 const DRAG_START = 6
 const THROW = 260
+const FLICK = 0.16
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 
@@ -148,7 +149,17 @@ export function createTrack(o: TrackOptions): Track {
   }
 
   // ---- pointer drag (mouse and touch), horizontal; vertical pans stay native.
-  let press: { id: number; x0: number; y0: number; last: number; t: number; v: number; moving: boolean } | null = null
+  let press: {
+    id: number
+    x0: number
+    y0: number
+    last: number
+    t: number
+    v: number
+    moving: boolean
+    start: number
+    offset0: number
+  } | null = null
 
   const onDown = (e: PointerEvent) => {
     if (e.button !== 0 || (e.target as Element).closest('a, button')) return
@@ -156,7 +167,17 @@ export function createTrack(o: TrackOptions): Track {
     window.clearTimeout(settleTimer)
     locked = null
     dragged = false
-    press = { id: e.pointerId, x0: e.clientX, y0: e.clientY, last: e.clientX, t: performance.now(), v: 0, moving: false }
+    press = {
+      id: e.pointerId,
+      x0: e.clientX,
+      y0: e.clientY,
+      last: e.clientX,
+      t: performance.now(),
+      v: 0,
+      moving: false,
+      start: nearest(x),
+      offset0: x,
+    }
   }
 
   const onMovePointer = (e: PointerEvent) => {
@@ -196,7 +217,12 @@ export function createTrack(o: TrackOptions): Track {
     // A stale velocity (finger held still) should not throw.
     const v = performance.now() - p.t > 90 ? 0 : p.v
     const projected = clamp(x + v * THROW)
-    go(nearest(projected))
+    // One panel per swipe, like a carousel; a short but deliberate drag still counts.
+    const moved = x - p.offset0
+    const spacing = count() > 1 ? Math.abs(offsetFor(0) - offsetFor(1)) : width
+    let i = nearest(projected)
+    if (i === p.start && Math.abs(moved) > spacing * FLICK) i = p.start + (moved < 0 ? 1 : -1)
+    go(Math.min(p.start + 1, Math.max(p.start - 1, i)))
   }
 
   // ---- keys

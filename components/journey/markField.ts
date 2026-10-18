@@ -172,13 +172,17 @@ function buildTargets(cells: number[][], n: number): Target[] {
 }
 
 export function createMarkField(container: HTMLElement, opts: MarkFieldOptions): MarkField | null {
+  // Probe on the canvas three will use, so a missing WebGL costs no second context and logs nothing.
+  const canvas = document.createElement('canvas')
+  const attrs: WebGLContextAttributes = { antialias: false, alpha: true, powerPreference: 'low-power' }
+  const context = canvas.getContext('webgl2', attrs) ?? canvas.getContext('webgl', attrs)
+  if (!context) return null
   let renderer: WebGLRenderer
   try {
-    renderer = new WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'low-power' })
+    renderer = new WebGLRenderer({ canvas, context, antialias: false, alpha: true, powerPreference: 'low-power' })
   } catch {
     return null
   }
-  const canvas = renderer.domElement
   canvas.className = 'gl-field-canvas'
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
   renderer.setClearColor(0x000000, 0)

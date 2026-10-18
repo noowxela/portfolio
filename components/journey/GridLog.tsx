@@ -35,6 +35,35 @@ function canUseWebGL() {
   return typeof window !== 'undefined' && 'WebGLRenderingContext' in window
 }
 
+/**
+ * Resolve once the home's hand-off (curtain + staged entrance) is over and the
+ * main thread is idle, so building the particle field (font raster, shader
+ * compile) never lands on an entrance frame. Direct visits resolve at once.
+ */
+function whenCalm(signal: { cancelled: boolean }) {
+  const html = document.documentElement
+  const busy = () => html.classList.contains('route-enter') || !!html.dataset.curtain
+  return new Promise<void>((resolve) => {
+    const idle = () => {
+      if (signal.cancelled) return
+      if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(() => resolve(), { timeout: 400 })
+      else setTimeout(resolve, 60)
+    }
+    if (!busy()) return idle()
+    const mo = new MutationObserver(() => {
+      if (busy()) return
+      mo.disconnect()
+      window.clearTimeout(cap)
+      idle()
+    })
+    const cap = window.setTimeout(() => {
+      mo.disconnect()
+      idle()
+    }, 3000)
+    mo.observe(html, { attributes: true, attributeFilter: ['class', 'data-curtain'] })
+  })
+}
+
 const order = (i: number) => ({ '--i': i }) as CSSProperties
 
 function StepBody({ it }: { it: Extract<Item, { kind: 'step' }> }) {
@@ -227,17 +256,18 @@ export function GridLog({ className }: { className?: string }) {
     const root = rootRef.current
     const host = fieldRef.current
     if (!root || !host) return
-    let cancelled = false
+    const signal = { cancelled: false }
     let field: MarkField | null = null
     void (async () => {
-      const { createMarkField } = await import('./markField')
+      const [{ createMarkField }] = await Promise.all([import('./markField'), whenCalm(signal)])
+      if (signal.cancelled) return
       const fontFamily = getComputedStyle(root).fontFamily || 'sans-serif'
       try {
         await document.fonts.load(`600 100px ${fontFamily}`)
       } catch {
         /* sample with whatever font is there */
       }
-      if (cancelled) return
+      if (signal.cancelled) return
       field = createMarkField(host, {
         marks: ITEMS.map((it) => it.mark),
         fontFamily,
@@ -253,7 +283,7 @@ export function GridLog({ className }: { className?: string }) {
       root.dataset.field = 'ready'
     })()
     return () => {
-      cancelled = true
+      signal.cancelled = true
       markRef.current = null
       field?.dispose()
       delete root.dataset.field
@@ -351,6 +381,27 @@ export function GridLog({ className }: { className?: string }) {
       panel?.querySelectorAll<HTMLElement>('[data-count]').forEach((c) => (c.textContent = c.dataset.count ?? ''))
     }
   }, [cur])
+
+  // Panels taller than the stage (phones) scroll inside; flag them for the fade hint.
+  useEffect(() => {
+    const row = rowRef.current
+    if (!row) return
+    const mark = () => {
+      row.querySelectorAll<HTMLElement>('.gl-body').forEach((b) => {
+        const more = b.scrollHeight - b.clientHeight > 4 && b.scrollTop + b.clientHeight < b.scrollHeight - 4
+        if (more) b.dataset.more = 'true'
+        else delete b.dataset.more
+      })
+    }
+    const ro = new ResizeObserver(mark)
+    ro.observe(row)
+    row.addEventListener('scroll', mark, { capture: true, passive: true })
+    mark()
+    return () => {
+      ro.disconnect()
+      row.removeEventListener('scroll', mark, { capture: true })
+    }
+  }, [])
 
   const pick = useCallback((i: number) => trackRef.current?.go(i), [])
 
