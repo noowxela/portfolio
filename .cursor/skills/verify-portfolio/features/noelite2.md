@@ -1,6 +1,6 @@
 # Noelite 2
 
-Noelite 2 is the scroll-driven ride from a desk, through a grid, and back (it lived at `/noelite2/` until 2026-10-18). It is not linked from the header or the Home corners; `/noelite2/` links to it.
+Noelite 2 is the scroll-driven ride from a desk, through a grid, and back (it lived at `/journey/` until 2026-10-18). It is not linked from the header, the Home corners, or `/journey/`. Open it by URL.
 
 ## Sub-features
 
@@ -9,7 +9,6 @@ Noelite 2 is the scroll-driven ride from a desk, through a grid, and back (it li
 ## How to get to it (user POV)
 
 - Open `/noelite2/`.
-- From `/journey/`, choose the link `Ride the 3D journey`.
 
 ## Driving it with verify.mjs
 

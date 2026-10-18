@@ -181,9 +181,17 @@ async function drive(feature) {
     }
     if (feature === 'journey') {
       await page.goto(`${base}/journey/`, { waitUntil: 'networkidle' })
-      await page.getByRole('heading', { level: 1, name: 'Journey' }).waitFor()
-      await page.getByRole('link', { name: /Ride the 3D journey/ }).waitFor()
-      await proof('journey', page, page.locator('main'))
+      const main = page.locator('main')
+      await main.getByRole('heading', { level: 1, name: /^Journey: .*work experience$/ }).waitFor()
+      const row = main.getByRole('list', { name: 'Work experience, oldest first' })
+      await row.getByRole('heading', { level: 2, name: 'Multimedia University' }).waitFor()
+      // The rail node for Auronex moves the row there and writes its commit hash to the URL.
+      await main.getByRole('button', { name: /Auronex Sdn Bhd/ }).click()
+      await page.waitForFunction(() => location.hash === '#ef5e76')
+      const cur = main.locator('.gl-panel.is-cur')
+      await cur.getByRole('heading', { level: 2, name: /Auronex Sdn Bhd/ }).waitFor()
+      await page.waitForTimeout(700)
+      await proof('journey', page, main)
       return
     }
     if (feature === 'noelite2') {
