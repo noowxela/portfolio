@@ -41,6 +41,8 @@ export type PortraitOptions = {
 
 export type PortraitScene = {
   setPose: (id: PoseId) => void
+  /** True while a drag is in progress or just moved past the tap threshold. */
+  wasDrag: () => boolean
   dispose: () => void
 }
 
@@ -48,6 +50,8 @@ const FOV = 30
 const CAM_Z = 10
 const PUSH_RADIUS = 120
 const PUSH_GAIN = 2.2
+const TILT_MAX = 0.45
+const TAU = Math.PI * 2
 
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v))
@@ -436,6 +440,61 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     document.documentElement.addEventListener('pointerleave', onLeave)
   }
 
+  // ---- Drag / wheel rotation ----
+  const spin = { yaw: 0, vel: 0, tilt: 0, puff: 0 }
+  const drag = { on: false, id: -1, x: 0, y: 0, t: 0, moved: 0 }
+  let tiltTween: gsap.core.Tween | null = null
+  const onDown = (e: PointerEvent) => {
+    if (e.button !== 0 || drag.on) return
+    drag.on = true
+    drag.id = e.pointerId
+    drag.x = e.clientX
+    drag.y = e.clientY
+    drag.t = performance.now()
+    drag.moved = 0
+    spin.vel = 0
+    tiltTween?.kill()
+    container.setPointerCapture?.(e.pointerId)
+    wake()
+  }
+  const onDrag = (e: PointerEvent) => {
+    if (!drag.on || e.pointerId !== drag.id) return
+    const now = performance.now()
+    const dt = Math.max(0.008, (now - drag.t) / 1000)
+    const dx = e.clientX - drag.x
+    const dy = e.clientY - drag.y
+    drag.moved += Math.abs(dx) + Math.abs(dy)
+    drag.x = e.clientX
+    drag.y = e.clientY
+    drag.t = now
+    const dYaw = dx * 0.0065
+    spin.yaw += dYaw
+    spin.tilt = clamp(spin.tilt + dy * 0.004, -TILT_MAX, TILT_MAX)
+    spin.vel += (dYaw / dt - spin.vel) * 0.5
+    wake()
+  }
+  const onUp = (e: PointerEvent) => {
+    if (!drag.on || e.pointerId !== drag.id) return
+    drag.on = false
+    // A pause before release kills the throw.
+    if (performance.now() - drag.t > 90 || opts.reducedMotion) spin.vel = 0
+    spin.vel = clamp(spin.vel, -14, 14)
+    tiltTween = gsap.to(spin, { tilt: 0, duration: opts.reducedMotion ? 0 : 0.9, ease: 'power2.out', onUpdate: wake })
+    wake()
+  }
+  const onWheel = (e: WheelEvent) => {
+    e.preventDefault()
+    const d = clamp((Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * (e.deltaMode === 1 ? 16 : 1), -120, 120)
+    if (opts.reducedMotion) spin.yaw += d * 0.004
+    else spin.vel = clamp(spin.vel + d * 0.012, -10, 10)
+    wake()
+  }
+  container.addEventListener('pointerdown', onDown)
+  container.addEventListener('pointermove', onDrag)
+  container.addEventListener('pointerup', onUp)
+  container.addEventListener('pointercancel', onUp)
+  container.addEventListener('wheel', onWheel, { passive: false })
+
   // ---- Poses ----
   const samples = new Map<PoseId, PoseSample & { img: HTMLImageElement }>()
   const images = new Map<string, Promise<HTMLImageElement>>()
@@ -558,8 +617,17 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   let fade = 0
   let ready = false
 
+  const restYaw = () => Math.round(spin.yaw / TAU) * TAU
+  const sway = !opts.reducedMotion
+  let tick = 0
+
   const isBusy = () =>
     fade < 1 ||
+    drag.on ||
+    Math.abs(spin.vel) > 0.002 ||
+    Math.abs(spin.yaw - restYaw()) > 0.0005 ||
+    spin.puff > 0.002 ||
+    !!tiltTween?.isActive() ||
     push > 0.002 ||
     trailEnergy > 0.004 ||
     !!morphTween?.isActive() ||
@@ -573,6 +641,28 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     last = now
     time += dt
     const u = mat.uniforms
+    const busy = isBusy()
+    // Idle sway only: render every other frame (~30 fps).
+    if (!busy && sway && tick++ % 2 === 1) {
+      schedule()
+      return
+    }
+
+    // Inertia, then a slow return to facing front once the throw dies out.
+    if (!drag.on) {
+      spin.yaw += spin.vel * dt
+      spin.vel *= Math.exp(-dt * 2.4)
+      if (Math.abs(spin.vel) < 0.002) spin.vel = 0
+      if (Math.abs(spin.vel) < 0.35) {
+        const rest = restYaw()
+        spin.yaw += (rest - spin.yaw) * approach(1.6, dt)
+        if (Math.abs(rest - spin.yaw) < 0.0005) spin.yaw = rest
+      }
+    }
+    const puffTarget = opts.reducedMotion ? 0 : smooth(2.5, 9, Math.abs(spin.vel))
+    spin.puff += (puffTarget - spin.puff) * approach(puffTarget > spin.puff ? 12 : 3, dt)
+    if (spin.puff < 0.002 && puffTarget === 0) spin.puff = 0
+    u.uPuff.value = spin.puff
 
     // Mouse speed (px/s) and push strength with fast attack, slow release.
     const inst = dt > 0 ? pointer.dist / dt : 0
@@ -622,12 +712,16 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     if (ready) fade = Math.min(1, fade + dt / 0.7)
     u.uFade.value = fade
     const m = u.uMorph.value as number
-    photoMat.uniforms.uOpacity.value = fade * smooth(0.75, 1, m)
+    // The flat photo only reads face-on: hide the reveal while the portrait is turned.
+    const turned = Math.abs(spin.yaw - restYaw()) + Math.abs(spin.tilt) + spin.puff
+    photoMat.uniforms.uOpacity.value = fade * smooth(0.75, 1, m) * (1 - smooth(0.08, 0.3, turned))
     u.uTime.value = time
 
-    turn.rotation.set(tween.tilt, tween.spin, 0)
+    const swayYaw = sway ? Math.sin(time * 0.42) * 0.07 : 0
+    const swayTilt = sway ? Math.sin(time * 0.29 + 1) * 0.025 : 0
+    turn.rotation.set(tween.tilt + spin.tilt + swayTilt, tween.spin + spin.yaw + swayYaw, 0)
     renderer.render(scene, camera)
-    if (isBusy()) schedule()
+    if (isBusy() || sway) schedule()
   }
 
   const schedule = () => {
@@ -667,12 +761,19 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
 
   return {
     setPose,
+    wasDrag: () => drag.moved > 8,
     dispose: () => {
       disposed = true
       stop()
       morphTween?.kill()
       viewTween?.kill()
+      tiltTween?.kill()
       ro.disconnect()
+      container.removeEventListener('pointerdown', onDown)
+      container.removeEventListener('pointermove', onDrag)
+      container.removeEventListener('pointerup', onUp)
+      container.removeEventListener('pointercancel', onUp)
+      container.removeEventListener('wheel', onWheel)
       document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('pointermove', onMove)
       document.documentElement.removeEventListener('pointerleave', onLeave)
