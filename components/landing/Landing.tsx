@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FocusEvent, type MouseEvent } from 'react'
 import { site } from '@/data/site'
 import { withBasePath } from '@/lib/withBasePath'
 import { ContactPanel } from './ContactPanel'
@@ -15,13 +15,9 @@ const FINE = '(hover: hover) and (pointer: fine)'
 const REDUCED = '(prefers-reduced-motion: reduce)'
 const NAV_H = 56
 
+/** Cheap check only: probing with a test canvas would cost a second WebGL context. */
 function canUseWebGL() {
-  try {
-    const c = document.createElement('canvas')
-    return !!(c.getContext('webgl2') || c.getContext('webgl'))
-  } catch {
-    return false
-  }
+  return typeof window !== 'undefined' && 'WebGLRenderingContext' in window
 }
 
 /**
@@ -132,6 +128,17 @@ export function Landing({ className }: { className?: string }) {
     return () => window.clearTimeout(id)
   }, [active])
 
+  // Touch: a tap on the stage (not a drag) clears the selection.
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!touch || !stage) return
+    const onTap = () => {
+      if (!sceneRef.current?.wasDrag()) setActive(null)
+    }
+    stage.addEventListener('click', onTap)
+    return () => stage.removeEventListener('click', onTap)
+  }, [touch])
+
   const closeContact = useCallback(() => setContactOpen(false), [])
 
   const onEntryClick = (entry: Entry) => (e: MouseEvent) => {
@@ -193,7 +200,10 @@ export function Landing({ className }: { className?: string }) {
             const handlers = {
               onMouseEnter: () => !touch && setActive(entry.id),
               onMouseLeave: () => !touch && setActive((id) => (id === entry.id ? null : id)),
-              onFocus: () => setActive(entry.id),
+              // Keyboard focus only; a tap also focuses, and must not count as the first tap.
+              onFocus: (e: FocusEvent<HTMLElement>) => {
+                if (e.currentTarget.matches(':focus-visible')) setActive(entry.id)
+              },
               onBlur: () => !touch && setActive((id) => (id === entry.id ? null : id)),
               onClick: onEntryClick(entry),
             }
