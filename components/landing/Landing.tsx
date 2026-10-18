@@ -39,6 +39,7 @@ export function Landing({ className }: { className?: string }) {
   const [active, setActive] = useState<EntryId | null>(null)
   const [contactOpen, setContactOpen] = useState(false)
   const [touch, setTouch] = useState(false)
+  const activeRef = useRef<EntryId | null>(null)
 
   // The Tron void ground (shared with /noelite and /journey).
   useEffect(() => {
@@ -108,6 +109,7 @@ export function Landing({ className }: { className?: string }) {
         return
       }
       sceneRef.current = scene
+      scene.setPose(activeRef.current ?? 'hello')
     })
 
     return () => {
@@ -117,6 +119,18 @@ export function Landing({ className }: { className?: string }) {
       sceneRef.current = null
     }
   }, [mode, motionKey])
+
+  // Hover / focus / tap-select morphs the portrait to that entry's pose. Going
+  // back to "hello" waits a beat so sliding between entries does not bounce.
+  useEffect(() => {
+    activeRef.current = active
+    if (active) {
+      sceneRef.current?.setPose(active)
+      return
+    }
+    const id = window.setTimeout(() => sceneRef.current?.setPose('hello'), 160)
+    return () => window.clearTimeout(id)
+  }, [active])
 
   const closeContact = useCallback(() => setContactOpen(false), [])
 
