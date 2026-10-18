@@ -1,7 +1,4 @@
-'use client'
-
 import { useRef, useState } from 'react'
-import Image from 'next/image'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { A11y, EffectCoverflow, Keyboard, Mousewheel, Navigation, Pagination } from 'swiper/modules'
 import type { Swiper as SwiperInstance } from 'swiper/types'
@@ -9,7 +6,7 @@ import 'swiper/css'
 import 'swiper/css/effect-coverflow'
 import 'swiper/css/pagination'
 import { Demo, demoLiveUrl, demoThumb } from '@/data/demos'
-import { withBasePath } from '@/lib/withBasePath'
+import { asset } from '@/lib/asset'
 import { PillButton } from './PillButton'
 import { useMediaQuery } from './useMediaQuery'
 import { scaledFrameStyle, useScaledFrame } from './useScaledFrame'
@@ -52,14 +49,13 @@ function LiveFrame({ demo, interactive }: { demo: Demo; interactive: boolean }) 
 
 function Thumb({ demo, priority }: { demo: Demo; priority?: boolean }) {
   return (
-    <Image
-      src={withBasePath(demoThumb(demo))}
+    <img
+      src={asset(demoThumb(demo))}
       alt=""
-      fill
-      sizes="(min-width: 640px) 880px, 82vw"
-      priority={priority}
       draggable={false}
-      className="pointer-events-none object-cover object-top select-none"
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+      className="pointer-events-none absolute inset-0 h-full w-full object-cover object-top select-none"
     />
   )
 }

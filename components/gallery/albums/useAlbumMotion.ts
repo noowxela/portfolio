@@ -1,5 +1,3 @@
-'use client'
-
 import { useMediaQuery } from '../useMediaQuery'
 
 /** Shared motion flags for the album variants. */

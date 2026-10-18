@@ -1,11 +1,8 @@
-'use client'
-
-import dynamic from 'next/dynamic'
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { GridDisc } from '@/components/gallery/albums/GridDisc'
 
 // three.js only loads when v3 is picked.
-const Disc3D = dynamic(() => import('@/components/discs/Disc3D').then((m) => m.Disc3D), { ssr: false })
+const Disc3D = lazy(() => import('@/components/discs/Disc3D').then((m) => ({ default: m.Disc3D })))
 
 type Version = 'v1' | 'v2' | 'v3'
 
@@ -20,7 +17,13 @@ export function SideDisc() {
 
   return (
     <>
-      {version === 'v3' ? <Disc3D contained signal /> : <GridDisc contained signal={version === 'v2'} />}
+      {version === 'v3' ? (
+        <Suspense fallback={null}>
+          <Disc3D contained signal />
+        </Suspense>
+      ) : (
+        <GridDisc contained signal={version === 'v2'} />
+      )}
       <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-2">
         {VERSIONS.map((v) => {
           const on = version === v.id

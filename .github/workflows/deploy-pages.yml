@@ -18,8 +18,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      GITHUB_PAGES: 'true'
-      NEXT_PUBLIC_SITE_URL: https://noowxela.github.io/portfolio
+      VITE_SITE_URL: https://noowxela.github.io/portfolio
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -30,7 +29,7 @@ jobs:
       - run: npm run build
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: out
+          path: dist
 
   deploy:
     needs: build

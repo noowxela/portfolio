@@ -1,5 +1,3 @@
-'use client'
-
 import { useEffect, useRef, useState } from 'react'
 import {
   ACESFilmicToneMapping,
@@ -16,7 +14,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { createGridDiscs } from '@/components/archive/gallery/gridDiscScene'
 import { CenteredDisc } from '@/components/discs/CenteredDisc'
 import { SideDisc } from '@/components/discs/SideDisc'
-import { withBasePath } from '@/lib/withBasePath'
+import { asset } from '@/lib/asset'
 
 function Label({ title, note }: { title: string; note: string }) {
   return (
@@ -76,7 +74,7 @@ function ModelStage() {
     controls.autoRotateSpeed = 0.7
 
     const loader = new GLTFLoader()
-    loader.load(withBasePath('/models/grid-disc.glb'), (gltf) => {
+    loader.load(asset('/models/grid-disc.glb'), (gltf) => {
       const root = gltf.scene
       root.updateMatrixWorld(true)
       const raw = new Box3().setFromObject(root).getSize(new Vector3())

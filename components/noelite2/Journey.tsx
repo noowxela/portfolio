@@ -1,9 +1,7 @@
-'use client'
-
 import { useEffect, useRef, useState } from 'react'
 import { DiscV2 } from '@/components/home/discs'
 import { site } from '@/data/site'
-import { withBasePath } from '@/lib/withBasePath'
+import { asset } from '@/lib/asset'
 import { JourneyFallback } from './JourneyFallback'
 import { ACTS, BEATS, actAt } from './path'
 
@@ -198,7 +196,7 @@ export function Journey({ className }: { className?: string }) {
         Skip intro
       </button>
 
-      <a ref={ctaRef} className="journey-cta journey-cta-end" href={withBasePath('/work/')}>
+      <a ref={ctaRef} className="journey-cta journey-cta-end" href={asset('/work/')}>
         <span>Enter the Work</span>
         <span aria-hidden>→</span>
       </a>

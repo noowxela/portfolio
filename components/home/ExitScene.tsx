@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from 'react-router'
 import { site } from '@/data/site'
 
 const links = [
@@ -23,7 +23,7 @@ export function ExitScene() {
         <p className="exit-lead" data-lag="0.3">
           {site.role} · {site.location}
         </p>
-        <Link href="/work" className="exit-cta">
+        <Link to="/work" className="exit-cta">
           Enter the gallery
         </Link>
         <ul className="exit-links">

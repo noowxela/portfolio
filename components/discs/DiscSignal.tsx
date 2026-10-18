@@ -1,5 +1,3 @@
-'use client'
-
 import { useEffect, useState } from 'react'
 import { type Live, mix, signal } from '@/components/discs/signalFrames'
 

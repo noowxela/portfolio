@@ -32,3 +32,4 @@
 | [028-journey-home.md](./028-journey-home.md) | implemented | Scroll-driven 3D journey home (preview); now at /noelite2 |
 | [029-portrait-home.md](./029-portrait-home.md) | implemented | Full-screen home with a particle portrait; old home moves to /noelite |
 | [030-journey-gridlog.md](./030-journey-gridlog.md) | implemented | Work-experience journey "grid.log" at /journey |
+| [031-vite-migration.md](./031-vite-migration.md) | implemented | Next.js static export to Vite + React Router |

@@ -20,7 +20,7 @@ import {
   WebGLRenderer,
   WebGLRenderTarget,
 } from 'three'
-import { withBasePath } from '@/lib/withBasePath'
+import { asset } from '@/lib/asset'
 import { POSES, type Pose, type PoseId } from './poses'
 import { loadImage, samplePose, type PoseSample } from './sampler'
 
@@ -557,7 +557,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     const pose = POSES[id]
     let img = images.get(pose.image)
     if (!img) {
-      img = loadImage(withBasePath(pose.image))
+      img = loadImage(asset(pose.image))
       images.set(pose.image, img)
     }
     const loaded = await img

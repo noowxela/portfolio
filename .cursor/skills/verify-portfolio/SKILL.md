@@ -5,9 +5,9 @@ description: "Drive the portfolio Next.js site in a browser and prove a page wor
 
 # Verify portfolio
 
-Portfolio is a static Next.js site. A user moves through the header (`alexW`, Work, About) and, on Work, a layout toolbar. The discs board is a direct URL, not a header link until the clock is triple-clicked. There is no login, database, or env file. Do not set `GITHUB_PAGES`.
+Portfolio is a static Vite site mounted at `/portfolio/`. A user moves through the header (`alexW`, Work, About) and, on Work, a layout toolbar. The discs board is a direct URL, not a header link until the clock is triple-clicked. There is no login or database. `VITE_SITE_URL` defaults to the GitHub Pages origin.
 
-Never drive the user's dev server on port 3000. This skill builds the static export and serves `out/` on `127.0.0.1:3100` (`VERIFY_PORT` to move it). Next.js refuses a second `next dev` in this repo, so verification does not use `next dev`. One verification server at a time. If port 3100 is already taken by something this run did not start, stop and pick another port. Do not kill that process.
+Never drive the user's dev server on port 3000 or 3001. This skill builds `dist/` and serves it on `127.0.0.1:3100/portfolio/` (`VERIFY_PORT` to move it). One verification server at a time. If port 3100 is already taken by something this run did not start, stop and pick another port. Do not kill that process.
 
 Commands run from `01_project/o000o_active/portfolio`:
 
@@ -28,7 +28,7 @@ Routes use a trailing slash (`/about/`, `/work/`, `/discs/`). Playwright is the 
 
 ## Launch
 
-`launch` runs `npx next build` with `GITHUB_PAGES` empty, then `npx serve out -l tcp://127.0.0.1:3100`. Ready means `GET /` returns 200 from that server. The pid and port are stored in `.verify/run.json`. The build and server log is `.verify/server.log`.
+`launch` runs `npm run build`, then `node scripts/serve-pages.mjs`. Ready means `GET /portfolio/` returns 200 from that server. The pid and port are stored in `.verify/run.json`. The build and server log is `.verify/server.log`.
 
 `launch` refuses to start when a verification pid is still alive, or when the port is already open.
 

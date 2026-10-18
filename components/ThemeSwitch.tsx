@@ -1,6 +1,4 @@
-'use client'
-
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/src/theme'
 import { setThemeWithTransition } from '@/components/setThemeWithTransition'
 
 export default function ThemeSwitch() {
