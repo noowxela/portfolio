@@ -29,5 +29,5 @@ Preconditions:
 - The level-1 heading is visually hidden. It is still in the accessibility tree.
 - The particle field is built only after the page is idle (and after the Home entrance ends). Wait for `main[data-field="ready"]` before you judge the particles. It never appears with reduced motion or without WebGL; the static years mark shows instead and `main[data-mode="static"]` is set.
 - The HEAD rail control is the three dots, a button named `Next commit — available`, not a `.gl-node`. Rail buttons: `main .gl-rail button` (5 of them).
-- A short Web Audio blip plays when the row settles on a new step, but only after a click, tap or key press on the page (browser autoplay rules). The speaker button `Sound effects` (`aria-pressed`) in the top bar turns it off; the choice is saved in `localStorage['gridlog-sound']`.
+- A short Web Audio blip plays when the row settles on a new step, but only after a click, tap or key press on the page (browser autoplay rules). The speaker button `Sound effects` (`aria-pressed`, class `.sound-toggle`) is in the site header now, not the journey bar; it turns every site sound off, and the choice is saved in `localStorage['gridlog-sound']`.
 - On phones, the long Trinergy panel scrolls inside its own body. A vertical swipe scrolls it; a horizontal swipe moves one panel.

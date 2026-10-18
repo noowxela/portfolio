@@ -7,8 +7,6 @@
 
 export type Branch = 'edu' | 'main'
 
-export type Stat = { value: number; label: string }
-
 export type Step = {
   id: string
   branch: Branch
@@ -28,8 +26,6 @@ export type Step = {
   message: string
   facts: string[]
   tags: string[]
-  /** Extra numbers stated on the resume (the duration stat is computed). */
-  stats?: Stat[]
 }
 
 export type HeadStep = {
@@ -113,7 +109,6 @@ export const STEPS: readonly Step[] = [
       'AI-assisted development and Spec-Driven Development (SDD), backed by a Markdown knowledge center of workflows, business logic and architecture.',
     ],
     tags: ['laravel', 'vue.js', 'expo', 'react native', 'oracle', 'windows iis'],
-    stats: [{ value: 3, label: 'developers led' }],
   },
 ]
 
@@ -139,13 +134,6 @@ function parse(d: string) {
 export function formatMonth(d: string) {
   const { m, y } = parse(d)
   return `${MONTHS[m - 1]} ${y}`
-}
-
-/** Whole months between two resume dates. */
-export function monthsBetween(from: string, to: string) {
-  const a = parse(from)
-  const b = parse(to)
-  return (b.y - a.y) * 12 + (b.m - a.m)
 }
 
 /** Short stable hex id per step, shown as the commit hash. */

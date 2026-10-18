@@ -54,6 +54,10 @@ Contact still opens its window. Cmd / Ctrl / Shift / middle clicks open the page
 
 The header nav's **Work · Journey · About** play the same exit while the home is open, aimed at the matching corner (the particles stream into that corner, which flashes). The home registers its exit with `registerHomeExit` in `routeTransition.ts` while it is mounted; `NavPill` calls `requestHomeExit(href)` on a plain left click and only prevents the link's own navigation when the home took it. So: one tap is enough from the header on phones (no select-then-open), modifier and middle clicks still open a new tab, clicks during a running exit are ignored, and on every other page the header links navigate normally. `alexW` and the hidden Discs link are unchanged. Header links prefetch on hover and focus like the corners.
 
+## Sounds
+
+The site-wide `lib/sound.ts` (Web Audio, no files) gives every choice a short neon blip, the same note for a header link and its corner: `alexW` C5, Work / 01 D5, Journey / 02 E5, About / 03 G5, Contact / 04 A5. Closing `contact.app` (×, Esc or backdrop) plays the same voice falling A5 → E5. On phones the first tap on a corner (select) gives a quiet E6 tick and the second tap (open) the blip. The sound starts on the click, before the exit; the exit itself is silent, so a click makes one sound. Nothing plays before the first click, tap or key (browser autoplay rules). The speaker button in the header turns all of it off, on every page; the choice is saved in `localStorage['gridlog-sound']`.
+
 The page entrance only plays when the page finds a fresh flag (`sessionStorage['route-enter']`, < 6 s old, for its own path) written by the home. Direct visits, reloads, back / forward and new tabs show the page as before. The curtain is also dropped if a navigation never lands (5 s). Code: `components/transition/` (`routeTransition.ts` has the flag, `beginRouteExit` and the per-page entrance list; `RouteCurtain.tsx` is mounted once in `app/layout.tsx`).
 
 | Page | Entrance order |

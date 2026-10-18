@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties, type Focu
 import { site } from '@/data/site'
 import { withBasePath } from '@/lib/withBasePath'
 import { beginRouteExit, normalizePath, registerHomeExit } from '@/components/transition/routeTransition'
+import { playClick, playTick } from '@/lib/sound'
 import { ContactPanel } from './ContactPanel'
 import { ENTRIES, type Entry, type EntryId } from './entries'
 import type { PortraitScene, Slot } from './portraitScene'
@@ -214,11 +215,14 @@ export function Landing({ className }: { className?: string }) {
     // Touch: the first tap selects (morph + ENTER), the second opens.
     if (touch && active !== entry.id) {
       e.preventDefault()
+      playTick()
       setActive(entry.id)
       prefetch(entry)
       return
     }
     e.preventDefault()
+    // Same note as the header link for this page, before the exit starts.
+    playClick(entry.id)
     if (!entry.href) {
       setContactOpen(true)
       return
@@ -298,6 +302,7 @@ export function Landing({ className }: { className?: string }) {
                   <button
                     type="button"
                     className="landing-entry-link"
+                    data-entry={entry.id}
                     aria-haspopup="dialog"
                     aria-expanded={contactOpen}
                     {...handlers}
