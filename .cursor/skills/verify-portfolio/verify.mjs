@@ -175,7 +175,9 @@ async function drive(feature) {
       const entries = page.getByRole('navigation', { name: 'Home' })
       await entries.getByRole('link', { name: 'Work' }).waitFor()
       await page.getByRole('heading', { level: 1, name: 'alex woon' }).waitFor()
-      await page.getByRole('navigation', { name: 'Site navigation' }).getByRole('link', { name: 'alexW' }).waitFor()
+      const siteNav = page.getByRole('navigation', { name: 'Site navigation' })
+      await siteNav.getByRole('link', { name: 'alexW' }).waitFor()
+      await siteNav.getByRole('link', { name: 'Journey', exact: true }).waitFor()
       await proof('home', page, entries)
       return
     }

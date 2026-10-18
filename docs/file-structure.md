@@ -126,7 +126,7 @@ These files implement the gallery layout.
 | `GalleryShell.tsx` | **Orchestrator.** Manages selected demo, sidebar collapse (defaults collapsed on small screens), and the project-details overlay. |
 | `DemoSidebar.tsx` | Left column: thumbnail list with titles, selection outline, collapse animation, ⌘+[ shortcut. Title row toggles the details card. |
 | `DemoStage.tsx` | Center: iframe (or fallback card if embedding is blocked), scaled to fit, with an optional name/blurb/Live/GitHub overlay. |
-| `NavPill.tsx` | Fixed top header: alexW, Work, About, social icons, an Available status, and the local date and time. On `/` the bar is dark glass and its edge follows `--tron`. |
+| `NavPill.tsx` | Fixed top header: alexW, Work, Journey, About (on `/` these three play the home exit via `requestHomeExit`), social icons, an Available status, and the local date and time. On `/` the bar is dark glass and its edge follows `--tron`. |
 | `IdentityChip.tsx` | Bottom-left chip with name and role; links to About. Collapses on small screens. |
 | `PillButton.tsx` | Reusable rounded button/link used by the sidebar toggle, header icons, and identity chip. |
 
@@ -142,7 +142,7 @@ Static content — no API calls. Edit these files to change what the gallery sho
 |------|------|
 | `demos.ts` | **Main content file.** Exports the `Demo` type, `demoLiveUrl()`, and the `demos` array. |
 | `site.ts` | Name, role, tagline, contact URLs, highlights, the About toolkit, and hobbies. |
-| `headerNavLinks.ts` | Nav items for the header (Home, Work, About). |
+| `headerNavLinks.ts` | Nav items for the header (Home, Work, Journey, About; Discs hidden until revealed). |
 | `experience.ts` | Work history for `/journey` (from the resume): `STEPS` (MMU on `edu`, then each job on `main`) and the `HEAD` panel, plus date / hash helpers. |
 
 ### `Demo` shape

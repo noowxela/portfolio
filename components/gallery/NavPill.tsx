@@ -2,10 +2,11 @@
 
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import headerNavLinks from '@/data/headerNavLinks'
 import { site } from '@/data/site'
+import { requestHomeExit } from '@/components/transition/routeTransition'
 
 const PAGE_LINKS = headerNavLinks.filter((link) => link.href !== '/')
 
@@ -57,6 +58,8 @@ const iconLinks = [
 
 export function NavPill() {
   const pathname = usePathname()
+  const router = useRouter()
+  const onRoot = normalizePath(pathname) === '/'
   // The Tron bar also dresses /journey, /noelite (the previous home) and /noelite2 (the 3D journey), which share the void ground.
   const onHome = ['/', '/journey', '/noelite', '/noelite2'].includes(normalizePath(pathname))
   const [discsOpen, setDiscsOpen] = useState(false)
@@ -66,16 +69,16 @@ export function NavPill() {
     <nav
       className={
         onHome
-          ? 'site-nav fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--tron,#5ce1ff)_55%,transparent)] bg-[#07080c]/88 pr-4 text-[#d7f6ff] backdrop-blur-md sm:pr-6'
-          : 'site-nav fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-black/8 bg-white/92 pr-4 backdrop-blur-md sm:pr-6 dark:border-white/10 dark:bg-[#111]/92'
+          ? 'site-nav fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-2 border-b border-[color-mix(in_srgb,var(--tron,#5ce1ff)_55%,transparent)] bg-[#07080c]/88 pr-3 sm:gap-3 text-[#d7f6ff] backdrop-blur-md sm:pr-6'
+          : 'site-nav fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-2 border-b border-black/8 bg-white/92 pr-3 sm:gap-3 backdrop-blur-md sm:pr-6 dark:border-white/10 dark:bg-[#111]/92'
       }
       data-surface={onHome ? 'tron' : undefined}
       aria-label="Site navigation"
     >
-      <div className="flex h-full min-w-0 items-center self-stretch">
+      <div className="flex h-full shrink-0 items-center self-stretch">
         <Link
           href="/"
-          className={`grid h-full shrink-0 place-items-center px-4 text-[0.78rem] font-medium tracking-tight transition-colors duration-150 sm:px-6 ${
+          className={`grid h-full shrink-0 place-items-center px-3 text-[0.78rem] font-medium tracking-tight transition-colors duration-150 sm:px-6 ${
             onHome
               ? 'text-white hover:bg-[color-mix(in_srgb,var(--tron,#5ce1ff)_72%,transparent)] hover:text-[#041016] hover:shadow-[inset_0_0_14px_var(--tron,#5ce1ff),0_0_16px_color-mix(in_srgb,var(--tron,#5ce1ff)_75%,transparent)]'
               : 'text-[#111] hover:bg-[color-mix(in_srgb,#5ce1ff_72%,transparent)] hover:text-[#041016] hover:shadow-[inset_0_0_14px_#5ce1ff,0_0_16px_color-mix(in_srgb,#5ce1ff_75%,transparent)] dark:text-white dark:hover:text-[#041016]'
@@ -91,7 +94,15 @@ export function NavPill() {
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className={`group grid h-full place-items-center px-2.5 text-[0.75rem] font-medium transition-colors duration-150 sm:px-3 ${
+              onMouseEnter={() => router.prefetch(href)}
+              onFocus={() => router.prefetch(href)}
+              onClick={(e) => {
+                // On the home, Work / Journey / About leave through the home's exit (same as its corners).
+                // New tab / window clicks stay with the browser.
+                if (!onRoot || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+                if (requestHomeExit(href)) e.preventDefault()
+              }}
+              className={`group grid h-full place-items-center px-1.5 text-[0.75rem] font-medium transition-colors duration-150 sm:px-3 ${
                 active
                   ? onHome
                     ? 'text-[var(--tron,#5ce1ff)] [text-shadow:0_0_12px_color-mix(in_srgb,var(--tron,#5ce1ff)_85%,transparent)]'
@@ -129,7 +140,7 @@ export function NavPill() {
         })}
       </div>
 
-      <div className="flex h-full items-center self-stretch">
+      <div className="flex h-full min-w-0 items-center self-stretch">
         <HeaderRule onHome={onHome} />
         <AvailableMenu onHome={onHome} />
         <HeaderRule onHome={onHome} />
@@ -152,14 +163,15 @@ function AvailableMenu({ onHome }: { onHome: boolean }) {
   return (
     <Menu as="div" className="relative flex h-full">
       <MenuButton
-        className={`inline-flex h-full cursor-pointer items-center gap-2 px-4 text-[0.72rem] font-medium transition-colors duration-150 ${
+        className={`inline-flex h-full cursor-pointer items-center gap-2 px-3 text-[0.72rem] sm:px-4 font-medium transition-colors duration-150 ${
           onHome
             ? 'text-[#b7e7f2] hover:bg-white/8 hover:text-white data-[open]:bg-white/8 data-[open]:text-white'
             : 'text-[#555] hover:bg-black/5 hover:text-[#111] data-[open]:bg-black/5 data-[open]:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white dark:data-[open]:bg-white/8 dark:data-[open]:text-white'
         }`}
       >
         <span className="available-dot h-1.5 w-1.5 rounded-full bg-[#5ce1ff]" aria-hidden />
-        available
+        {/* Phones up to 400 px keep just the dot, so Work · Journey · About fit beside the clock. */}
+        <span className="max-[400px]:sr-only">available</span>
       </MenuButton>
       <MenuItems
         transition
@@ -242,7 +254,7 @@ function HeaderClock({ onHome, onReveal }: { onHome: boolean; onReveal: () => vo
     <button
       type="button"
       onClick={onClick}
-      className={`cursor-pointer border-0 bg-transparent p-0 pl-4 text-left text-[0.72rem] tabular-nums transition-colors duration-150 ${
+      className={`cursor-pointer border-0 bg-transparent p-0 pl-3 text-left text-[0.72rem] sm:pl-4 tabular-nums transition-colors duration-150 ${
         onHome ? 'text-[#b7e7f2]' : 'text-[#555] dark:text-[#aaa]'
       }`}
     >

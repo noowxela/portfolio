@@ -52,6 +52,8 @@ A click, keyboard Enter or the second tap on a phone does not navigate straight 
 
 Contact still opens its window. Cmd / Ctrl / Shift / middle clicks open the page in a new tab as usual.
 
+The header nav's **Work · Journey · About** play the same exit while the home is open, aimed at the matching corner (the particles stream into that corner, which flashes). The home registers its exit with `registerHomeExit` in `routeTransition.ts` while it is mounted; `NavPill` calls `requestHomeExit(href)` on a plain left click and only prevents the link's own navigation when the home took it. So: one tap is enough from the header on phones (no select-then-open), modifier and middle clicks still open a new tab, clicks during a running exit are ignored, and on every other page the header links navigate normally. `alexW` and the hidden Discs link are unchanged. Header links prefetch on hover and focus like the corners.
+
 The page entrance only plays when the page finds a fresh flag (`sessionStorage['route-enter']`, < 6 s old, for its own path) written by the home. Direct visits, reloads, back / forward and new tabs show the page as before. The curtain is also dropped if a navigation never lands (5 s). Code: `components/transition/` (`routeTransition.ts` has the flag, `beginRouteExit` and the per-page entrance list; `RouteCurtain.tsx` is mounted once in `app/layout.tsx`).
 
 | Page | Entrance order |

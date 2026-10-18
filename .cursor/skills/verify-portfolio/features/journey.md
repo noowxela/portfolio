@@ -12,6 +12,7 @@
 
 - Open `/journey/`.
 - From Home, choose the corner link `Journey`. The staged entrance plays under the curtain.
+- Choose `Journey` in the site navigation. From Home it plays the same exit and entrance as the corner; from other pages it navigates directly.
 
 ## Driving it with verify.mjs
 

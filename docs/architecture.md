@@ -55,7 +55,7 @@ Phones and `prefers-reduced-motion` do not create the smoother or any pin. Scene
 
 - `data/site.ts` — name, role, tagline, contact
 - `data/demos.ts` — gallery items. `featured: true` picks the three cards on the `/noelite` track
-- `data/headerNavLinks.ts` — Home, Work, About, Discs. Discs stays out of the header until the clock is clicked three times in a row, and the next three clicks hide it again.
+- `data/headerNavLinks.ts` — Home, Work, Journey, About, Discs. On `/`, Work / Journey / About play the home's exit transition (see [portrait-home.md](./pages/portrait-home.md#leaving-for-a-page-work-journey-about)). Discs stays out of the header until the clock is clicked three times in a row, and the next three clicks hide it again.
 
 ## Theme
 

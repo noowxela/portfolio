@@ -5,7 +5,7 @@ Home at `/` is one full-screen stage. The name sits in the middle. Four entries 
 ## Sub-features
 
 - `home-open` shows the lowercase name and the corner navigation.
-- `home-nav` keeps `alexW`, Work, and About in the site header.
+- `home-nav` keeps `alexW`, Work, Journey, and About in the site header. On `/`, those three header links play the same exit transition as the corners.
 
 ## How to get to it (user POV)
 
@@ -18,7 +18,7 @@ Preconditions:
 
 - Doctor passes against `http://127.0.0.1:3100`.
 
-- **Open home.** Go to `/`. Run `node .cursor/skills/verify-portfolio/verify.mjs drive home`. A navigation named `Home` is present and contains a link named `Work`. The level-1 heading reads `alex woon`. The site navigation contains a link named `alexW`.
+- **Open home.** Go to `/`. Run `node .cursor/skills/verify-portfolio/verify.mjs drive home`. A navigation named `Home` is present and contains a link named `Work`. The level-1 heading reads `alex woon`. The site navigation contains links named `alexW` and `Journey`.
 - **Proof.** `artifacts/home/page.png` shows the stage. `artifacts/home/main.aria.txt` is the `Home` navigation and includes `Work`.
 
 ## Gotchas

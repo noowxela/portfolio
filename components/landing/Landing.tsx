@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type FocusEvent, type MouseEvent } from 'react'
 import { site } from '@/data/site'
 import { withBasePath } from '@/lib/withBasePath'
-import { beginRouteExit } from '@/components/transition/routeTransition'
+import { beginRouteExit, normalizePath, registerHomeExit } from '@/components/transition/routeTransition'
 import { ContactPanel } from './ContactPanel'
 import { ENTRIES, type Entry, type EntryId } from './entries'
 import type { PortraitScene, Slot } from './portraitScene'
@@ -185,6 +185,25 @@ export function Landing({ className }: { className?: string }) {
     window.setTimeout(() => router.push(href), reduced ? REDUCED_EXIT_MS : EXIT_MS)
   }
 
+  // The header nav's Work / Journey / About play the same exit, aimed at the matching corner.
+  const leaveRef = useRef(leaveTo)
+  useEffect(() => {
+    leaveRef.current = leaveTo
+  })
+  useEffect(
+    () =>
+      registerHomeExit((to) => {
+        if (exitingRef.current) return true
+        const entry = ENTRIES.find((en) => en.href && normalizePath(en.href) === to)
+        const link = entry && entriesRef.current?.querySelector<HTMLElement>(`[data-entry="${entry.id}"]`)
+        if (!entry || !link) return false
+        setContactOpen(false)
+        leaveRef.current(entry, link)
+        return true
+      }),
+    [],
+  )
+
   const onEntryClick = (entry: Entry) => (e: MouseEvent<HTMLElement>) => {
     if (exitingRef.current) {
       e.preventDefault()
@@ -272,7 +291,7 @@ export function Landing({ className }: { className?: string }) {
                 data-exit-target={exit?.id === entry.id || undefined}
               >
                 {entry.href ? (
-                  <Link href={entry.href} className="landing-entry-link" {...handlers}>
+                  <Link href={entry.href} className="landing-entry-link" data-entry={entry.id} {...handlers}>
                     {body}
                   </Link>
                 ) : (

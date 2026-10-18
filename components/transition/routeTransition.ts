@@ -38,6 +38,25 @@ export function clearEnterFlag() {
 
 let coverTimer = 0
 
+/**
+ * The home registers its exit here while it is mounted, so links outside it
+ * (the header nav) can ask for the same exit. `requestHomeExit` returns true
+ * when the home took the click (it plays, or one is already running).
+ */
+type HomeExit = (to: string) => boolean
+let homeExit: HomeExit | null = null
+
+export function registerHomeExit(fn: HomeExit) {
+  homeExit = fn
+  return () => {
+    if (homeExit === fn) homeExit = null
+  }
+}
+
+export function requestHomeExit(to: string) {
+  return homeExit ? homeExit(normalizePath(to)) : false
+}
+
 /** Flag the destination and drop the curtain after `coverDelay` ms. */
 export function beginRouteExit(to: string, { reduced, coverDelay }: { reduced: boolean; coverDelay: number }) {
   const flag: EnterFlag = { to: normalizePath(to), at: Date.now(), reduced }

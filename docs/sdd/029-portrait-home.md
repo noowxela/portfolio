@@ -131,3 +131,8 @@ Run on the Mac in headless Chrome for Testing with Metal (`--use-angle=metal`), 
 - [x] Reduced motion: 0 draw calls at rest, hover jumps straight to the pose. Context loss and no-WebGL show the static fallback.
 
 Frame timing (rAF gaps, ms): desktop idle median 16.7 / p95 16.7; during the fast sweep median 16.6 / p95 16.7 (one 267 ms gap is the screenshot taken mid-sweep); mobile idle 16.7 / 16.7. Draw calls: ~69/s idle on desktop (two draws at ~30 fps + trail clear), ~60/s with a resting cursor, ~167/s during a sweep, 30/s idle on mobile, 0 with reduced motion.
+
+### Note (2026-10-18): header nav uses the same exit
+
+The header gained `Journey` (Work · Journey · About, the corners' order). On `/`, a plain click on one of those three header links plays the corner exit for the matching corner instead of navigating straight away: `Landing` registers `registerHomeExit` (in `components/transition/routeTransition.ts`) while mounted, `NavPill` calls `requestHomeExit(href)` and prevents the default only when the home accepted. Modifier / middle clicks open a new tab untouched; repeat clicks during an exit are swallowed; other pages keep plain navigation. To fit Work · Journey · About beside the clock on phones, the header's link and button padding is tighter below `sm`, and at 400 px or narrower the `available` menu shows only its dot (the word stays for screen readers). Verified at 1440×900 and 390×844 (and 360 px): curtain at the header's bottom edge (56 px) at 650 ms for all three, staged entrance on arrival, corners unchanged, Cmd and middle click open new tabs, `/work` → Journey plain, back to `/` restores the home, reduced motion and no-WebGL hand off; no console errors. Media: `/workspace/portfolio/shots/nav-journey/`.
+
