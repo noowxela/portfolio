@@ -1,0 +1,30 @@
+# Home
+
+Home at `/` is one full-screen stage. The name sits in the middle. Four entries sit in the corners: Work, Journey, About, and Contact. A particle portrait sits behind the name. The old scroll story is `/noelite`, not this page.
+
+## Sub-features
+
+- `home-open` shows the lowercase name and the corner navigation.
+- `home-nav` keeps `alexW`, Work, and About in the site header.
+
+## How to get to it (user POV)
+
+- Open `/`.
+- Choose `alexW` in the site navigation.
+
+## Driving it with verify.mjs
+
+Preconditions:
+
+- Doctor passes against `http://127.0.0.1:3100`.
+
+- **Open home.** Go to `/`. Run `node .cursor/skills/verify-portfolio/verify.mjs drive home`. A navigation named `Home` is present and contains a link named `Work`. The level-1 heading reads `alex woon`. The site navigation contains a link named `alexW`.
+- **Proof.** `artifacts/home/page.png` shows the stage. `artifacts/home/main.aria.txt` is the `Home` navigation and includes `Work`.
+
+## Gotchas
+
+- Do not wait for a region named `Introduction`. That region is on `/noelite`.
+- The visible name is `alex woon`, lowercase. The About page uses the full name.
+- The `Home` nav has no box of its own. The corner links are absolutely positioned. Wait for a link, not for the nav to be visible.
+- Contact opens a panel on this page. It is not a route. This recipe does not open it.
+- WebGL can fail and show a static portrait. The name and the four entries are still the proof.

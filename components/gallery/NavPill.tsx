@@ -57,7 +57,8 @@ const iconLinks = [
 
 export function NavPill() {
   const pathname = usePathname()
-  const onHome = normalizePath(pathname) === '/'
+  // The Tron bar also dresses /journey, /noelite (the previous home) and /noelite2 (the 3D journey), which share the void ground.
+  const onHome = ['/', '/journey', '/noelite', '/noelite2'].includes(normalizePath(pathname))
   const [discsOpen, setDiscsOpen] = useState(false)
   const links = discsOpen ? PAGE_LINKS : PAGE_LINKS.filter((link) => link.href !== '/discs')
 
@@ -141,7 +142,7 @@ export function NavPill() {
 function HeaderRule({ onHome }: { onHome: boolean }) {
   return (
     <span
-      className={`w-px self-stretch ${onHome ? 'bg-white/25' : 'bg-black/15 dark:bg-white/20'}`}
+      className={`w-px self-stretch transition-colors duration-150 ${onHome ? 'bg-white/25' : 'bg-black/15 dark:bg-white/20'}`}
       aria-hidden
     />
   )
@@ -241,7 +242,7 @@ function HeaderClock({ onHome, onReveal }: { onHome: boolean; onReveal: () => vo
     <button
       type="button"
       onClick={onClick}
-      className={`cursor-pointer border-0 bg-transparent p-0 pl-4 text-left text-[0.72rem] tabular-nums ${
+      className={`cursor-pointer border-0 bg-transparent p-0 pl-4 text-left text-[0.72rem] tabular-nums transition-colors duration-150 ${
         onHome ? 'text-[#b7e7f2]' : 'text-[#555] dark:text-[#aaa]'
       }`}
     >

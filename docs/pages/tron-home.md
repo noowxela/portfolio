@@ -1,5 +1,7 @@
 # Tron home, section by section
 
+> Since 2026-10-18 this scroll story lives at **`/noelite`**. `/` is the particle-portrait stage, see [portrait-home.md](./portrait-home.md) and [SDD 029](../sdd/029-portrait-home.md). Where this page says `/`, read `/noelite`.
+
 中文版：[tron-home.zh.md](./tron-home.zh.md)
 
 The page at `/` is a short film made of five scenes. It is not the project gallery. The gallery stays at `/work`.

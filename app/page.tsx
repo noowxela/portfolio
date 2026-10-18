@@ -1,7 +1,9 @@
+import type { Metadata } from 'next'
 import { Oxanium, Share_Tech_Mono } from 'next/font/google'
-import { TronHome } from '@/components/home/TronHome'
-import { demos } from '@/data/demos'
+import { Landing } from '@/components/landing/Landing'
+import { site } from '@/data/site'
 import '@/components/home/tron.css'
+import '@/components/landing/landing.css'
 
 const display = Oxanium({
   subsets: ['latin'],
@@ -17,7 +19,11 @@ const hud = Share_Tech_Mono({
   display: 'swap',
 })
 
+export const metadata: Metadata = {
+  title: { absolute: site.name },
+  description: site.description,
+}
+
 export default function Page() {
-  const featured = demos.filter((demo) => demo.featured)
-  return <TronHome demos={featured} className={`${display.variable} ${hud.variable}`} />
+  return <Landing className={`${display.variable} ${hud.variable}`} />
 }

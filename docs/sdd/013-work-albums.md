@@ -52,6 +52,7 @@ The switcher is a production feature. It started as a temporary dev preview, and
 - The view is read from URL `?v=` first, then `localStorage['work-view']`, then the old `localStorage['work-preview-version']`, then Shelf. Choosing a view writes `?v=<id>` and `work-view`, and drops the old key.
 - Old values still map: `0` → coverflow, `1` → shelf, `2` → grid, `3` (Crate, removed) → shelf, `list` → list. Unknown values fall back to Shelf.
 - The wrapper sets `--work-top: 5.5rem` (header plus row), and every Work layout pads by it.
+- Arriving from the home's 01 corner (2026-10-18): behind the home curtain, the switcher row comes in first, then each block of the current view (album stage, caption / sidebar). The switcher and `PREVIEW` tag look the same; only CSS hooks are added for the hand-off ([SDD 029](./029-portrait-home.md)).
 
 **Rejected alternatives:** Using ScrollTrigger with window scroll for Shelf. The page is one screen tall, so `Observer` on the stage is simpler and keeps page scroll at zero.
 
