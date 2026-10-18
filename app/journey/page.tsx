@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Oxanium, Share_Tech_Mono } from 'next/font/google'
-import { JourneySoon } from '@/components/journey/JourneySoon'
+import { GridLog } from '@/components/journey/GridLog'
 import '@/components/home/tron.css'
-import '@/components/journey/journey-soon.css'
+import '@/components/journey/journey.css'
 
 const display = Oxanium({
   subsets: ['latin'],
@@ -20,9 +20,10 @@ const hud = Share_Tech_Mono({
 
 export const metadata: Metadata = {
   title: 'Journey',
-  description: 'Work experience journey, coming soon. The 3D ride lives at /noelite2 for now.',
+  description:
+    'Work experience as a git log: Multimedia University, Auronex, Oasis Interactive and Trinergy Digital, from the resume.',
 }
 
 export default function JourneyPage() {
-  return <JourneySoon className={`${display.variable} ${hud.variable}`} />
+  return <GridLog className={`${display.variable} ${hud.variable}`} />
 }
