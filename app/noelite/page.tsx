@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Oxanium, Share_Tech_Mono } from 'next/font/google'
 import { TronHome } from '@/components/home/TronHome'
 import { demos } from '@/data/demos'
@@ -16,6 +17,11 @@ const hud = Share_Tech_Mono({
   variable: '--font-hud',
   display: 'swap',
 })
+
+export const metadata: Metadata = {
+  title: 'Noelite',
+  description: 'The previous scroll-driven Tron home: Legacy hero, identity disc, featured work, and contact.',
+}
 
 export default function Page() {
   const featured = demos.filter((demo) => demo.featured)

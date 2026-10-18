@@ -57,8 +57,8 @@ const iconLinks = [
 
 export function NavPill() {
   const pathname = usePathname()
-  // The Tron bar also dresses the /journey preview, which shares the home's void ground.
-  const onHome = normalizePath(pathname) === '/' || normalizePath(pathname) === '/journey'
+  // The Tron bar also dresses /journey and /noelite (the previous home), which share the void ground.
+  const onHome = ['/', '/journey', '/noelite'].includes(normalizePath(pathname))
   const [discsOpen, setDiscsOpen] = useState(false)
   const links = discsOpen ? PAGE_LINKS : PAGE_LINKS.filter((link) => link.href !== '/discs')
 
