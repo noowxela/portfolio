@@ -67,7 +67,7 @@ flowchart TD
 | `layout.tsx` | Root HTML shell: Inter font, metadata, `ThemeProviders`, `NavPill`, and `RouteCurtain` (home → page transition). |
 | `theme-providers.tsx` | Client wrapper around `next-themes` for light / dark / system mode. |
 | `globals.css` | Tailwind import, dark-mode variant, custom cursor, and `.no-scrollbar` utility. |
-| `icon.svg` | Favicon (initials-style mark). |
+| `icon.svg` | Favicon. A circular arch with a thin rounded W inside. |
 | `opengraph-image.tsx` | Generated Open Graph image for link previews. |
 
 **Entry point:** start at `page.tsx` if you want to change what renders on `/`.
