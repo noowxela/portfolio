@@ -12,9 +12,7 @@ const ink = '#e4c48a'
 const line = 'rgba(228, 196, 138, 0.45)'
 
 export default async function OpenGraphImage() {
-  const portrait = new Blob([await readFile(path.join(process.cwd(), 'app/og-portrait.png'))], {
-    type: 'image/png',
-  })
+  const portrait = `data:image/png;base64,${(await readFile(path.join(process.cwd(), 'app/og-portrait.png'))).toString('base64')}`
 
   return new ImageResponse(
     (
