@@ -16,6 +16,7 @@ import {
   RGBAFormat,
   Scene,
   ShaderMaterial,
+  Texture,
   WebGLRenderer,
   WebGLRenderTarget,
 } from 'three'
@@ -146,6 +147,36 @@ const particleFragment = /* glsl */ `
     float a = vAlpha * across * along;
     if (a < 0.003) discard;
     gl_FragColor = vec4(vColor, a);
+  }
+`
+
+const photoVertex = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`
+
+/** The real photo, visible only where the cursor trail's reveal channel is. */
+const photoFragment = /* glsl */ `
+  uniform sampler2D uMap;
+  uniform sampler2D uTrail;
+  uniform vec4 uCrop;
+  uniform vec2 uResPx;
+  uniform float uOpacity;
+  uniform vec3 uTron;
+  varying vec2 vUv;
+  void main() {
+    float r = texture2D(uTrail, gl_FragCoord.xy / uResPx).w;
+    vec2 tuv = vec2(uCrop.x + vUv.x * uCrop.z, 1.0 - (uCrop.y + (1.0 - vUv.y) * uCrop.w));
+    vec4 c = texture2D(uMap, tuv);
+    float show = smoothstep(0.03, 0.55, r);
+    float rim = smoothstep(0.02, 0.18, r) * (1.0 - smoothstep(0.18, 0.5, r));
+    vec3 col = mix(c.rgb, c.rgb * vec3(0.86, 1.0, 1.06), 0.5) + uTron * rim * 0.55;
+    float a = c.a * max(show, rim * 0.6) * uOpacity;
+    if (a < 0.004) discard;
+    gl_FragColor = vec4(col, a);
   }
 `
 
@@ -309,7 +340,42 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   })
   const points = new Mesh(geo, mat)
   points.frustumCulled = false
+  points.renderOrder = 1
   turn.add(points)
+
+  // ---- Photo plane for the reveal ----
+  const photoGeo = new PlaneGeometry(1, 1)
+  const photoMat = new ShaderMaterial({
+    vertexShader: photoVertex,
+    fragmentShader: photoFragment,
+    uniforms: {
+      uMap: { value: null as Texture | null },
+      uTrail: { value: trailRead.texture },
+      uCrop: { value: [0, 0, 1, 1] },
+      uResPx: { value: [1, 1] },
+      uOpacity: { value: 0 },
+      uTron: { value: tron },
+    },
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  })
+  const photo = new Mesh(photoGeo, photoMat)
+  photo.renderOrder = 0
+  photo.visible = opts.pointerEffects
+  turn.add(photo)
+  const textures = new Map<string, Texture>()
+  const textureFor = (src: string, img: HTMLImageElement) => {
+    let tex = textures.get(src)
+    if (!tex) {
+      tex = new Texture(img)
+      tex.minFilter = LinearFilter
+      tex.generateMipmaps = false
+      tex.needsUpdate = true
+      textures.set(src, tex)
+    }
+    return tex
+  }
 
   // ---- Layout ----
   let width = 1
@@ -331,6 +397,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     camera.aspect = width / height
     camera.updateProjectionMatrix()
     mat.uniforms.uRes.value = [width, height]
+    photoMat.uniforms.uResPx.value = [width * dpr, height * dpr]
     const tw = Math.max(16, Math.round(width / 4))
     const th = Math.max(16, Math.round(height / 4))
     trailRead.setSize(tw, th)
@@ -370,7 +437,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   }
 
   // ---- Poses ----
-  const samples = new Map<PoseId, PoseSample>()
+  const samples = new Map<PoseId, PoseSample & { img: HTMLImageElement }>()
   const images = new Map<string, Promise<HTMLImageElement>>()
   const getSample = async (id: PoseId) => {
     const cached = samples.get(id)
@@ -381,7 +448,8 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
       img = loadImage(withBasePath(pose.image))
       images.set(pose.image, img)
     }
-    const sample = samplePose(await img, pose, count)
+    const loaded = await img
+    const sample = { ...samplePose(loaded, pose, count), img: loaded }
     samples.set(id, sample)
     return sample
   }
@@ -406,9 +474,14 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     }
   }
 
-  const applyPose = (id: PoseId, sample: PoseSample, first: boolean) => {
+  const applyPose = (id: PoseId, sample: PoseSample & { img: HTMLImageElement }, first: boolean) => {
     const pose: Pose = POSES[id]
     poseId = id
+    // The reveal photo jumps to the new pose and fades in as the morph lands.
+    photoMat.uniforms.uMap.value = textureFor(pose.image, sample.img)
+    photoMat.uniforms.uCrop.value = [...pose.crop]
+    photo.scale.set(sample.aspect, 1, 1)
+    photo.position.z = pose.depth * 0.4
     morphTween?.kill()
     viewTween?.kill()
     if (first) {
@@ -513,7 +586,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
 
     // Trail: dust for fast sweeps, reveal for any movement.
     const dust = opts.pointerEffects ? smooth(500, 2400, speed) : 0
-    const reveal = 0
+    const reveal = opts.pointerEffects ? smooth(30, 900, speed) : 0
     const tu = trailMat.uniforms
     const moving = pointer.inside && Math.hypot(pointer.x - pointer.px, pointer.y - pointer.py) > 0.5
     tu.uA.value = [pointer.px / width, 1 - pointer.py / height]
@@ -538,6 +611,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
       trailRead = trailWrite
       trailWrite = t
       u.uTrail.value = trailRead.texture
+      photoMat.uniforms.uTrail.value = trailRead.texture
     } else if (trailEnergy <= 0.004 && trailEnergy > 0) {
       trailEnergy = 0
       renderer.setRenderTarget(trailRead)
@@ -547,6 +621,8 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
 
     if (ready) fade = Math.min(1, fade + dt / 0.7)
     u.uFade.value = fade
+    const m = u.uMorph.value as number
+    photoMat.uniforms.uOpacity.value = fade * smooth(0.75, 1, m)
     u.uTime.value = time
 
     turn.rotation.set(tween.tilt, tween.spin, 0)
@@ -604,6 +680,9 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
       geo.dispose()
       quad.dispose()
       mat.dispose()
+      photoGeo.dispose()
+      photoMat.dispose()
+      textures.forEach((t) => t.dispose())
       trailGeo.dispose()
       trailMat.dispose()
       trailRead.dispose()
