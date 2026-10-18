@@ -3,8 +3,26 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { site } from '@/data/site'
+import { withBasePath } from '@/lib/withBasePath'
 import { ContactPanel } from './ContactPanel'
 import { ENTRIES, type Entry, type EntryId } from './entries'
+import type { PortraitScene, Slot } from './portraitScene'
+
+type Mode = 'pending' | 'webgl' | 'fallback'
+
+const MOBILE = '(max-width: 767px)'
+const FINE = '(hover: hover) and (pointer: fine)'
+const REDUCED = '(prefers-reduced-motion: reduce)'
+const NAV_H = 56
+
+function canUseWebGL() {
+  try {
+    const c = document.createElement('canvas')
+    return !!(c.getContext('webgl2') || c.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
 
 /**
  * `/`: one full-screen stage. The name sits in the middle, four entries are
@@ -12,6 +30,12 @@ import { ENTRIES, type Entry, type EntryId } from './entries'
  */
 export function Landing({ className }: { className?: string }) {
   const rootRef = useRef<HTMLElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const titleRef = useRef<HTMLElement>(null)
+  const entriesRef = useRef<HTMLUListElement>(null)
+  const sceneRef = useRef<PortraitScene | null>(null)
+  const [mode, setMode] = useState<Mode>('pending')
+  const [motionKey, setMotionKey] = useState('')
   const [active, setActive] = useState<EntryId | null>(null)
   const [contactOpen, setContactOpen] = useState(false)
   const [touch, setTouch] = useState(false)
@@ -30,6 +54,69 @@ export function Landing({ className }: { className?: string }) {
     mq.addEventListener('change', pick)
     return () => mq.removeEventListener('change', pick)
   }, [])
+
+  // WebGL or the static fallback; remount the scene when motion / pointer prefs change.
+  useEffect(() => {
+    const queries = [MOBILE, FINE, REDUCED].map((q) => window.matchMedia(q))
+    const pick = () => {
+      if (!canUseWebGL()) setMode('fallback')
+      else setMode((m) => (m === 'fallback' ? m : 'webgl'))
+      setMotionKey(queries.map((q) => (q.matches ? '1' : '0')).join(''))
+    }
+    queueMicrotask(pick)
+    queries.forEach((q) => q.addEventListener('change', pick))
+    return () => queries.forEach((q) => q.removeEventListener('change', pick))
+  }, [])
+
+  useEffect(() => {
+    if (mode !== 'webgl' || !motionKey) return
+    const root = rootRef.current
+    const stage = stageRef.current
+    if (!root || !stage) return
+    let cancelled = false
+    let scene: PortraitScene | null = null
+    const [small, fine, reduced] = motionKey.split('').map((c) => c === '1')
+
+    const getSlot = (): Slot => {
+      const w = stage.clientWidth
+      const h = stage.clientHeight
+      if (small) {
+        const top = titleRef.current?.getBoundingClientRect().bottom ?? NAV_H + 120
+        const bottom = entriesRef.current?.getBoundingClientRect().top ?? h - 160
+        return { cx: w / 2, cy: (top + bottom) / 2 + 10, w, h: Math.max(120, bottom - top + 40) }
+      }
+      return { cx: w / 2, cy: (NAV_H + h) / 2, w, h: h - NAV_H }
+    }
+
+    void import('./portraitScene').then(({ createPortraitScene }) => {
+      if (cancelled) return
+      const style = getComputedStyle(root)
+      scene = createPortraitScene(stage, {
+        small,
+        reducedMotion: reduced,
+        pointerEffects: fine && !reduced,
+        getSlot,
+        tron: style.getPropertyValue('--tron').trim() || '#5ce1ff',
+        ember: style.getPropertyValue('--ember').trim() || '#ff2b2b',
+        onReady: () => {
+          root.dataset.ready = 'true'
+        },
+        onLost: () => setMode('fallback'),
+      })
+      if (!scene) {
+        setMode('fallback')
+        return
+      }
+      sceneRef.current = scene
+    })
+
+    return () => {
+      cancelled = true
+      delete root.dataset.ready
+      scene?.dispose()
+      sceneRef.current = null
+    }
+  }, [mode, motionKey])
 
   const closeContact = useCallback(() => setContactOpen(false), [])
 
@@ -52,16 +139,23 @@ export function Landing({ className }: { className?: string }) {
       className={`landing-root ${className ?? ''}`}
       data-active={active ?? 'none'}
       data-touch={touch}
+      data-mode={mode}
     >
       <div className="landing-floor" aria-hidden>
         <div className="landing-floor-grid" />
       </div>
       <div className="landing-haze" aria-hidden />
-      <div className="landing-stage" aria-hidden />
+      <div ref={stageRef} className="landing-stage" aria-hidden />
+      {mode === 'fallback' && (
+        <div className="landing-fallback" data-landing="fallback" aria-hidden>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={withBasePath('/portrait/alex-square.webp')} alt="" />
+        </div>
+      )}
       <div className="tron-scan" aria-hidden />
       <div className="scene-frame landing-frame" aria-hidden />
 
-      <header className="landing-title">
+      <header ref={titleRef} className="landing-title">
         <p className="landing-role">
           {site.role} · {site.location}
         </p>
@@ -69,7 +163,7 @@ export function Landing({ className }: { className?: string }) {
       </header>
 
       <nav className="landing-entries" aria-label="Home">
-        <ul>
+        <ul ref={entriesRef}>
           {ENTRIES.map((entry) => {
             const isActive = active === entry.id
             const body = (
