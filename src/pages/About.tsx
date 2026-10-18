@@ -1,23 +1,10 @@
-import type { Metadata } from 'next'
-import { Oxanium } from 'next/font/google'
-import Link from 'next/link'
+import { Link } from 'react-router'
 import { AboutHexGlow } from '@/components/about/AboutHexGlow'
 import { HeroName } from '@/components/archive/home/HeroName'
 import { HeroRole } from '@/components/archive/home/HeroRole'
 import { site } from '@/data/site'
 import '@/components/home/tron.css'
-
-const display = Oxanium({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-display',
-  display: 'swap',
-})
-
-export const metadata: Metadata = {
-  title: 'About',
-  description: `${site.fullName} — ${site.role} in ${site.location}. ${site.tagline}`,
-}
+import { PageMeta } from '@/src/PageMeta'
 
 const columns = [
   {
@@ -45,11 +32,12 @@ const columns = [
 export default function AboutPage() {
   return (
     <main className="about-page relative flex min-h-dvh flex-col bg-[#eeeeee] px-6 pt-28 sm:px-10 dark:bg-[#0d0d0d]">
+      <PageMeta path="about" />
       <div className="about-hex-field" aria-hidden>
         <div className="about-hex-grid" />
         <AboutHexGlow />
       </div>
-      <article className={`${display.variable} about-intro relative z-10 mx-auto w-full max-w-2xl flex-1`}>
+      <article className="about-intro relative z-10 mx-auto w-full max-w-2xl flex-1">
         <HeroName />
         <HeroRole />
         <p className="mt-8 text-base leading-7 text-[#444] dark:text-[#ccc]">
@@ -100,7 +88,7 @@ export default function AboutPage() {
         </ol>
       </article>
 
-      <div className={`${display.variable} about-marquee`}>
+      <div className="about-marquee">
         <ul className="about-marquee-track">
           {site.hobbies.map((item) => (
             <li key={item}>{item}</li>
@@ -125,7 +113,7 @@ export default function AboutPage() {
                   <li key={link.label}>
                     {link.href.startsWith('/') ? (
                       <Link
-                        href={link.href}
+                        to={link.href}
                         className="text-[0.85rem] break-all text-[#333] underline decoration-black/15 underline-offset-2 hover:text-[#111] dark:text-[#ddd] dark:decoration-white/20 dark:hover:text-white"
                       >
                         {link.label}

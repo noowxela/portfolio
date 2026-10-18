@@ -1,5 +1,3 @@
-'use client'
-
 import { useEffect, type RefObject } from 'react'
 
 const LEGACY = { tron: '#5ce1ff', ember: '#b8f4ff' }

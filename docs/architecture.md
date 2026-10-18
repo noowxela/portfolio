@@ -1,14 +1,14 @@
 # Architecture
 
-Next.js App Router static export. Home (`/`) is one full-screen stage: the name, four corner entries and a 3D particle portrait. The previous GSAP scroll story lives on at `/noelite`. The demo gallery lives at `/work`. About stays a short page.
+Vite SPA with one HTML shell per route. Home (`/`) is one full-screen stage: the name, four corner entries and a 3D particle portrait. The previous GSAP scroll story lives on at `/noelite`. The demo gallery lives at `/work`. About stays a short page.
 
 ## Stack
 
-- Next.js 16, React 19, Tailwind CSS v4
+- Vite 8, React 19, React Router 8, Tailwind CSS v4 (`@tailwindcss/vite`)
 - Three.js for the home particle portrait (`components/landing/`), the `/journey` particle mark, the `/noelite` mosaic and `/noelite2`
 - GSAP for the portrait pose tweens on `/`; `ScrollTrigger` and `ScrollSmoother` on `/noelite` only
-- `next-themes` for light, dark, and system on the gallery and About
-- Static export (`output: 'export'`). GitHub Pages sets `GITHUB_PAGES=true`, which adds `basePath: /portfolio`
+- A small theme provider (class on `html`, `localStorage['theme']`, system default) for light, dark, and system on the gallery and About
+- GitHub Pages base path is always `/portfolio/`. `scripts/prerender-shells.mjs` writes each route's title and Open Graph tags into `dist/`
 
 ## Routes
 
@@ -22,7 +22,7 @@ Next.js App Router static export. Home (`/`) is one full-screen stage: the name,
 | `/journey` | grid.log: work experience as a horizontal git log with a branch rail and a particle years mark (`components/journey/`, `data/experience.ts`, [SDD 030](./sdd/030-journey-gridlog.md), [walkthrough](./pages/journey-gridlog.md)) |
 | `/noelite2` | Preview: scroll-driven 3D ride, desk → Grid → neon city → disc portal → desk (`components/noelite2/`, [SDD 028](./sdd/028-journey-home.md)); was `/journey` until 2026-10-18 |
 
-`app/layout.tsx` wraps every route with Inter, metadata, `ThemeProviders`, and the fixed header (`NavPill`). The smoother wrapper exists only inside `/noelite`, so the header stays `position: fixed` outside it. `NavPill` uses its dark Tron bar on `/`, `/noelite`, `/noelite2` and `/journey`.
+`src/RootLayout.tsx` wraps every route with `ThemeProvider`, the fixed header (`NavPill`), and `RouteCurtain`. Fonts are self-hosted in `src/fonts.css`. The smoother wrapper exists only inside `/noelite`, so the header stays `position: fixed` outside it. `NavPill` uses its dark Tron bar on `/`, `/noelite`, `/noelite2` and `/journey`.
 
 The new home is written up in [portrait-home.md](./pages/portrait-home.md). A section-by-section walkthrough of the scroll story (now `/noelite`) is in [tron-home.md](./pages/tron-home.md). 中文版：[tron-home.zh.md](./pages/tron-home.zh.md).
 

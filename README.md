@@ -11,25 +11,26 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Edit [`data/demos.ts`](./data/demos.ts) to add or change gallery items.
+Open [http://localhost:3001/portfolio/](http://localhost:3001/portfolio/). Port 3000 stays free for the Next checkout of this repo. Edit [`data/demos.ts`](./data/demos.ts) to add or change gallery items.
 
 ## GitHub Pages
 
-The production site is a static export at [https://noowxela.github.io/portfolio/](https://noowxela.github.io/portfolio/).
+The production site is a static Vite build at [https://noowxela.github.io/portfolio/](https://noowxela.github.io/portfolio/).
 
-Push to `main` and the Deploy GitHub Pages workflow builds `out/` and publishes it. One-time repo setting: **Settings → Pages → Source → GitHub Actions**.
+Push to `main` and the Deploy GitHub Pages workflow builds `dist/` and publishes it. One-time repo setting: **Settings → Pages → Source → GitHub Actions**.
 
 ```bash
-npm run build          # writes static files to out/
-npx serve out          # preview the export locally
+npm run build                 # Vite build plus HTML shells in dist/
+node scripts/serve-pages.mjs # http://127.0.0.1:3100/portfolio/
 ```
 
-Local `npm run dev` stays at `/`. The GitHub Action sets `GITHUB_PAGES=true` so the export uses `basePath: /portfolio`.
+Dev and production both use base path `/portfolio/`.
 
 ## Scripts
 
 ```bash
-npm run dev    # local server
-npm run build  # static export into out/
-npm run lint   # ESLint
+npm run dev      # Vite on port 3001
+npm run build    # dist/
+npm run preview  # port 3002
+npm run lint
 ```

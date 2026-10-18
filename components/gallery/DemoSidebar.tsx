@@ -1,8 +1,5 @@
-'use client'
-
 import { Demo, demoThumb } from '@/data/demos'
-import { withBasePath } from '@/lib/withBasePath'
-import Image from 'next/image'
+import { asset } from '@/lib/asset'
 import { useEffect, useRef, useState } from 'react'
 import { PillButton } from './PillButton'
 
@@ -154,14 +151,12 @@ export function DemoSidebar({
                         New
                       </span>
                     )}
-                    <Image
-                      src={withBasePath(demoThumb(d))}
+                    <img
+                      src={asset(demoThumb(d))}
                       alt=""
-                      fill
-                      sizes="(min-width: 640px) 227px, 175px"
-                      priority={index === 0}
+                      decoding="async"
                       loading={index === 0 ? 'eager' : 'lazy'}
-                      className="block h-full w-full object-cover"
+                      className="absolute inset-0 block h-full w-full object-cover"
                     />
                   </div>
                 </button>

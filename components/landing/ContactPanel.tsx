@@ -1,5 +1,3 @@
-'use client'
-
 import { useCallback, useEffect, useRef } from 'react'
 import { playClose } from '@/lib/sound'
 import { CONTACT_LINKS } from './entries'

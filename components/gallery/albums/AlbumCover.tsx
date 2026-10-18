@@ -1,6 +1,5 @@
-import Image from 'next/image'
 import { Demo, demoThumb } from '@/data/demos'
-import { withBasePath } from '@/lib/withBasePath'
+import { asset } from '@/lib/asset'
 
 /** Square sleeve with the screenshot as cover art. */
 export function AlbumCover({ demo, priority, className }: { demo: Demo; priority?: boolean; className?: string }) {
@@ -8,14 +7,13 @@ export function AlbumCover({ demo, priority, className }: { demo: Demo; priority
     <div
       className={`relative aspect-square w-full overflow-hidden rounded-md bg-white shadow-[0_14px_34px_rgb(0_0_0/0.22)] ring-1 ring-black/5 dark:bg-[#1a1a1a] dark:shadow-[0_14px_34px_rgb(0_0_0/0.55)] dark:ring-white/10 ${className ?? ''}`}
     >
-      <Image
-        src={withBasePath(demoThumb(demo))}
+      <img
+        src={asset(demoThumb(demo))}
         alt=""
-        fill
-        sizes="(min-width: 640px) 880px, 82vw"
-        priority={priority}
         draggable={false}
-        className="pointer-events-none object-cover object-left-top select-none"
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover object-left-top select-none"
       />
       <div className="absolute inset-0 bg-gradient-to-tr from-black/25 via-transparent to-white/10" />
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2.5 pt-8 text-left">

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#07080c" />
+    <meta name="author" content="Alex Woon Jun Rong" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Alex Woon" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title data-shell="title">Alex Woon</title>
+    <meta data-shell="description" name="description" content="Portfolio of Alex Woon, a full stack developer in Malaysia. A particle portrait home, a live gallery of games and web apps, and work experience as a git log." />
+    <link data-shell="canonical" rel="canonical" href="https://noowxela.github.io/portfolio/" />
+    <meta data-shell="og:title" property="og:title" content="Alex Woon" />
+    <meta data-shell="og:description" property="og:description" content="Portfolio of Alex Woon, a full stack developer in Malaysia. A particle portrait home, a live gallery of games and web apps, and work experience as a git log." />
+    <meta data-shell="og:url" property="og:url" content="https://noowxela.github.io/portfolio/" />
+    <meta data-shell="og:image" property="og:image" content="https://noowxela.github.io/portfolio/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Alex Woon" />
+    <meta data-shell="twitter:title" name="twitter:title" content="Alex Woon" />
+    <meta data-shell="twitter:description" name="twitter:description" content="Portfolio of Alex Woon, a full stack developer in Malaysia. A particle portrait home, a live gallery of games and web apps, and work experience as a git log." />
+    <meta data-shell="twitter:image" name="twitter:image" content="https://noowxela.github.io/portfolio/og.png" />
+    <meta data-shell="robots" name="robots" content="index,follow" />
+    <script>
+      ;(function () {
+        try {
+          var t = localStorage.getItem('theme')
+          var dark = t === 'dark' || ((t == null || t === 'system') && matchMedia('(prefers-color-scheme: dark)').matches)
+          var root = document.documentElement
+          root.classList.toggle('dark', dark)
+          root.classList.toggle('light', !dark)
+          root.style.colorScheme = dark ? 'dark' : 'light'
+        } catch (e) {}
+      })()
+    </script>
+  </head>
+  <body class="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-[rgb(13,13,13)] dark:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

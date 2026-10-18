@@ -1,5 +1,3 @@
-'use client'
-
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import type { Branch } from '@/data/experience'
 

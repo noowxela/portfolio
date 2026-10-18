@@ -1,10 +1,8 @@
-'use client'
-
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type FocusEvent, type MouseEvent } from 'react'
+import { Link, useNavigate } from 'react-router'
+import { preloadRoute } from '@/src/routes'
 import { site } from '@/data/site'
-import { withBasePath } from '@/lib/withBasePath'
+import { asset } from '@/lib/asset'
 import { beginRouteExit, normalizePath, registerHomeExit } from '@/components/transition/routeTransition'
 import { playClick, playTick } from '@/lib/sound'
 import { ContactPanel } from './ContactPanel'
@@ -43,7 +41,7 @@ export function Landing({ className }: { className?: string }) {
   const [contactOpen, setContactOpen] = useState(false)
   const [touch, setTouch] = useState(false)
   const activeRef = useRef<EntryId | null>(null)
-  const router = useRouter()
+  const navigate = useNavigate()
   const [exit, setExit] = useState<{ id: EntryId; dx: number; dy: number } | null>(null)
   const exitingRef = useRef(false)
 
@@ -163,13 +161,14 @@ export function Landing({ className }: { className?: string }) {
   }, [])
 
   const prefetch = (entry: Entry) => {
-    if (entry.href) router.prefetch(entry.href)
+    if (entry.href) preloadRoute(entry.href)
   }
 
   /** Exit to a page: name glitches out, particles stream into the clicked corner, curtain, push. */
   const leaveTo = (entry: Entry, link: HTMLElement) => {
     const href = entry.href
     if (!href || exitingRef.current) return
+    preloadRoute(href)
     exitingRef.current = true
     const reduced = window.matchMedia(REDUCED).matches
     const root = rootRef.current
@@ -183,7 +182,7 @@ export function Landing({ className }: { className?: string }) {
     root?.setAttribute('data-exit', entry.id)
     if (!reduced) sceneRef.current?.exit(x, y, EXIT_MS / 1000)
     beginRouteExit(href, { reduced, coverDelay: reduced ? 0 : COVER_AT })
-    window.setTimeout(() => router.push(href), reduced ? REDUCED_EXIT_MS : EXIT_MS)
+    window.setTimeout(() => navigate(href), reduced ? REDUCED_EXIT_MS : EXIT_MS)
   }
 
   // The header nav's Work / Journey / About play the same exit, aimed at the matching corner.
@@ -247,8 +246,7 @@ export function Landing({ className }: { className?: string }) {
       <div ref={stageRef} className="landing-stage" aria-hidden />
       {mode === 'fallback' && (
         <div className="landing-fallback" data-landing="fallback" aria-hidden>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={withBasePath('/portrait/alex-square.webp')} alt="" />
+          <img src={asset('/portrait/alex-square.webp')} alt="" />
         </div>
       )}
       <div className="tron-scan" aria-hidden />
@@ -295,7 +293,7 @@ export function Landing({ className }: { className?: string }) {
                 data-exit-target={exit?.id === entry.id || undefined}
               >
                 {entry.href ? (
-                  <Link href={entry.href} className="landing-entry-link" data-entry={entry.id} {...handlers}>
+                  <Link to={entry.href} className="landing-entry-link" data-entry={entry.id} {...handlers}>
                     {body}
                   </Link>
                 ) : (

@@ -1,5 +1,3 @@
-'use client'
-
 import { useSyncExternalStore } from 'react'
 
 /** Subscribe to a CSS media query. Returns `false` during static prerender. */

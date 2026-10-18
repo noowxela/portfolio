@@ -1,7 +1,5 @@
-'use client'
-
 import { useState } from 'react'
-import Link from 'next/link'
+import { Link } from 'react-router'
 import { PillButton } from '@/components/gallery/PillButton'
 import { site } from '@/data/site'
 
@@ -51,7 +49,7 @@ export function IdentityChip() {
               </p>
               <p className="mt-1 text-[0.65rem] text-[#999] sm:text-[0.75rem]">{site.tagline}</p>
               <Link
-                href="/about"
+                to="/about"
                 className="mt-3 inline-block rounded-full border border-black/10 bg-black/5 px-3 py-1.5 text-[0.75rem] font-medium text-[#333] transition hover:bg-black/10 sm:mt-3.5 sm:px-3.5 sm:py-1.5 sm:text-[0.8rem] dark:border-white/10 dark:bg-white/5 dark:text-[#ddd] dark:hover:bg-white/10"
               >
                 About

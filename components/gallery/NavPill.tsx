@@ -1,9 +1,7 @@
-'use client'
-
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useSyncExternalStore, type MouseEvent } from 'react'
+import { Link, useLocation } from 'react-router'
+import { preloadRoute } from '@/src/routes'
 import headerNavLinks from '@/data/headerNavLinks'
 import { site } from '@/data/site'
 import { requestHomeExit } from '@/components/transition/routeTransition'
@@ -72,8 +70,7 @@ const iconLinks = [
 ] as const
 
 export function NavPill() {
-  const pathname = usePathname()
-  const router = useRouter()
+  const { pathname } = useLocation()
   const onRoot = normalizePath(pathname) === '/'
   // The Tron bar also dresses /journey, /noelite (the previous home) and /noelite2 (the 3D journey), which share the void ground.
   const onHome = ['/', '/journey', '/noelite', '/noelite2'].includes(normalizePath(pathname))
@@ -95,7 +92,7 @@ export function NavPill() {
     >
       <div className="flex h-full shrink-0 items-center self-stretch">
         <Link
-          href="/"
+          to="/"
           onClick={(e) => clickSound(e, '/')}
           className={`grid h-full shrink-0 place-items-center px-3 text-[0.78rem] font-medium tracking-tight transition-colors duration-150 sm:px-6 ${
             onHome
@@ -111,11 +108,12 @@ export function NavPill() {
           return (
             <Link
               key={href}
-              href={href}
+              to={href}
               aria-current={active ? 'page' : undefined}
-              onMouseEnter={() => router.prefetch(href)}
-              onFocus={() => router.prefetch(href)}
+              onMouseEnter={() => preloadRoute(href)}
+              onFocus={() => preloadRoute(href)}
               onClick={(e) => {
+                if (plainClick(e)) preloadRoute(href)
                 // Sound first, before any exit transition or navigation.
                 clickSound(e, href)
                 // On the home, Work / Journey / About leave through the home's exit (same as its corners).

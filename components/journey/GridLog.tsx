@@ -1,6 +1,4 @@
-'use client'
-
-import Link from 'next/link'
+import { Link } from 'react-router'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { CONTACT_LINKS } from '@/components/landing/entries'
 import { HEAD, STEPS, commitHash, formatMonth, type Step } from '@/data/experience'
@@ -142,7 +140,7 @@ function HeadBody({ it }: { it: Extract<Item, { kind: 'head' }> }) {
             {link.external && <span aria-hidden> ↗</span>}
           </a>
         ))}
-        <Link href="/about" className="gl-link is-primary">
+        <Link to="/about" className="gl-link is-primary">
           About <span aria-hidden>→</span>
         </Link>
       </div>

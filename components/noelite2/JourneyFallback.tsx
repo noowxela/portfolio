@@ -1,6 +1,6 @@
 import { DiscV2 } from '@/components/home/discs'
 import { site } from '@/data/site'
-import { withBasePath } from '@/lib/withBasePath'
+import { asset } from '@/lib/asset'
 
 /**
  * Plain 2D version of the Legacy hero with the Work CTA. Shown for
@@ -22,7 +22,7 @@ export function JourneyFallback({ poster = false }: { poster?: boolean }) {
         <p className="hero-role">{site.role} · {site.location}</p>
         <h1 className="hero-name">{site.name}</h1>
         {!poster && (
-          <a className="journey-cta" href={withBasePath('/work/')}>
+          <a className="journey-cta" href={asset('/work/')}>
             <span>Enter the Work</span>
             <span aria-hidden>→</span>
           </a>

@@ -1,6 +1,4 @@
-'use client'
-
-import { usePathname } from 'next/navigation'
+import { useLocation } from 'react-router'
 import { useEffect, useRef } from 'react'
 import { clearEnterFlag, ENTER_TTL, ENTRANCES, normalizePath, readEnterFlag, type EnterFlag } from './routeTransition'
 import './route-transition.css'
@@ -62,7 +60,7 @@ function untag(els: HTMLElement[]) {
 
 /** Global curtain + destination entrance for the home page transition. */
 export function RouteCurtain() {
-  const pathname = usePathname()
+  const { pathname } = useLocation()
   const pending = useRef<EnterFlag | null>(null)
 
   useEffect(() => {

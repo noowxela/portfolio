@@ -5,7 +5,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3001/portfolio/](http://localhost:3001/portfolio/). This branch keeps port 3000 free for the Next checkout. Preview is [http://localhost:3002/portfolio/](http://localhost:3002/portfolio/).
 
 | Route | Page |
 | --- | --- |
@@ -16,8 +16,9 @@ Open [http://localhost:3000](http://localhost:3000).
 `gsap` (ScrollTrigger and ScrollSmoother) is a dependency of the home page only. No env vars are required for local dev.
 
 ```bash
-npm run build   # static export into out/
+npm run build   # dist/: Vite build plus one HTML shell per route
 npm run lint
+npm run typecheck
 ```
 
-GitHub Pages sets `GITHUB_PAGES=true`, which adds `basePath: /portfolio` and publishes `out/`.
+`VITE_SITE_URL` defaults to `https://noowxela.github.io/portfolio`. GitHub Pages publishes `dist/` at `/portfolio/`.

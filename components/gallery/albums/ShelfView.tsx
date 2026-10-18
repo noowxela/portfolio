@@ -1,5 +1,3 @@
-'use client'
-
 import { useCallback, useRef, useState, type KeyboardEvent } from 'react'
 import { Demo } from '@/data/demos'
 import { AlbumCover } from './AlbumCover'

@@ -1,13 +1,15 @@
-<!-- BEGIN:nextjs-agent-rules -->
+This site is a Vite + React Router SPA. It is not a Next.js app. Do not add `app/`, `next.config`, or `next/*` imports.
 
-# This is NOT the Next.js you know
+`npm run dev` is Vite on port **3001**, strict, at [http://localhost:3001/portfolio/](http://localhost:3001/portfolio/). Preview is port **3002**. Leave **3000** for the other checkout. Do not use Vite's default 5173.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+`vite.config.ts` sets `base: '/portfolio/'` for dev and production. In-app links stay unprefixed (`/work`). Public files go through `asset()` in `lib/asset.ts`. Do not read `NEXT_PUBLIC_*` or `GITHUB_PAGES`.
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+Do not wrap the tree in `<StrictMode>`. A double mount creates and destroys the WebGL scenes twice.
 
-<!-- END:nextjs-agent-rules -->
+GitHub Pages publishes `dist/` from `.github/workflows/deploy-pages.yml`. `npm run build` is `tsc --noEmit`, `vite build`, then `scripts/prerender-shells.mjs` (one HTML shell per route). `VITE_SITE_URL` defaults to `https://noowxela.github.io/portfolio`.
 
-Keep `turbopack.root` as `path.resolve(process.cwd())` so Next does not treat `/Users/alexwoon/Documents/github` as the app. A parent lockfile or a wrong `__dirname` in compiled `next.config.ts` makes `next-themes` resolve from the wrong `node_modules`.
+Theme lives in `src/theme.tsx`. The storage key is `theme`. The blocking script in `index.html` sets `html.dark` before first paint.
 
-GitHub Pages uses `output: 'export'` and `images.unoptimized`. CI sets `GITHUB_PAGES=true` (adds `basePath: /portfolio`) and publishes `out/` via `.github/workflows/deploy-pages.yml`. Do not add `headers()` — static hosts ignore Next.js `headers()`.
+Do not change disc tilt in `components/discs/*`. A `React.lazy` import is the only edit that belongs there.
+
+Verify with `.cursor/skills/verify-portfolio`. It builds and serves `dist/` at `http://127.0.0.1:3100/portfolio/`. Do not drive ports 3000 or 3001.

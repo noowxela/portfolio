@@ -20,7 +20,7 @@ const STATE_FILE = path.join(STATE_DIR, 'run.json')
 const LOG_FILE = path.join(STATE_DIR, 'server.log')
 const ARTIFACTS = path.join(SKILL_DIR, 'artifacts')
 const PORT = Number(process.env.VERIFY_PORT || 3100)
-const BASE = `http://127.0.0.1:${PORT}`
+const BASE = `http://127.0.0.1:${PORT}/portfolio`
 
 function readState() {
   if (!fs.existsSync(STATE_FILE)) return null
@@ -50,7 +50,7 @@ async function waitReady(port, timeoutMs) {
   const start = Date.now()
   while (Date.now() - start < timeoutMs) {
     try {
-      const res = await fetch(`http://127.0.0.1:${port}/`)
+      const res = await fetch(`http://127.0.0.1:${port}/portfolio/`)
       if (res.status === 200) return
     } catch {
       // server still booting
@@ -71,27 +71,27 @@ async function launch() {
   fs.mkdirSync(STATE_DIR, { recursive: true })
   const log = fs.openSync(LOG_FILE, 'a')
   fs.writeSync(log, `\n--- build ${new Date().toISOString()} ---\n`)
-  const build = spawn('npx', ['next', 'build'], {
+  const build = spawn('npm', ['run', 'build'], {
     cwd: ROOT,
     stdio: ['ignore', log, log],
-    env: { ...process.env, GITHUB_PAGES: '' },
+    env: { ...process.env, VITE_SITE_URL: process.env.VITE_SITE_URL || 'https://noowxela.github.io/portfolio' },
   })
   const buildCode = await new Promise((resolve) => build.on('close', resolve))
   if (buildCode !== 0) {
     fs.closeSync(log)
-    throw new Error(`next build exited ${buildCode}. See ${LOG_FILE}`)
+    throw new Error(`npm run build exited ${buildCode}. See ${LOG_FILE}`)
   }
-  const child = spawn('npx', ['--yes', 'serve', 'out', '-l', `tcp://127.0.0.1:${PORT}`, '--no-clipboard'], {
+  const child = spawn('node', ['scripts/serve-pages.mjs'], {
     cwd: ROOT,
     detached: true,
     stdio: ['ignore', log, log],
-    env: { ...process.env, GITHUB_PAGES: '' },
+    env: { ...process.env, VERIFY_PORT: String(PORT) },
   })
   child.unref()
   fs.closeSync(log)
   fs.writeFileSync(
     STATE_FILE,
-    JSON.stringify({ pid: child.pid, port: PORT, startedAt: new Date().toISOString(), mode: 'serve out' }, null, 2),
+    JSON.stringify({ pid: child.pid, port: PORT, startedAt: new Date().toISOString(), mode: 'serve-pages dist' }, null, 2),
   )
   try {
     await waitReady(PORT, 120000)
@@ -103,7 +103,7 @@ async function launch() {
     }
     throw error
   }
-  console.log(JSON.stringify({ ok: true, url: BASE, pid: child.pid, port: PORT, mode: 'serve out', log: LOG_FILE }))
+  console.log(JSON.stringify({ ok: true, url: BASE, pid: child.pid, port: PORT, mode: 'serve-pages dist', log: LOG_FILE }))
 }
 
 function doctor() {
@@ -137,7 +137,7 @@ async function browser() {
   page.setDefaultTimeout(20000)
   return {
     page,
-    base: `http://127.0.0.1:${state.port}`,
+    base: `http://127.0.0.1:${state.port}/portfolio`,
     async close() {
       await browser.close()
     },

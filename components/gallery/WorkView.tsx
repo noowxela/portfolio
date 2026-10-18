@@ -1,5 +1,3 @@
-'use client'
-
 import { useSyncExternalStore } from 'react'
 import { Demo } from '@/data/demos'
 import { CoverflowStage } from './CoverflowStage'

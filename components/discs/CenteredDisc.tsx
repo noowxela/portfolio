@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { DiscSignal } from '@/components/discs/DiscSignal'
 

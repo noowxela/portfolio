@@ -1,0 +1,43 @@
+[
+  {
+    "path": "",
+    "title": "Alex Woon",
+    "description": "Portfolio of Alex Woon, a full stack developer in Malaysia. A particle portrait home, a live gallery of games and web apps, and work experience as a git log."
+  },
+  {
+    "path": "work",
+    "title": "Work · Alex Woon",
+    "description": "Portfolio of Alex Woon, a full stack developer in Malaysia. A particle portrait home, a live gallery of games and web apps, and work experience as a git log."
+  },
+  {
+    "path": "journey",
+    "title": "Journey · Alex Woon",
+    "description": "Work experience as a git log: Multimedia University, Auronex, Oasis Interactive and Trinergy Digital, from the resume."
+  },
+  {
+    "path": "about",
+    "title": "About · Alex Woon",
+    "description": "Alex Woon Jun Rong — Full Stack Developer in Malaysia. Particle portrait, live work, and a journey log."
+  },
+  {
+    "path": "noelite",
+    "title": "Noelite · Alex Woon",
+    "description": "The previous scroll-driven Tron home: Legacy hero, identity disc, featured work, and contact."
+  },
+  {
+    "path": "noelite2",
+    "title": "Noelite 2 · Alex Woon",
+    "description": "The scroll-driven 3D journey preview: from the desk, through the Grid, and home again."
+  },
+  {
+    "path": "discs",
+    "title": "Discs · Alex Woon",
+    "description": "Temporary board of the disc versions made for the grid."
+  },
+  {
+    "path": "404",
+    "title": "Not found · Alex Woon",
+    "description": "This page is not on the site.",
+    "noindex": true
+  }
+]

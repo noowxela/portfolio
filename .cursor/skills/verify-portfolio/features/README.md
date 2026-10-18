@@ -5,9 +5,9 @@ Read this index, then follow one feature file. Drive only the verification serve
 ## Baseline preconditions
 
 - Repo: `01_project/o000o_active/portfolio`.
-- `node .cursor/skills/verify-portfolio/verify.mjs launch` is healthy at `http://127.0.0.1:3100`.
+- `node .cursor/skills/verify-portfolio/verify.mjs launch` is healthy at `http://127.0.0.1:3100/portfolio/`.
 - `node .cursor/skills/verify-portfolio/verify.mjs doctor` exits 0.
-- Do not set `GITHUB_PAGES`. Do not use port 3000.
+- Do not use port 3000 or 3001.
 - No seed data. Pages render from the repo.
 
 ## Driving conventions
