@@ -1,7 +1,7 @@
 import type { Pose } from './poses'
 
 export type PoseSample = {
-  /** Unit-height positions (x scaled by aspect), N * 3. */
+  /** Unit-height positions (x scaled by aspect), N * 3. z is the relief, >= 0. */
   positions: Float32Array
   /** Linear-ish photo colour 0..1, N * 3. */
   colors: Float32Array
@@ -223,7 +223,8 @@ export function samplePose(img: HTMLImageElement, pose: Pose, count: number, see
     }
     positions[n * 3] = (fx / W - 0.5) * aspect
     positions[n * 3 + 1] = 0.5 - fy / H
-    positions[n * 3 + 2] = pose.depth * (0.62 * bulge + 0.38 * (l - 0.5)) + (rand() - 0.5) * 0.012
+    // Relief (0..depth): how far this particle stands out from its sheet.
+    positions[n * 3 + 2] = pose.depth * (0.62 * bulge + 0.38 * l) + rand() * 0.012
     // Photo hue at the stretched brightness: the shader reads luminance from it.
     const i = p * 4
     const k = l / Math.max(0.02, lum[p])

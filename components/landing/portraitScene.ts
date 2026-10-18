@@ -51,7 +51,12 @@ const CAM_Z = 10
 const PUSH_RADIUS = 120
 const PUSH_GAIN = 2.2
 const TILT_MAX = 0.45
-const TAU = Math.PI * 2
+/** Gap between the front and back particle sheets (portrait height = 1). */
+const LAYER_GAP = 0.12
+/** Share of a pose's depth used for each sheet's outward relief. */
+const RELIEF = 0.42
+/** Alpha of the sheet facing away from the camera (no see-through double image head-on). */
+const AWAY_ALPHA = 0.06
 /** Below this the dust is under a pixel and the reveal is invisible. */
 const TRAIL_EPS = 0.02
 
@@ -70,6 +75,7 @@ const particleVertex = /* glsl */ `
   attribute vec3 aColFrom;
   attribute vec3 aColTo;
   attribute vec4 aRand;
+  attribute float aSide;
 
   uniform float uMorph;
   uniform float uFade;
@@ -84,6 +90,7 @@ const particleVertex = /* glsl */ `
   uniform sampler2D uTrail;
   uniform vec3 uTron;
   uniform vec3 uEmber;
+  uniform float uAway;
 
   varying vec3 vColor;
   varying float vAlpha;
@@ -103,6 +110,10 @@ const particleVertex = /* glsl */ `
     // Fast spin puffs the cloud outward.
     vec3 outward = normalize(vec3(p.xy, p.z * 2.0) + vec3(aRand.zw - 0.5, aRand.y - 0.5) * 0.6);
     p += outward * uPuff * (0.05 + 0.25 * aRand.w);
+
+    // Two sheets (front +z, back -z): the one facing away fades to a whisper.
+    float facing = normalize(normalMatrix * vec3(0.0, 0.0, aSide)).z;
+    float face = mix(uAway, 1.0, smoothstep(-0.2, 0.3, facing));
 
     vec4 clip = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
     vec2 px = (clip.xy / clip.w * 0.5 + 0.5) * uRes;
@@ -138,7 +149,7 @@ const particleVertex = /* glsl */ `
     float accent = clamp(uAccent * step(aRand.w, 0.55 + 0.45 * uAccent) + dust * 0.85, 0.0, 1.0);
     vColor = mix(neon, warm, accent);
     float twinkle = 0.85 + 0.15 * sin(uTime * 2.0 + aRand.x * 40.0);
-    vAlpha = uFade * twinkle * (0.22 + 0.78 * lum) * (1.0 - trail.w * 0.75);
+    vAlpha = face * uFade * twinkle * (0.22 + 0.78 * lum) * (1.0 - trail.w * 0.75);
     vCorner = position.xy;
   }
 `
@@ -252,7 +263,9 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   }
   canvas.addEventListener('webglcontextlost', onLost)
 
-  const count = opts.small ? 9000 : 22000
+  // Two sheets of `half` particles each: front (+z) and back (-z, mirrored in x).
+  const half = opts.small ? 5000 : 15000
+  const count = half * 2
   const scene = new Scene()
   const camera = new PerspectiveCamera(FOV, 1, 0.1, 100)
   camera.position.set(0, 0, CAM_Z)
@@ -284,6 +297,9 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   geo.setAttribute('aColFrom', aColFrom)
   geo.setAttribute('aColTo', aColTo)
   geo.setAttribute('aRand', new InstancedBufferAttribute(rand, 4))
+  const side = new Float32Array(count)
+  for (let i = 0; i < count; i++) side[i] = i < half ? 1 : -1
+  geo.setAttribute('aSide', new InstancedBufferAttribute(side, 1))
   geo.instanceCount = count
 
   // ---- Trail (ping-pong, quarter resolution) ----
@@ -341,6 +357,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
       uTrail: { value: trailRead.texture },
       uTron: { value: tron },
       uEmber: { value: ember },
+      uAway: { value: AWAY_ALPHA },
     },
     transparent: true,
     depthTest: false,
@@ -369,10 +386,16 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     depthTest: false,
     depthWrite: false,
   })
+  // One plane per sheet. Front-side only, so each shows just from its own side;
+  // the back one is turned 180° and reads the right way round from behind.
   const photo = new Mesh(photoGeo, photoMat)
-  photo.renderOrder = 0
-  photo.visible = opts.pointerEffects
-  turn.add(photo)
+  const photoBack = new Mesh(photoGeo, photoMat)
+  photoBack.rotation.y = Math.PI
+  for (const m of [photo, photoBack]) {
+    m.renderOrder = 0
+    m.visible = opts.pointerEffects
+    turn.add(m)
+  }
   const textures = new Map<string, Texture>()
   const textureFor = (src: string, img: HTMLImageElement) => {
     let tex = textures.get(src)
@@ -472,7 +495,8 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     drag.x = e.clientX
     drag.y = e.clientY
     drag.t = now
-    const dYaw = dx * 0.0065
+    // Narrow screens turn faster, so a thumb swipe can reach the back.
+    const dYaw = dx * Math.max(0.0065, Math.PI / (0.75 * width))
     spin.yaw += dYaw
     spin.tilt = clamp(spin.tilt + dy * 0.004, -TILT_MAX, TILT_MAX)
     spin.vel += (dYaw / dt - spin.vel) * 0.5
@@ -501,7 +525,8 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   container.addEventListener('wheel', onWheel, { passive: false })
 
   // ---- Poses ----
-  const samples = new Map<PoseId, PoseSample & { img: HTMLImageElement }>()
+  type Layered = PoseSample & { img: HTMLImageElement; surface: number }
+  const samples = new Map<PoseId, Layered>()
   const images = new Map<string, Promise<HTMLImageElement>>()
   const getSample = async (id: PoseId) => {
     const cached = samples.get(id)
@@ -513,9 +538,32 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
       images.set(pose.image, img)
     }
     const loaded = await img
-    const sample = { ...samplePose(loaded, pose, count), img: loaded }
+    const sample = { ...layered(samplePose(loaded, pose, half)), img: loaded }
     samples.set(id, sample)
     return sample
+  }
+
+  /** Build both sheets from one sample: same image, back mirrored in x, relief facing outward. */
+  const layered = (s: PoseSample) => {
+    const positions = new Float32Array(count * 3)
+    const colors = new Float32Array(count * 3)
+    let mean = 0
+    for (let i = 0; i < half; i++) {
+      const x = s.positions[i * 3]
+      const y = s.positions[i * 3 + 1]
+      const z = LAYER_GAP / 2 + s.positions[i * 3 + 2] * RELIEF
+      mean += z
+      const f = i * 3
+      const b = (half + i) * 3
+      positions[f] = x
+      positions[f + 1] = y
+      positions[f + 2] = z
+      positions[b] = -x
+      positions[b + 1] = y
+      positions[b + 2] = -z
+      for (let c = 0; c < 3; c++) colors[f + c] = colors[b + c] = s.colors[i * 3 + c]
+    }
+    return { positions, colors, aspect: s.aspect, surface: mean / Math.max(1, half) }
   }
 
   let poseId: PoseId | null = null
@@ -538,14 +586,16 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     }
   }
 
-  const applyPose = (id: PoseId, sample: PoseSample & { img: HTMLImageElement }, first: boolean) => {
+  const applyPose = (id: PoseId, sample: Layered, first: boolean) => {
     const pose: Pose = POSES[id]
     poseId = id
     // The reveal photo jumps to the new pose and fades in as the morph lands.
     photoMat.uniforms.uMap.value = textureFor(pose.image, sample.img)
     photoMat.uniforms.uCrop.value = [...pose.crop]
     photo.scale.set(sample.aspect, 1, 1)
-    photo.position.z = pose.depth * 0.4
+    photoBack.scale.set(sample.aspect, 1, 1)
+    photo.position.z = sample.surface
+    photoBack.position.z = -sample.surface
     morphTween?.kill()
     viewTween?.kill()
     if (first) {
@@ -622,7 +672,8 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   let fade = 0
   let ready = false
 
-  const restYaw = () => Math.round(spin.yaw / TAU) * TAU
+  // Either face can be the resting one: settle to the nearest half turn.
+  const restYaw = () => Math.round(spin.yaw / Math.PI) * Math.PI
   const sway = !opts.reducedMotion
   let tick = 0
 
@@ -717,7 +768,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     if (ready) fade = Math.min(1, fade + dt / 0.7)
     u.uFade.value = fade
     const m = u.uMorph.value as number
-    // The flat photo only reads face-on: hide the reveal while the portrait is turned.
+    // The flat photo only reads face-on (from either side): hide the reveal while turned.
     const turned = Math.abs(spin.yaw - restYaw()) + Math.abs(spin.tilt) + spin.puff
     photoMat.uniforms.uOpacity.value = fade * smooth(0.75, 1, m) * (1 - smooth(0.08, 0.3, turned))
     u.uTime.value = time
