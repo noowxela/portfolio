@@ -74,7 +74,7 @@ Until now `/` was the Legacy-to-Ares scroll story (`components/home/`, `TronHome
 The portrait is now a coin: a front sheet and a back sheet with the same picture, so turning it round shows Alex the right way round from behind instead of an inside-out relief.
 
 - **Budget:** 15k + 15k particles on desktop, 5k + 5k on phones (was 22k / 9k in one sheet). Timings stayed at 60 fps in every run, so desktop gets slightly more than an even split of the old budget.
-- **Build:** each pose is sampled once (`half` particles) and `layered()` writes both sheets into `aFrom/aTo`: front at `z = +(LAYER_GAP/2 + relief·RELIEF)`, back at `x → −x`, `z = −(LAYER_GAP/2 + relief·RELIEF)`, same colours. `LAYER_GAP = 0.12`, `RELIEF = 0.42` (portrait height = 1): from the side it reads as two curved sheets with a dark gap. The back is mirrored in x so that, seen from behind (yaw π), it reads exactly like the front. Instance `i < half` is front, the rest back (`aSide` = ±1), so morphs map front to front and back to back.
+- **Build:** each pose is sampled once (`half` particles) and `layered()` writes both sheets into `aFrom/aTo`: front at `z = +(LAYER_GAP/2 + relief·RELIEF)`, back at `x → −x`, `z = −(LAYER_GAP/2 + relief·RELIEF)`, same colours. `LAYER_GAP = 0.12`, `RELIEF = 0.42` at first (now 0.04 / 0.22, see below; portrait height = 1): from the side it reads as two curved sheets with a dark gap. The back is mirrored in x so that, seen from behind (yaw π), it reads exactly like the front. Instance `i < half` is front, the rest back (`aSide` = ±1), so morphs map front to front and back to back.
 - **Facing:** the vertex shader takes the sheet normal `(0, 0, aSide)` through `normalMatrix`; the sheet facing away fades to `AWAY_ALPHA = 0.06` (smoothstep over view-normal z from −0.2 to 0.3). Head-on there is no see-through mirrored double image; side-on both sheets are equally visible.
 - **Behaviours:** push, dust, reveal dimming and puff work in screen space or object space per particle, so both sheets get them unchanged; pose morphs, fade-in, sway and drag act on the shared group.
 - **Reveal on both faces:** two photo planes (front at `+surface`, back at `−surface` turned 180°), front-side culled, so each shows only from its own side and the back photo reads the right way round. Rest and reveal gating use the nearest half turn.
@@ -82,6 +82,37 @@ The portrait is now a coin: a front sheet and a back sheet with the same picture
 - **Cost:** one more draw call per frame (the back photo plane; culled, so no fill). Idle ≈ 90 draw calls/s on desktop at the ~30 fps sway rate.
 
 Verification (Mac, headless Chrome for Testing + Metal, dark, 1440×900 DPR 2 and 390×844 DPR 3 touch; shots and `rotate.mp4` under `/workspace/portfolio/shots/home2-layers/`): held drags to 0°, 45°, 90°, 135°, 180° on both sizes; at 90° the two sheets and the gap are visible; at 180° the image correlates 0.994 with the front view and 0.887 with the front mirrored (mobile 0.999 / 0.905), so the back reads the right way round. Released at 180° it rests on the back, and the reveal there correlates 0.987 with the front reveal vs 0.911 mirrored. Hover pose, fast sweep, throw and mobile tap-select still work; one WebGL context, no console messages. rAF gaps (median / p95 ms): desktop idle 16.7 / 16.7, held drag 16.7 / 16.7, throw 16.7 / 16.8, sweep 16.7 / 16.7; mobile idle 16.7 / 16.8, touch drag 16.7 / 16.7 (single 200–250 ms gaps are the screenshots). `tsc`, `eslint` and the `GITHUB_PAGES=true` build pass.
+
+### Tighter seam, no tagline, page transitions (2026-10-18, Alex's feedback)
+
+> 暗缝小一点，让两个更靠近
+
+- **Seam:** `LAYER_GAP` 0.12 → 0.04 and `RELIEF` 0.42 → 0.22. Most of the side-on gap came from each sheet's outward relief (the body bulge), so only shrinking the gap barely changed it (0.045 alone: about −30%); with both the sheets sit about half as far apart. Relief still points outward from each sheet, so the sheets never cross or z-fight (the nearest points stay `LAYER_GAP` apart). `AWAY_ALPHA` unchanged, so head-on there is still no double image. 45° keeps a bit less depth, which reads fine.
+- **Tagline:** the `site.role · site.location` line above the name and its CSS (desktop + mobile) are gone. The header gets `margin-top: 1.1rem`, so the name sits where it did.
+- **Page transitions:** see "Leaving for a page" in [portrait-home.md](../pages/portrait-home.md).
+  - Home exit: `Landing` intercepts the `next/link` click (not modified / middle clicks, not the first tap), sets `data-exit` on the root (CSS glitch / fades), calls `scene.exit(x, y, 0.72)` with the corner's centre, then `beginRouteExit(href)` and `router.push` after 720 ms. Prefetch on hover, keyboard focus and first tap.
+  - `scene.exit` tweens `uExit` 0 → 1 (power1.in). Vertex shader: per-particle `ex = clamp((uExit − 0.3·rand) / 0.7)`; displacement in screen px `toTarget · ex^1.7 · [0.78..1] + side · sin(πex) · ±55 + burst · sin(πex)`; streaks follow the motion; colour to hot cyan plus 12% embers; alpha fades from `ex` 0.55. Photo reveal off, pointer and drag ignored, `setPose` ignored, drawing stops after the last frame. Dispose now calls `forceContextLoss()` so a back-navigation remount never holds two live contexts.
+  - Hand-off: global `RouteCurtain` (z 80, above the header) plus a `sessionStorage` flag `{to, at, reduced}`. On a path change the curtain consumes the flag; if it is fresh and for this path it tags that page's blocks (a `data-route-enter` attribute and two custom properties, no new markup), lifts, and runs the CSS entrance; otherwise it just stays hidden. Tags and classes are removed after ~1.4 s.
+  - The entrance only animates `filter: opacity() brightness()`, the individual `translate` property and `clip-path`, never `transform` or `opacity`, so pages keep their own transforms and opacities. Per element it skips whichever of those the element already uses, skips elements with their own CSS animation (the marquee), and steps into children of `preserve-3d` parents so 3D is never flattened.
+  - **View Transitions API: not used.** The exit is a WebGL animation that has to run before the route changes, and the destination's entrance is staged per block; a cross-document snapshot would only add a crossfade on top, needs `flushSync` around the App Router navigation, and is missing in Firefox / older Safari. The curtain gives the same "no white flash" guarantee everywhere.
+
+| Rejected | Why |
+| --- | --- |
+| View Transitions API | See above. |
+| Wrapper component around each page | Alex asked not to restructure the pages; CSS hooks from one global component do the job. |
+| Animate `opacity` / `transform` on page elements | Would override the pages' own values (shelf albums, Tailwind translate utilities) and pop at the end. |
+| Fade every album card on `/work` | Discs show before sleeves, and filters on 3D cards stalled the compositor for ~250 ms. |
+
+Verification (Mac, headless Chrome for Testing + Metal, `GITHUB_PAGES=true` export served under `/portfolio`, dark, 1440×900 and 390×844 touch; shots, sequences, `transitions.mp4` under `/workspace/portfolio/shots/home2-trans/`):
+
+- [x] Home → `/work`, `/journey`, `/about` on desktop (hover + click) and mobile (tap + tap), plus keyboard (Tab to Work, Enter): click → URL change 735–806 ms; curtain gone and no tags left afterwards; the flag is consumed.
+- [x] rAF gaps during the exit (first 700 ms): median 16.7 / p95 16.8 / max 16.8 ms in every run. Hand-off (700–1100 ms): median 16.7; one 50–100 ms frame when `/work` and `/journey` mount (Journey creates its WebGL scene).
+- [x] One WebGL context on home before every exit; 0 in the no-WebGL run, which plays the CSS exit.
+- [x] Reduced motion: URL changes after 174–180 ms, no stagger.
+- [x] Direct visits to `/work/`, `/journey/`, `/about/` (desktop, and `/work/` on mobile), and a reload of `/journey/` after a transition: no curtain, no `route-enter`, no tags at any of 10 samples over 1.2 s.
+- [x] Back from `/work` to `/`: home restored (`data-ready`, one canvas, no `data-exit`, no curtain) and a second transition (to `/about`) works.
+- [x] No console errors. The only console output is Chrome's "preloaded but not used" warning for two prefetched CSS chunks (Swiper, Journey); it appears on the export home with no interaction too (next/link prefetch), so it is not from this change.
+- [x] 90° and 180° shots with the new seam; home without the tagline. `tsc`, `eslint .` and the `GITHUB_PAGES=true` build pass.
 
 ## 5. Acceptance criteria and verification
 

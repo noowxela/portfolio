@@ -31,6 +31,8 @@ About is written up the same way in [tron-about.md](./pages/tron-about.md). ф╕нц
 
 `Landing` is a client component. It renders the DOM (name, corner entries, contact window, static fallback) and lazy-loads `portraitScene.ts`, which owns the page's single `WebGLRenderer`. Photos are sampled into instanced line-segment particles (`sampler.ts`), each entry has a pose in `poses.ts`, and the render loop runs only while something moves (idle sway renders at ~30 fps; with reduced motion nothing renders at rest). Details in [SDD 029](./sdd/029-portrait-home.md).
 
+Clicking Work, Journey or About plays an exit on the home (name glitch, particles stream into the corner), drops the global `RouteCurtain` (mounted in `app/layout.tsx`), and `router.push`es after 720 ms. The destination plays a staggered entrance only when it finds the home's fresh `sessionStorage['route-enter']` flag for its own path, so direct visits, reloads and back / forward are untouched. See [portrait-home.md](./pages/portrait-home.md#leaving-for-a-page-work-journey-about).
+
 ## `/noelite` scroll (previous home)
 
 `TronHome` is a client component. `useHomeScroll` loads GSAP in the browser.

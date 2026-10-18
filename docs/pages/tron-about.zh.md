@@ -70,6 +70,8 @@ flowchart TD
 
 ---
 
+**从首页进入：** 从首页 03 角进入 About 时，页面在深色幕布后出现：先六边形层，再逐行出现简介、marquee、页脚各列（错开的淡入、上移和擦入，约 1 秒）。页面结构不变，由 `components/transition/RouteCurtain.tsx` 加上再移除 CSS 钩子。直接打开或刷新时页面直接显示。见 [portrait-home.md](./portrait-home.md#leaving-for-a-page-work-journey-about)。
+
 ## 1. 六边形层
 
 文件：`app/about/page.tsx`。样式在 `components/home/tron.css`。指针光在 `components/about/AboutHexGlow.tsx`。

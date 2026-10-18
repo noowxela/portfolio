@@ -75,6 +75,10 @@
 - **Light cycles:** they now ride in a window 14–110 units ahead of the camera, fading in and out at its ends and before the road ends, in lanes ±1.0 / ±1.3; none come near the camera path.
 - **Gathering wireframe:** the desk edges are camera-facing ribbons (2.5 px, 6 px with a glow while gathering) instead of 1 px lines, white-hot on the floor and cooling to cyan as they land; gather starts at 0.855. At rest they drop back to the faint edge glow, the same at both ends.
 
+### Arriving from the home (2026-10-18)
+
+Opening Journey from the home's 02 corner plays the home exit, then the page comes in behind the global curtain: the stage first, then the HUD, meter and skip button. No change to the Journey code; `components/transition/` adds CSS hooks only, and only for that hand-off (direct visits, reloads, back / forward unchanged). See [SDD 029](./029-portrait-home.md) and [portrait-home.md](../pages/portrait-home.md#leaving-for-a-page-work-journey-about).
+
 ## 5. Acceptance criteria and verification
 
 - [x] `/journey` renders the three acts on scroll; `/`, `/work`, `/about`, `/discs` still load.

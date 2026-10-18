@@ -68,6 +68,8 @@ flowchart TD
 
 The hex field is `position: absolute; inset: 0` and `pointer-events: none`. It covers the page and does not catch clicks. The intro and the footer are `relative z-10`, so the type sits on top of the hexes.
 
+**Arriving from the home:** when About is opened from the home's 03 corner, the page comes in behind a dark curtain: hex field, then the intro line by line, the marquee, then the footer columns (staggered fade, rise and wipe, ~1 s). The page markup is unchanged; `components/transition/RouteCurtain.tsx` adds and removes CSS hooks. Direct visits and reloads show the page straight away. See [portrait-home.md](./portrait-home.md#leaving-for-a-page-work-journey-about).
+
 ---
 
 ## 1. Hex field

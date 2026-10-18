@@ -9,6 +9,7 @@ portfolio/
 ├── app/                      # Next.js routes, layout, and global styles
 ├── components/               # React UI components
 │   ├── landing/              # `/` stage: corner entries, particle portrait, contact window
+│   ├── transition/           # Home → page hand-off: curtain + staggered entrance
 │   ├── home/                 # `/noelite` scroll story (+ tron.css shared with about/journey)
 │   └── gallery/              # Gallery-specific components
 ├── data/                     # Static content (demos, nav links, site identity)
@@ -59,7 +60,7 @@ flowchart TD
 | `journey/page.tsx` | `/journey` preview (SDD 028). |
 | `work/page.tsx` | Gallery route (`/work`). Passes `demos` to `GalleryShell`. |
 | `about/page.tsx` | About route (`/about`). Bio, focus, and contact links. |
-| `layout.tsx` | Root HTML shell: Inter font, metadata, `ThemeProviders`, and `NavPill`. |
+| `layout.tsx` | Root HTML shell: Inter font, metadata, `ThemeProviders`, `NavPill`, and `RouteCurtain` (home → page transition). |
 | `theme-providers.tsx` | Client wrapper around `next-themes` for light / dark / system mode. |
 | `globals.css` | Tailwind import, dark-mode variant, custom cursor, and `.no-scrollbar` utility. |
 | `icon.svg` | Favicon (initials-style mark). |
@@ -89,7 +90,17 @@ The `/` stage ([SDD 029](./sdd/029-portrait-home.md)).
 | `poses.ts` | Pose config map: entry → photo, crop, tilt, spin, scale, line width, depth, accent. Add poses here. |
 | `sampler.ts` | Turns a photo crop into particle positions and colours (alpha / contrast mask, local contrast, depth). |
 | `portraitScene.ts` | The single three.js renderer: instanced line particles, cursor push, trail (dust + photo reveal), pose morphs, drag / wheel rotation. |
-| `landing.css` | Stage, name, corners, contact window, mobile 2×2 layout, fallback. |
+| `landing.css` | Stage, name, corners, contact window, mobile 2×2 layout, fallback, page-exit animations. |
+
+### `components/transition/`
+
+The home → page transition ([portrait-home.md](./pages/portrait-home.md#leaving-for-a-page-work-journey-about)).
+
+| File | Role |
+|------|------|
+| `routeTransition.ts` | `beginRouteExit` (sessionStorage flag + curtain), flag helpers, and `ENTRANCES`: per-page selectors in entrance order. Edit this to change what comes in first. |
+| `RouteCurtain.tsx` | Mounted once in `app/layout.tsx`. Dark curtain; on arrival with a fresh flag it tags the page's blocks and plays the staggered entrance, otherwise does nothing. |
+| `route-transition.css` | Curtain, scan line, entrance keyframes (filter / translate / clip-path only), reduced-motion overrides. |
 
 ### `components/home/`
 
