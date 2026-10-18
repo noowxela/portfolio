@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3001/portfolio/](http://localhost:3001/portfolio/). Edit [`data/demos.ts`](./data/demos.ts) to add or change gallery items.
+Open [http://localhost:3001/portfolio/](http://localhost:3001/portfolio/). Port 3000 stays free for the Next checkout of this repo. Edit [`data/demos.ts`](./data/demos.ts) to add or change gallery items.
 
 ## GitHub Pages
 
