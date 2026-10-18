@@ -66,8 +66,12 @@ export const ENTRANCES: Record<string, { selectors: string[]; max?: number }[]> 
     // fading single albums would show their discs before their sleeves.
     { selectors: ['.h-dvh > *'], max: 6 },
   ],
-  // Placeholder until the work-experience journey lands; the 3D ride moved to /noelite2.
-  '/journey': [{ selectors: ['.journey-soon-grid'] }, { selectors: ['.journey-soon-copy > *'] }],
+  '/journey': [
+    { selectors: ['.gl-floor'] },
+    { selectors: ['.gl-bar', '.gl-cmd'] },
+    { selectors: ['.gl-panel.is-cur .gl-body > :not(ul)', '.gl-panel.is-cur .gl-facts > li'], max: 12 },
+    { selectors: ['.gl-rail'] },
+  ],
   '/noelite2': [
     { selectors: ['.journey-stage'] },
     { selectors: ['.journey-hud', '.journey-meter', '.journey-skip'] },
