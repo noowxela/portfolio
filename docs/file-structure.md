@@ -12,7 +12,7 @@ portfolio/
 │   ├── transition/           # Home → page hand-off: curtain + staggered entrance
 │   ├── home/                 # `/noelite` scroll story (+ tron.css shared with about/journey/noelite2)
 │   ├── noelite2/             # `/noelite2` scroll-driven 3D journey (SDD 028, was /journey)
-│   ├── journey/              # `/journey` placeholder (coming-soon stub)
+│   ├── journey/              # `/journey` grid.log work-experience page (SDD 030)
 │   └── gallery/              # Gallery-specific components
 ├── data/                     # Static content (demos, nav links, site identity)
 ├── docs/                     # Project documentation
@@ -60,7 +60,7 @@ flowchart TD
 | `page.tsx` | Home route (`/`). Loads Oxanium + Share Tech Mono and renders `Landing`. |
 | `noelite/page.tsx` | `/noelite`: the previous home, the scroll story (`TronHome`). |
 | `noelite2/page.tsx` | `/noelite2`: the scroll-driven 3D journey preview (SDD 028), moved from `/journey`. |
-| `journey/page.tsx` | `/journey`: temporary Tron "coming soon" stub linking to `/noelite2`, until the work-experience journey lands. |
+| `journey/page.tsx` | `/journey`: grid.log, the work-experience journey (SDD 030). |
 | `work/page.tsx` | Gallery route (`/work`). Passes `demos` to `GalleryShell`. |
 | `about/page.tsx` | About route (`/about`). Bio, focus, and contact links. |
 | `layout.tsx` | Root HTML shell: Inter font, metadata, `ThemeProviders`, `NavPill`, and `RouteCurtain` (home → page transition). |
@@ -111,7 +111,7 @@ The `/noelite2` 3D journey ([SDD 028](./sdd/028-journey-home.md)): `Journey.tsx`
 
 ### `components/journey/`
 
-`JourneySoon.tsx` + `journey-soon.css`: the temporary `/journey` page (title, status line, link to `/noelite2`). The home's 02 Journey corner still points here.
+The `/journey` grid.log page ([SDD 030](./sdd/030-journey-gridlog.md), [walkthrough](./pages/journey-gridlog.md)): `GridLog.tsx` (bar, terminal line, panel row, HEAD panel, scramble / count-up, fallbacks), `track.ts` (wheel / drag / swipe / keys / hash row controller), `Rail.tsx` (SVG branch graph with the light cycle), `markField.ts` (three.js instanced-dash particle mark), `journey.css`. Content comes from `data/experience.ts`.
 
 ### `components/home/`
 
@@ -143,6 +143,7 @@ Static content — no API calls. Edit these files to change what the gallery sho
 | `demos.ts` | **Main content file.** Exports the `Demo` type, `demoLiveUrl()`, and the `demos` array. |
 | `site.ts` | Name, role, tagline, contact URLs, highlights, the About toolkit, and hobbies. |
 | `headerNavLinks.ts` | Nav items for the header (Home, Work, About). |
+| `experience.ts` | Work history for `/journey` (from the resume): `STEPS` (MMU on `edu`, then each job on `main`) and the `HEAD` panel, plus date / hash helpers. |
 
 ### `Demo` shape
 

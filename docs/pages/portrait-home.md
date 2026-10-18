@@ -57,7 +57,7 @@ The page entrance only plays when the page finds a fresh flag (`sessionStorage['
 | Page | Entrance order |
 | --- | --- |
 | `/work` | View switcher row, then each block of the current view (album stage, caption / sidebar). Single albums are not faded on their own (their discs would show before the sleeves). |
-| `/journey` | Temporary stub (2026-10-18): the grid floor, then the label, title, status line and link to `/noelite2`. |
+| `/journey` | The grid floor, then the bar and terminal line, then the current panel's lines (up to 12), then the branch rail ([journey-gridlog.md](./journey-gridlog.md)). |
 | `/noelite2` | The stage (poster / canvas), then the HUD, meter and skip button (not linked from the home; kept for when the 3D journey is opened via a home hand-off). |
 | `/about` | Hex field, then the intro line by line (name, role, bio, focus, toolkit rows), the hobbies marquee, the footer columns. |
 

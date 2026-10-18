@@ -1,7 +1,7 @@
 # SDD: Work-experience journey ("grid.log")
 
 - **Repo:** `01_project/o000o_active/portfolio`
-- **Status:** `in progress`
+- **Status:** `implemented`
 - **Date:** 2026-10-18
 - **Related:** [028-journey-home.md](./028-journey-home.md) (the 3D ride, now `/noelite2`), [029-portrait-home.md](./029-portrait-home.md) (home, particles, page transition), page walkthrough [journey-gridlog.md](../pages/journey-gridlog.md)
 
@@ -35,7 +35,7 @@
 
 - `data/experience.ts`: typed steps (`branch`, `from` / `to`, particle `mark`, title, role, optional place / link, commit message, facts, tags, optional resume stats) plus `HEAD`. Commit hashes are a 6-hex FNV hash of the id; the duration stat is computed from the dates.
 - `components/journey/GridLog.tsx`: full-height stage under the navbar. Top: a breadcrumb bar (`~/grid / journey.log · 5 commits · 2 branches`, hint, resume link) and a terminal line (`alex@grid:~$ git checkout <hash> --detach && git show <hash>`). Middle: a horizontal row of panels; the current one is centred and lit, the others dim. Bottom: the branch rail. The current index is React state (classes, `aria-current`); the row offset is written straight to the DOM.
-- `components/journey/track.ts`: the row controller. Wheel (either axis) moves the row freely and snaps to the nearest panel 140 ms after the last event (ease-out cubic, 0.45 s). Pointer drag (mouse and touch, dominant axis) with release velocity projects a target and snaps. Arrow keys / Home / End step; clicking a node or a dim panel jumps; focus inside a panel brings it to the centre. `#<hash>` deep links in, and the hash follows the current step (`replaceState`). Reduced motion: no tweens.
+- `components/journey/track.ts`: the row controller. Wheel (either axis) moves the row freely and snaps to the nearest panel 140 ms after the last event (ease-out cubic, 0.45 s). Pointer drag (mouse and touch, dominant axis) with release velocity projects a target and snaps, at most one panel per gesture (a deliberate drag past 16 % of the spacing counts). Arrow keys / Home / End step; clicking a node or a dim panel jumps; focus inside a panel brings it to the centre. `#<hash>` deep links in, and the hash follows the current step (`replaceState`). Reduced motion: no tweens.
 - `components/journey/Rail.tsx`: SVG drawn in pixels from a ResizeObserver: the `edu` lane, the merge, `main`, a dashed segment to HEAD. A lit trail and a light-cycle head follow the row's fractional position, so dragging moves the cycle continuously.
 - `components/journey/markField.ts`: one three.js renderer (orthographic, pixel space), instanced quads drawn as short cyan dashes. Each step's `mark` is rasterised with the page font into a cell grid; particles morph from where they are to the next mark with a per-particle stagger, jitter slightly, scatter with wheel / drag speed, and are pushed away from the cursor (speed-driven, so a resting cursor leaves no hole). DPR ≤ 2, stops drawing when settled or hidden, `forceContextLoss()` on unmount, context loss falls back.
 - Fallbacks: reduced motion or no WebGL show the mark as static outlined neon text; the row still works.
@@ -56,4 +56,19 @@
 
 ## 5. Acceptance criteria and verification
 
-To be filled in when the page is verified.
+Run on the Mac in headless Chrome for Testing with Metal (`--use-angle=metal`) against the `GITHUB_PAGES=true` export served under `/portfolio`, 1440×900 (DPR 2) and 390×844 (DPR 3, touch). Shots and videos on the box under `/workspace/portfolio/shots/journey-cv/`.
+
+- [x] `npx tsc --noEmit`, `npx eslint .` clean; `GITHUB_PAGES=true next build` exports `/journey`.
+- [x] Content is the resume's: three jobs with their resume titles and dates, MMU on `edu`, HEAD claims no current job. No location or employment type; tags only name technologies in the bullets.
+- [x] Desktop: wheel → Auronex (`#ef5e76`); mouse drag → Oasis; ArrowRight → Trinergy; Home / End; rail node → Oasis; dim panel click → Trinergy; `#7d3d11` deep link → Oasis; changing the hash → HEAD.
+- [x] Mobile: each horizontal swipe moves exactly one panel (0 → 1 → 2 → 3, back to 2); a vertical swipe scrolls the Trinergy body (0 → 116 px) without changing step; node tap → HEAD.
+- [x] Particles: one canvas, morph on every step, scatter with wheel / drag, pushed by a moving cursor.
+- [x] Reduced motion: no canvas, static mark, ArrowRight lands within 40 ms. WebGL API removed and `--disable-webgl`: static mode, works, no console output.
+- [x] Leaving to `/work`: 0 canvases, the page's `html` classes removed.
+- [x] Home → Journey (desktop and mobile): curtain top = header bottom (56 px), 8 elements staged, flags cleaned up afterwards, field ready after. Direct visit: no entrance.
+- [x] No console errors. The only messages are Chrome's "preloaded but not used" warnings for CSS chunks that `next/link` prefetches (same as SDD 029).
+- [x] `verify-portfolio` `drive journey` passes (heading, row, rail node → `#ef5e76`).
+
+Frame timing (rAF gaps, ms, median / p95): desktop idle 16.7 / 16.8; wheel 16.7 / 16.8; morph 16.7 / 16.8; mobile swipe 16.7 / 16.8. Home → Journey, three runs without screenshots: exit 16.7 / 16.8, hand-off max 33.4 / 16.7 / 16.7, entrance 16.7 / 16.7 (max 16.8). Building the field on mount used to cost one 80–150 ms frame during the entrance; it now waits for the entrance to end and an idle callback.
+
+Found while verifying: a scrollable panel body resets `touch-action`, so on phones the browser cancelled horizontal swipes that started on the text (fixed with `touch-action: pan-y` on `.gl-body`).
