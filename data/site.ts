@@ -3,9 +3,9 @@ export const site = {
   fullName: 'Alex Woon Jun Rong',
   role: 'Full Stack Developer',
   location: 'Malaysia',
-  tagline: 'Interactive demos, games, and web experiments.',
+  tagline: 'Particle portrait, live work, and a journey log.',
   description:
-    'Live gallery of games, 3D, and web apps by Alex Woon — a full stack developer based in Malaysia.',
+    'Portfolio of Alex Woon, a full stack developer in Malaysia. A particle portrait home, a live gallery of games and web apps, and work experience as a git log.',
   education:
     'B.Sc. Computer Science (Data Science), Multimedia University Malaysia',
   email: 'alexwoon.jhb@gmail.com',

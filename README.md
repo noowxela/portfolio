@@ -1,6 +1,6 @@
-# Alex Woon — Demo Gallery
+# Alex Woon — Portfolio
 
-A [Next.js](https://nextjs.org) gallery of live, iframe-embedded demos: games, 3D, and web apps. Inspired by the interaction of [pmnd.rs](https://pmnd.rs/), with personal projects and identity.
+Personal site of Alex Woon, a full stack developer in Malaysia. Home is a particle portrait. Work is a live gallery of games, 3D, and web apps. Journey tells the resume as a git log.
 
 See **[docs/file-structure.md](./docs/file-structure.md)** for a walkthrough of the codebase.
 
