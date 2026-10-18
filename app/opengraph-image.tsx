@@ -12,7 +12,9 @@ const ink = '#e4c48a'
 const line = 'rgba(228, 196, 138, 0.45)'
 
 export default async function OpenGraphImage() {
-  const portrait = await readFile(path.join(process.cwd(), 'app/og-portrait.png'))
+  const portrait = new Blob([await readFile(path.join(process.cwd(), 'app/og-portrait.png'))], {
+    type: 'image/png',
+  })
 
   return new ImageResponse(
     (
@@ -64,7 +66,7 @@ export default async function OpenGraphImage() {
           }}
         >
           <img
-            src={portrait.buffer as ArrayBuffer}
+            src={portrait}
             width={460}
             height={526}
             style={{ objectFit: 'cover' }}
