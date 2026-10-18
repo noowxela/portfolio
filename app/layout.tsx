@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { NavPill } from '@/components/gallery/NavPill'
+import { RouteCurtain } from '@/components/transition/RouteCurtain'
 import { ThemeProviders } from './theme-providers'
 import { site } from '@/data/site'
 import './globals.css'
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProviders>
           <NavPill />
           {children}
+          <RouteCurtain />
         </ThemeProviders>
       </body>
     </html>

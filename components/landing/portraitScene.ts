@@ -43,6 +43,8 @@ export type PortraitScene = {
   setPose: (id: PoseId) => void
   /** True while a drag is in progress or just moved past the tap threshold. */
   wasDrag: () => boolean
+  /** Page exit: stream the particles to (x, y) (CSS px in the container) and fade out. */
+  exit: (x: number, y: number, duration: number) => void
   dispose: () => void
 }
 
@@ -91,6 +93,8 @@ const particleVertex = /* glsl */ `
   uniform vec3 uTron;
   uniform vec3 uEmber;
   uniform float uAway;
+  uniform float uExit;
+  uniform vec2 uTarget;
 
   varying vec3 vColor;
   varying float vAlpha;
@@ -130,6 +134,17 @@ const particleVertex = /* glsl */ `
     float dust = trail.z;
     vec2 rdir = normalize(vec2(aRand.w - 0.5, aRand.y - 0.5) + 0.0001);
     vec2 disp = push + (rdir * mix(10.0, 52.0, aRand.w) + trail.xy * 26.0) * dust;
+
+    // Page exit: each particle (staggered) bursts, then streams into the chosen
+    // corner on a curved path, thinning out as it arrives.
+    float ex = clamp((uExit - aRand.x * 0.3) / 0.7, 0.0, 1.0);
+    if (uExit > 0.0) {
+      vec2 toT = uTarget - px;
+      vec2 side = normalize(vec2(-toT.y, toT.x) + 0.0001);
+      disp += toT * pow(ex, 1.7) * mix(0.78, 1.0, aRand.z)
+        + side * sin(ex * 3.14159) * mix(-55.0, 55.0, aRand.w)
+        + rdir * sin(ex * 3.14159) * mix(6.0, 40.0, aRand.y);
+    }
     float moved = length(disp);
 
     // Short line segment, horizontal-ish at rest, streaking along its motion.
@@ -148,8 +163,12 @@ const particleVertex = /* glsl */ `
     vec3 warm = uEmber * (0.35 + 0.9 * lum);
     float accent = clamp(uAccent * step(aRand.w, 0.55 + 0.45 * uAccent) + dust * 0.85, 0.0, 1.0);
     vColor = mix(neon, warm, accent);
+    // Exit: brighten to hot cyan, a few embers among them.
+    vColor = mix(vColor, mix(uTron, vec3(1.0), 0.55), ex * 0.6);
+    vColor = mix(vColor, uEmber, ex * step(aRand.w, 0.12));
     float twinkle = 0.85 + 0.15 * sin(uTime * 2.0 + aRand.x * 40.0);
-    vAlpha = face * uFade * twinkle * (0.22 + 0.78 * lum) * (1.0 - trail.w * 0.75);
+    float exitAlpha = (1.0 + sin(ex * 3.14159) * 0.35) * (1.0 - smoothstep(0.55, 1.0, ex));
+    vAlpha = face * uFade * twinkle * (0.22 + 0.78 * lum) * (1.0 - trail.w * 0.75) * exitAlpha;
     vCorner = position.xy;
   }
 `
@@ -358,6 +377,8 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
       uTron: { value: tron },
       uEmber: { value: ember },
       uAway: { value: AWAY_ALPHA },
+      uExit: { value: 0 },
+      uTarget: { value: [0, 0] },
     },
     transparent: true,
     depthTest: false,
@@ -440,13 +461,15 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     wake()
   }
 
+  let exiting = false
+
   // ---- Pointer (mouse only) ----
   const pointer = { x: -9999, y: -9999, px: -9999, py: -9999, dist: 0, inside: false }
   let speed = 0
   let push = 0
   let trailEnergy = 0
   const onMove = (e: PointerEvent) => {
-    if (e.pointerType !== 'mouse') return
+    if (e.pointerType !== 'mouse' || exiting) return
     const r = container.getBoundingClientRect()
     const x = e.clientX - r.left
     const y = e.clientY - r.top
@@ -473,7 +496,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   const drag = { on: false, id: -1, x: 0, y: 0, t: 0, moved: 0 }
   let tiltTween: gsap.core.Tween | null = null
   const onDown = (e: PointerEvent) => {
-    if (e.button !== 0 || drag.on) return
+    if (e.button !== 0 || drag.on || exiting) return
     drag.on = true
     drag.id = e.pointerId
     drag.x = e.clientX
@@ -657,6 +680,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   }
 
   const setPose = (id: PoseId) => {
+    if (exiting) return
     wanted = id
     if (id === poseId) return
     void getSample(id).then((sample) => {
@@ -676,6 +700,8 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   const restYaw = () => Math.round(spin.yaw / Math.PI) * Math.PI
   const sway = !opts.reducedMotion
   let tick = 0
+  let exitTween: gsap.core.Tween | null = null
+  let exited = false
 
   const isBusy = () =>
     fade < 1 ||
@@ -688,6 +714,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     trailEnergy > TRAIL_EPS ||
     !!morphTween?.isActive() ||
     !!viewTween?.isActive() ||
+    !!exitTween?.isActive() ||
     (pointer.inside && pointer.dist > 0)
 
   const frame = (now: number) => {
@@ -770,13 +797,15 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     const m = u.uMorph.value as number
     // The flat photo only reads face-on (from either side): hide the reveal while turned.
     const turned = Math.abs(spin.yaw - restYaw()) + Math.abs(spin.tilt) + spin.puff
-    photoMat.uniforms.uOpacity.value = fade * smooth(0.75, 1, m) * (1 - smooth(0.08, 0.3, turned))
+    const gone = 1 - clamp((u.uExit.value as number) * 4, 0, 1)
+    photoMat.uniforms.uOpacity.value = fade * smooth(0.75, 1, m) * (1 - smooth(0.08, 0.3, turned)) * gone
     u.uTime.value = time
 
     const swayYaw = sway ? Math.sin(time * 0.42) * 0.07 : 0
     const swayTilt = sway ? Math.sin(time * 0.29 + 1) * 0.025 : 0
     turn.rotation.set(tween.tilt + spin.tilt + swayTilt, tween.spin + spin.yaw + swayYaw, 0)
     renderer.render(scene, camera)
+    if (exited) return
     if (isBusy() || sway) schedule()
   }
 
@@ -818,12 +847,33 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
   return {
     setPose,
     wasDrag: () => drag.moved > 8,
+    exit: (x, y, duration) => {
+      if (exiting) return
+      exiting = true
+      pointer.inside = false
+      drag.on = false
+      spin.vel = 0
+      mat.uniforms.uTarget.value = [x, height - y]
+      exitTween = gsap.to(mat.uniforms.uExit, {
+        value: 1,
+        duration,
+        ease: 'power1.in',
+        onUpdate: wake,
+        onComplete: () => {
+          // One last (empty) frame, then stop drawing until unmount.
+          wake()
+          requestAnimationFrame(() => (exited = true))
+        },
+      })
+      wake()
+    },
     dispose: () => {
       disposed = true
       stop()
       morphTween?.kill()
       viewTween?.kill()
       tiltTween?.kill()
+      exitTween?.kill()
       ro.disconnect()
       container.removeEventListener('pointerdown', onDown)
       container.removeEventListener('pointermove', onDrag)
@@ -845,6 +895,8 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
       trailRead.dispose()
       trailWrite.dispose()
       renderer.dispose()
+      // Free the context now (listener is gone), so a back-navigation remount never holds two.
+      renderer.forceContextLoss()
       canvas.remove()
     },
   }

@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useRef, useState, type FocusEvent, type MouseEvent } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type FocusEvent, type MouseEvent } from 'react'
 import { site } from '@/data/site'
 import { withBasePath } from '@/lib/withBasePath'
+import { beginRouteExit } from '@/components/transition/routeTransition'
 import { ContactPanel } from './ContactPanel'
 import { ENTRIES, type Entry, type EntryId } from './entries'
 import type { PortraitScene, Slot } from './portraitScene'
@@ -14,6 +16,10 @@ const MOBILE = '(max-width: 767px)'
 const FINE = '(hover: hover) and (pointer: fine)'
 const REDUCED = '(prefers-reduced-motion: reduce)'
 const NAV_H = 56
+/** Exit length: particles + name out, then the curtain covers and the route changes. */
+const EXIT_MS = 720
+const COVER_AT = 560
+const REDUCED_EXIT_MS = 130
 
 /** Cheap check only: probing with a test canvas would cost a second WebGL context. */
 function canUseWebGL() {
@@ -36,6 +42,9 @@ export function Landing({ className }: { className?: string }) {
   const [contactOpen, setContactOpen] = useState(false)
   const [touch, setTouch] = useState(false)
   const activeRef = useRef<EntryId | null>(null)
+  const router = useRouter()
+  const [exit, setExit] = useState<{ id: EntryId; dx: number; dy: number } | null>(null)
+  const exitingRef = useRef(false)
 
   // The Tron void ground (shared with /noelite and /journey).
   useEffect(() => {
@@ -141,17 +150,61 @@ export function Landing({ className }: { className?: string }) {
 
   const closeContact = useCallback(() => setContactOpen(false), [])
 
-  const onEntryClick = (entry: Entry) => (e: MouseEvent) => {
+  // A bfcache restore must not come back mid-exit.
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return
+      exitingRef.current = false
+      setExit(null)
+    }
+    window.addEventListener('pageshow', onShow)
+    return () => window.removeEventListener('pageshow', onShow)
+  }, [])
+
+  const prefetch = (entry: Entry) => {
+    if (entry.href) router.prefetch(entry.href)
+  }
+
+  /** Exit to a page: name glitches out, particles stream into the clicked corner, curtain, push. */
+  const leaveTo = (entry: Entry, link: HTMLElement) => {
+    const href = entry.href
+    if (!href || exitingRef.current) return
+    exitingRef.current = true
+    const reduced = window.matchMedia(REDUCED).matches
+    const root = rootRef.current
+    const stage = stageRef.current
+    const r = link.getBoundingClientRect()
+    const s = stage?.getBoundingClientRect() ?? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }
+    const x = r.left + r.width / 2 - s.left
+    const y = r.top + r.height / 2 - s.top
+    setExit({ id: entry.id, dx: x - s.width / 2, dy: y - s.height / 2 })
+    setActive(entry.id)
+    root?.setAttribute('data-exit', entry.id)
+    if (!reduced) sceneRef.current?.exit(x, y, EXIT_MS / 1000)
+    beginRouteExit(href, { reduced, coverDelay: reduced ? 0 : COVER_AT })
+    window.setTimeout(() => router.push(href), reduced ? REDUCED_EXIT_MS : EXIT_MS)
+  }
+
+  const onEntryClick = (entry: Entry) => (e: MouseEvent<HTMLElement>) => {
+    if (exitingRef.current) {
+      e.preventDefault()
+      return
+    }
+    // New tab / window: let the browser have it.
+    if (entry.href && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0)) return
     // Touch: the first tap selects (morph + ENTER), the second opens.
     if (touch && active !== entry.id) {
       e.preventDefault()
       setActive(entry.id)
+      prefetch(entry)
       return
     }
+    e.preventDefault()
     if (!entry.href) {
-      e.preventDefault()
       setContactOpen(true)
+      return
     }
+    leaveTo(entry, e.currentTarget)
   }
 
   return (
@@ -161,6 +214,8 @@ export function Landing({ className }: { className?: string }) {
       data-active={active ?? 'none'}
       data-touch={touch}
       data-mode={mode}
+      data-exit={exit?.id}
+      style={exit ? ({ '--exit-dx': `${exit.dx}px`, '--exit-dy': `${exit.dy}px` } as CSSProperties) : undefined}
     >
       <div className="landing-floor" aria-hidden>
         <div className="landing-floor-grid" />
@@ -195,17 +250,27 @@ export function Landing({ className }: { className?: string }) {
               </>
             )
             const handlers = {
-              onMouseEnter: () => !touch && setActive(entry.id),
+              onMouseEnter: () => {
+                prefetch(entry)
+                if (!touch) setActive(entry.id)
+              },
               onMouseLeave: () => !touch && setActive((id) => (id === entry.id ? null : id)),
               // Keyboard focus only; a tap also focuses, and must not count as the first tap.
               onFocus: (e: FocusEvent<HTMLElement>) => {
-                if (e.currentTarget.matches(':focus-visible')) setActive(entry.id)
+                if (!e.currentTarget.matches(':focus-visible')) return
+                prefetch(entry)
+                setActive(entry.id)
               },
               onBlur: () => !touch && setActive((id) => (id === entry.id ? null : id)),
               onClick: onEntryClick(entry),
             }
             return (
-              <li key={entry.id} className={`landing-entry landing-entry-${entry.corner}`} data-active={isActive}>
+              <li
+                key={entry.id}
+                className={`landing-entry landing-entry-${entry.corner}`}
+                data-active={isActive}
+                data-exit-target={exit?.id === entry.id || undefined}
+              >
                 {entry.href ? (
                   <Link href={entry.href} className="landing-entry-link" {...handlers}>
                     {body}

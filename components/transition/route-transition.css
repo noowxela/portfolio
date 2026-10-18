@@ -1,0 +1,121 @@
+/* Home -> page hand-off: a dark Tron curtain, then a staggered entrance. */
+.route-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 55%, rgb(92 225 255 / 0.06), transparent 70%),
+    #050507;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.16s ease-out,
+    visibility 0s linear 0.16s;
+}
+
+.route-curtain-line {
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #5ce1ff 20%, #e6fbff 50%, #5ce1ff 80%, transparent);
+  box-shadow: 0 0 18px 2px rgb(92 225 255 / 0.55);
+  opacity: 0;
+  transform: scaleX(0.2);
+}
+
+html[data-curtain='cover'] .route-curtain {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.16s ease-out;
+}
+
+html[data-curtain='cover'] .route-curtain-line {
+  opacity: 0.9;
+  transform: scaleX(1);
+  transition:
+    opacity 0.16s,
+    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+html[data-curtain='reveal'] .route-curtain {
+  opacity: 0;
+  visibility: visible;
+  transition: opacity 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The line sweeps up and off as the page comes through. */
+html[data-curtain='reveal'] .route-curtain-line {
+  animation: route-curtain-sweep 0.26s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes route-curtain-sweep {
+  from {
+    top: 50%;
+    opacity: 0.9;
+  }
+  to {
+    top: 8%;
+    opacity: 0;
+  }
+}
+
+html.route-enter [data-route-enter] {
+  animation-name: var(--route-enter-anims);
+  animation-duration: 0.52s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation-delay: calc(var(--route-enter-delay, 0ms) + 40ms);
+  animation-fill-mode: both;
+}
+
+/* Before the curtain lifts, tagged elements wait in their start state. */
+html[data-curtain='cover'] [data-route-enter] {
+  filter: opacity(0);
+}
+
+@keyframes route-enter-fade {
+  0% {
+    filter: opacity(0) brightness(2.2);
+  }
+  55% {
+    filter: opacity(1) brightness(1.35);
+  }
+  100% {
+    filter: opacity(1) brightness(1);
+  }
+}
+
+@keyframes route-enter-rise {
+  from {
+    translate: 0 14px;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes route-enter-wipe {
+  from {
+    clip-path: inset(-50% -50% 100% -50%);
+  }
+  to {
+    clip-path: inset(-50% -50% -50% -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-curtain,
+  html[data-curtain='cover'] .route-curtain,
+  html[data-curtain='reveal'] .route-curtain {
+    transition-duration: 0.12s;
+  }
+
+  .route-curtain-line {
+    display: none;
+  }
+
+  html.route-enter [data-route-enter] {
+    animation: none;
+  }
+}

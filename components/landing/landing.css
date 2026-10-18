@@ -527,3 +527,134 @@ html.landing-page body {
     transition: none;
   }
 }
+
+/* ---- Page exit (Work / Journey / About) ----
+   The canvas does the particle stream itself; CSS handles the name, the
+   corners, the floor and the no-WebGL portrait. ~0.72s, then the curtain. */
+
+.landing-root[data-exit] {
+  pointer-events: none;
+}
+
+.landing-root[data-exit] .landing-name {
+  animation: landing-name-out 0.62s linear both;
+}
+
+@keyframes landing-name-out {
+  0% {
+    clip-path: inset(-30% -10%);
+    translate: 0 0;
+  }
+  8% {
+    clip-path: inset(12% -10% 50% -10%);
+    translate: -7px 0;
+    text-shadow:
+      -4px 0 var(--ember),
+      4px 0 var(--tron),
+      0 0 34px var(--tron);
+  }
+  16% {
+    clip-path: inset(56% -10% 4% -10%);
+    translate: 8px 0;
+  }
+  24% {
+    clip-path: inset(-30% -10%);
+    translate: 0 0;
+    filter: brightness(1.5);
+  }
+  34% {
+    clip-path: inset(28% -10% 36% -10%);
+    translate: -4px 0;
+    text-shadow:
+      3px 0 var(--ember),
+      -3px 0 var(--tron),
+      0 0 40px var(--tron);
+  }
+  44% {
+    clip-path: inset(-30% -10%);
+    translate: 0 0;
+    scale: 1 1;
+    opacity: 1;
+  }
+  /* CRT off: collapse to a bright line, stretch, gone. */
+  68% {
+    clip-path: inset(44% -10% 44% -10%);
+    scale: 1.04 0.5;
+    filter: brightness(2);
+    opacity: 0.9;
+  }
+  86% {
+    clip-path: inset(49% -40% 49% -40%);
+    scale: 1.35 0.08;
+    opacity: 0.85;
+  }
+  100% {
+    clip-path: inset(50% -60% 50% -60%);
+    scale: 0.1 0.02;
+    opacity: 0;
+  }
+}
+
+.landing-root[data-exit] .landing-entry {
+  opacity: 0;
+  transition: opacity 0.28s ease-out;
+}
+
+/* The chosen corner flashes, then follows. */
+.landing-root[data-exit] .landing-entry[data-exit-target] {
+  animation: landing-entry-pick 0.6s linear both;
+  transition: none;
+}
+
+@keyframes landing-entry-pick {
+  0%,
+  30% {
+    opacity: 1;
+    filter: brightness(1.8) drop-shadow(0 0 10px var(--tron));
+  }
+  15% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+}
+
+.landing-root[data-exit] :is(.landing-floor, .landing-haze, .landing-frame, .tron-scan) {
+  opacity: 0;
+  transition: opacity 0.55s ease-in 0.1s;
+}
+
+/* No WebGL: the duotone portrait shrinks into the corner and burns out. */
+.landing-root[data-exit] .landing-fallback {
+  animation: landing-fallback-out 0.62s cubic-bezier(0.45, 0, 0.7, 0.6) both;
+}
+
+@keyframes landing-fallback-out {
+  0% {
+    translate: 0 0;
+    scale: 1;
+    opacity: 1;
+    filter: none;
+  }
+  25% {
+    translate: calc(var(--exit-dx, 0px) * -0.04) calc(var(--exit-dy, 0px) * -0.04);
+    scale: 1.04;
+    filter: brightness(1.8);
+  }
+  100% {
+    translate: var(--exit-dx, 0px) var(--exit-dy, 0px);
+    scale: 0.05;
+    opacity: 0;
+    filter: brightness(2.4) blur(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-root[data-exit] :is(.landing-name, .landing-entry, .landing-fallback, .landing-stage, .landing-floor, .landing-haze, .landing-frame, .tron-scan) {
+    animation: none;
+    opacity: 0;
+    transition: opacity 0.12s linear;
+  }
+}
