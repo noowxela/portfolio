@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { CONTACT_LINKS } from '@/components/landing/entries'
-import { HEAD, STEPS, commitHash, formatMonth, monthsBetween, type Step } from '@/data/experience'
+import { HEAD, STEPS, commitHash, formatMonth, type Step } from '@/data/experience'
 import { site } from '@/data/site'
 import { Rail, type RailHandle, type RailItem } from './Rail'
 import { createTrack, type Track } from './track'
@@ -65,7 +65,6 @@ const order = (i: number) => ({ '--i': i }) as CSSProperties
 
 function StepBody({ it }: { it: Extract<Item, { kind: 'step' }> }) {
   const s = it.step
-  const months = s.to ? monthsBetween(s.from, s.to) : null
   let n = 0
   return (
     <div className="gl-body">
@@ -105,18 +104,6 @@ function StepBody({ it }: { it: Extract<Item, { kind: 'step' }> }) {
             ))}
           </ul>
         )}
-        <p className="gl-stats">
-          {months !== null && (
-            <span className="gl-stat">
-              <b data-count={months}>{months}</b> months
-            </span>
-          )}
-          {s.stats?.map((st) => (
-            <span key={st.label} className="gl-stat">
-              <b data-count={st.value}>{st.value}</b> {st.label}
-            </span>
-          ))}
-        </p>
       </div>
     </div>
   )
@@ -321,13 +308,12 @@ export function GridLog({ className }: { className?: string }) {
     }
   }, [])
 
-  // On every step change after the first: panel glitch-in, counters, particles.
+  // On every step change after the first: panel glitch-in and particles.
   useEffect(() => {
     markRef.current?.setMark(cur)
     // Only real changes (also skips StrictMode's effect replay on mount).
     if (shownRef.current === cur) return
     shownRef.current = cur
-    let raf = 0
     const reduced = reducedRef.current
     const panels = rowRef.current ? (Array.from(rowRef.current.children) as HTMLElement[]) : []
     panels.forEach((p, i) => {
@@ -338,19 +324,6 @@ export function GridLog({ className }: { className?: string }) {
       delete panel.dataset.swap
       void panel.offsetWidth
       panel.dataset.swap = 'true'
-      const counters = Array.from(panel.querySelectorAll<HTMLElement>('[data-count]'))
-      const t0 = performance.now()
-      const count = (now: number) => {
-        const t = Math.min(1, (now - t0) / 650)
-        const e = 1 - Math.pow(1 - t, 3)
-        counters.forEach((c) => (c.textContent = String(Math.round(Number(c.dataset.count) * e))))
-        if (t < 1) raf = requestAnimationFrame(count)
-      }
-      raf = requestAnimationFrame(count)
-    }
-    return () => {
-      cancelAnimationFrame(raf)
-      panel?.querySelectorAll<HTMLElement>('[data-count]').forEach((c) => (c.textContent = c.dataset.count ?? ''))
     }
   }, [cur])
 

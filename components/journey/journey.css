@@ -431,28 +431,6 @@ html.gridlog-page body {
   box-shadow: 0 0 14px color-mix(in srgb, var(--tron) 60%, transparent);
 }
 
-.gl-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.9rem;
-  margin: 0;
-  font-family: var(--font-hud), ui-monospace, monospace;
-  font-size: 0.7rem;
-  color: var(--dim);
-}
-
-.gl-stat b {
-  display: inline-block;
-  min-width: 1.6em;
-  margin-right: 0.35rem;
-  padding: 0.1rem 0.3rem;
-  font-weight: 400;
-  text-align: center;
-  background: var(--tron);
-  color: #041016;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--tron) 55%, transparent);
-}
-
 .gl-links {
   display: flex;
   flex-wrap: wrap;

@@ -27,7 +27,7 @@ flowchart LR
 
 ## Panels
 
-Each panel shows: short hash, branch, commit message; the heading (company, linked when the resume has a link); role, place and dates; the condensed resume bullets; technology tags (only ones the resume names); and stats (months computed from the dates; `3 developers led` for Trinergy). The numbers count up over 650 ms when the panel becomes current.
+Each panel shows: short hash, branch, commit message; the heading (company, linked when the resume has a link); role, place and dates; the condensed resume bullets; and technology tags (only ones the resume names).
 
 | Step | Branch | Hash |
 | --- | --- | --- |
