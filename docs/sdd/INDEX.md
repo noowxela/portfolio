@@ -30,3 +30,4 @@
 | [018-grid-card-ratio.md](./018-grid-card-ratio.md) | implemented | Grid cards at 16:9 |
 | [027-grid-discs-3d.md](./027-grid-discs-3d.md) | implemented | Grid background discs in 3D |
 | [028-journey-home.md](./028-journey-home.md) | implemented | Scroll-driven 3D journey home (preview) |
+| [029-portrait-home.md](./029-portrait-home.md) | implemented | Full-screen home with a particle portrait; old home moves to /noelite |

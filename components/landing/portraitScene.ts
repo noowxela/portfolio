@@ -52,6 +52,8 @@ const PUSH_RADIUS = 120
 const PUSH_GAIN = 2.2
 const TILT_MAX = 0.45
 const TAU = Math.PI * 2
+/** Below this the dust is under a pixel and the reveal is invisible. */
+const TRAIL_EPS = 0.02
 
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v))
@@ -178,7 +180,10 @@ const photoFragment = /* glsl */ `
     float show = smoothstep(0.03, 0.55, r);
     float rim = smoothstep(0.02, 0.18, r) * (1.0 - smoothstep(0.18, 0.5, r));
     vec3 col = mix(c.rgb, c.rgb * vec3(0.86, 1.0, 1.06), 0.5) + uTron * rim * 0.55;
-    float a = c.a * max(show, rim * 0.6) * uOpacity;
+    // Soft crop edges (the bottom most), so the shirt never ends on a hard line.
+    float edge = smoothstep(0.0, 0.2, vUv.y) * smoothstep(0.0, 0.05, vUv.x) * smoothstep(1.0, 0.95, vUv.x);
+    col *= 0.9;
+    float a = c.a * edge * max(show, rim * 0.6) * uOpacity;
     if (a < 0.004) discard;
     gl_FragColor = vec4(col, a);
   }
@@ -629,7 +634,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     spin.puff > 0.002 ||
     !!tiltTween?.isActive() ||
     push > 0.002 ||
-    trailEnergy > 0.004 ||
+    trailEnergy > TRAIL_EPS ||
     !!morphTween?.isActive() ||
     !!viewTween?.isActive() ||
     (pointer.inside && pointer.dist > 0)
@@ -692,7 +697,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
     pointer.px = pointer.x
     pointer.py = pointer.y
     trailEnergy = Math.max(trailEnergy * Math.exp(-dt * 1.5), moving ? Math.max(dust, reveal) : 0)
-    if (trailEnergy > 0.004 || moving) {
+    if (trailEnergy > TRAIL_EPS || moving) {
       tu.uPrev.value = trailRead.texture
       renderer.setRenderTarget(trailWrite)
       renderer.render(trailScene, trailCam)
@@ -702,7 +707,7 @@ export function createPortraitScene(container: HTMLElement, opts: PortraitOption
       trailWrite = t
       u.uTrail.value = trailRead.texture
       photoMat.uniforms.uTrail.value = trailRead.texture
-    } else if (trailEnergy <= 0.004 && trailEnergy > 0) {
+    } else if (trailEnergy <= TRAIL_EPS && trailEnergy > 0) {
       trailEnergy = 0
       renderer.setRenderTarget(trailRead)
       renderer.clear()

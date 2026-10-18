@@ -1,5 +1,7 @@
 # Tron 首页，逐段说明
 
+> 自 2026-10-18 起，这个滚动故事位于 **`/noelite`**。`/` 现在是粒子肖像首页，见 [portrait-home.md](./portrait-home.md) 与 [SDD 029](../sdd/029-portrait-home.md)。下文中的 `/` 请理解为 `/noelite`。
+
 英文版：[tron-home.md](./tron-home.md)
 
 `/` 是一部五段的短片，不是项目画廊。画廊仍在 `/work`。

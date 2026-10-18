@@ -1,12 +1,12 @@
 # Architecture
 
-Next.js App Router static export. Home is a GSAP scroll story. The demo gallery lives at `/work`. About stays a short page.
+Next.js App Router static export. Home (`/`) is one full-screen stage: the name, four corner entries and a 3D particle portrait. The previous GSAP scroll story lives on at `/noelite`. The demo gallery lives at `/work`. About stays a short page.
 
 ## Stack
 
 - Next.js 16, React 19, Tailwind CSS v4
-- Three.js for the home mosaic
-- GSAP `ScrollTrigger` and `ScrollSmoother` on `/` only
+- Three.js for the home particle portrait (`components/landing/`), the `/noelite` mosaic and `/journey`
+- GSAP for the portrait pose tweens on `/`; `ScrollTrigger` and `ScrollSmoother` on `/noelite` only
 - `next-themes` for light, dark, and system on the gallery and About
 - Static export (`output: 'export'`). GitHub Pages sets `GITHUB_PAGES=true`, which adds `basePath: /portfolio`
 
@@ -14,19 +14,24 @@ Next.js App Router static export. Home is a GSAP scroll story. The demo gallery 
 
 | Route | What it renders |
 | --- | --- |
-| `/` | Legacy-to-Ares scroll story (`components/home/`) |
+| `/` | Full-screen stage: centred name, corner entries 01–04, particle portrait, contact window (`components/landing/`, [SDD 029](./sdd/029-portrait-home.md), [walkthrough](./pages/portrait-home.md)) |
+| `/noelite` | The previous home: Legacy-to-Ares scroll story (`components/home/`) |
 | `/work` | `GalleryShell`: sidebar, live iframe, project details |
 | `/about` | Bio and contact |
 | `/discs` | Temporary board of the disc versions |
 | `/journey` | Preview: scroll-driven 3D ride, desk → Grid → neon city → disc portal → desk (`components/journey/`, [SDD 028](./sdd/028-journey-home.md)) |
 
-`app/layout.tsx` wraps every route with Inter, metadata, `ThemeProviders`, and the fixed header (`NavPill`). The smoother wrapper exists only inside the home page, so the header stays `position: fixed` outside it.
+`app/layout.tsx` wraps every route with Inter, metadata, `ThemeProviders`, and the fixed header (`NavPill`). The smoother wrapper exists only inside `/noelite`, so the header stays `position: fixed` outside it. `NavPill` uses its dark Tron bar on `/`, `/noelite` and `/journey`.
 
-A section-by-section walkthrough of the home page is in [tron-home.md](./pages/tron-home.md). 中文版：[tron-home.zh.md](./pages/tron-home.zh.md).
+The new home is written up in [portrait-home.md](./pages/portrait-home.md). A section-by-section walkthrough of the scroll story (now `/noelite`) is in [tron-home.md](./pages/tron-home.md). 中文版：[tron-home.zh.md](./pages/tron-home.zh.md).
 
 About is written up the same way in [tron-about.md](./pages/tron-about.md). 中文版：[tron-about.zh.md](./pages/tron-about.zh.md).
 
-## Home scroll
+## Home stage (`/`)
+
+`Landing` is a client component. It renders the DOM (name, corner entries, contact window, static fallback) and lazy-loads `portraitScene.ts`, which owns the page's single `WebGLRenderer`. Photos are sampled into instanced line-segment particles (`sampler.ts`), each entry has a pose in `poses.ts`, and the render loop runs only while something moves (idle sway renders at ~30 fps; with reduced motion nothing renders at rest). Details in [SDD 029](./sdd/029-portrait-home.md).
+
+## `/noelite` scroll (previous home)
 
 `TronHome` is a client component. `useHomeScroll` loads GSAP in the browser.
 
@@ -44,9 +49,9 @@ Phones and `prefers-reduced-motion` do not create the smoother or any pin. Scene
 ## Data
 
 - `data/site.ts` — name, role, tagline, contact
-- `data/demos.ts` — gallery items. `featured: true` picks the three cards on the home track
+- `data/demos.ts` — gallery items. `featured: true` picks the three cards on the `/noelite` track
 - `data/headerNavLinks.ts` — Home, Work, About, Discs. Discs stays out of the header until the clock is clicked three times in a row, and the next three clicks hide it again.
 
 ## Theme
 
-The home page paints its own night scene and does not follow the light theme. Gallery and About still follow `next-themes`. While `/` is mounted, `html` gets `tron-home` and `scroll-behavior: auto` so CSS smooth scroll does not fight ScrollSmoother.
+The home page (`/`), `/noelite` and `/journey` paint their own night scene and do not follow the light theme. Gallery and About still follow `next-themes`. While `/noelite` is mounted, `html` gets `tron-home` and `scroll-behavior: auto` so CSS smooth scroll does not fight ScrollSmoother. `/` adds `tron-home` and `landing-page` (no page scroll).
