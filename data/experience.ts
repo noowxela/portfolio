@@ -18,6 +18,8 @@ export type Step = {
   /** Short label drawn as particles behind the panel. */
   mark: string
   title: string
+  /** Short name on the branch rail. */
+  short: string
   role: string
   /** Only when the resume gives one. */
   place?: string
@@ -49,6 +51,7 @@ export const STEPS: readonly Step[] = [
     to: '11/2020',
     mark: '2016–20',
     title: 'Multimedia University',
+    short: 'MMU',
     role: 'Bachelor of Computer Science (Data Science)',
     place: 'Cyberjaya',
     message: 'edu: B.Sc. Computer Science (Data Science)',
@@ -62,6 +65,7 @@ export const STEPS: readonly Step[] = [
     to: '07/2023',
     mark: '2021–23',
     title: 'Auronex Sdn Bhd',
+    short: 'Auronex',
     role: 'Software Engineer',
     href: 'https://auronex.com/',
     message: "merge 'edu' → feat: software engineer, Auronex",
@@ -80,6 +84,7 @@ export const STEPS: readonly Step[] = [
     to: '02/2025',
     mark: '2023–25',
     title: 'Oasis Interactive Malaysia Sdn Bhd',
+    short: 'Oasis',
     role: 'Frontend Developer',
     message: 'feat(frontend): frontend developer, Oasis Interactive',
     facts: [
@@ -95,6 +100,7 @@ export const STEPS: readonly Step[] = [
     to: '08/2026',
     mark: '2025–26',
     title: 'Trinergy Digital Sdn Bhd',
+    short: 'Trinergy',
     role: 'Full-Stack Developer',
     href: 'https://www.linkedin.com/company/trinergy-digital/',
     message: 'feat(full-stack): full-stack developer, Trinergy Digital',

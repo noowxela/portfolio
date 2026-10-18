@@ -111,7 +111,7 @@ The `/noelite2` 3D journey ([SDD 028](./sdd/028-journey-home.md)): `Journey.tsx`
 
 ### `components/journey/`
 
-The `/journey` grid.log page ([SDD 030](./sdd/030-journey-gridlog.md), [walkthrough](./pages/journey-gridlog.md)): `GridLog.tsx` (bar, terminal line, panel row, HEAD panel, scramble / count-up, fallbacks), `track.ts` (wheel / drag / swipe / keys / hash row controller), `Rail.tsx` (SVG branch graph with the light cycle), `markField.ts` (three.js instanced-dash particle mark), `journey.css`. Content comes from `data/experience.ts`.
+The `/journey` grid.log page ([SDD 030](./sdd/030-journey-gridlog.md), [walkthrough](./pages/journey-gridlog.md)): `GridLog.tsx` (bar with sound toggle, panel row, HEAD panel, count-up, fallbacks), `track.ts` (wheel / drag / swipe / keys / hash row controller), `Rail.tsx` (SVG branch graph: labelled nodes, light cycle, trailing HEAD dots), `markField.ts` (three.js instanced-dash particle mark), `blip.ts` (Web Audio arrival sound), `journey.css`. Content comes from `data/experience.ts`.
 
 ### `components/home/`
 

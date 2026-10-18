@@ -49,7 +49,7 @@ html.gridlog-page body {
     linear-gradient(to bottom, color-mix(in srgb, var(--void) 70%, transparent), transparent 30%);
 }
 
-/* ---- top bar + terminal line ---- */
+/* ---- top bar ---- */
 
 .gl-bar {
   position: relative;
@@ -84,6 +84,29 @@ html.gridlog-page body {
   border-left: 1px solid var(--line);
 }
 
+.gl-sound {
+  margin: 0;
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  background: none;
+  font: inherit;
+  color: var(--dim);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.gl-sound[aria-pressed='true'] {
+  color: var(--tron);
+}
+
+.gl-sound:hover,
+.gl-sound:focus-visible {
+  color: #fff;
+  outline: none;
+  background: color-mix(in srgb, var(--tron) 14%, transparent);
+}
+
 .gl-resume {
   border-right: 0;
   color: var(--tron);
@@ -97,41 +120,6 @@ html.gridlog-page body {
   background: var(--tron);
   color: #041016;
   outline: none;
-}
-
-.gl-cmd {
-  position: relative;
-  z-index: 3;
-  flex: 0 0 auto;
-  margin: 0;
-  padding: 0.55rem 1rem;
-  overflow: hidden;
-  border-bottom: 1px solid var(--line);
-  font-family: var(--font-hud), ui-monospace, monospace;
-  font-size: 0.78rem;
-  color: var(--ink);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  background: color-mix(in srgb, var(--void) 70%, transparent);
-}
-
-.gl-ps {
-  color: var(--tron);
-  opacity: 0.8;
-}
-
-.gl-cmd.is-swap {
-  animation: gl-pop 0.22s steps(3, end);
-}
-
-@keyframes gl-pop {
-  0% {
-    color: var(--tron);
-    text-shadow: 0 0 10px var(--tron);
-  }
-  100% {
-    color: var(--ink);
-  }
 }
 
 /* ---- stage + row ---- */
@@ -183,11 +171,12 @@ html.gridlog-page body {
 .gl-mark {
   pointer-events: none;
   position: absolute;
-  top: 47%;
+  /* Top-anchored just under the bar, like the particle mark (MARK_TOP in markField.ts). */
+  top: var(--gl-mark-top, 12px);
   left: 50%;
   z-index: 0;
   margin: 0;
-  translate: -50% -50%;
+  translate: -50% -0.12em;
   font-size: clamp(4.5rem, 17vw, 15.5rem);
   font-weight: 600;
   line-height: 1;
@@ -266,7 +255,8 @@ html.gridlog-page body {
 
 .gl-panel.is-cur .gl-body {
   border-color: color-mix(in srgb, var(--tron) 34%, transparent);
-  background: color-mix(in srgb, var(--void) 38%, transparent);
+  /* Opaque enough that the years behind the panel top read as background. */
+  background: color-mix(in srgb, var(--void) 58%, transparent);
   box-shadow:
     inset 0 0 40px color-mix(in srgb, var(--tron) 6%, transparent),
     0 0 30px color-mix(in srgb, var(--tron) 8%, transparent);
@@ -582,10 +572,6 @@ html.gridlog-page body {
   stroke-dasharray: 6 5;
 }
 
-.gl-lane.b-next {
-  stroke-dasharray: 3 6;
-}
-
 .gl-trail {
   fill: none;
   stroke: var(--tron);
@@ -605,8 +591,87 @@ html.gridlog-page body {
   pointer-events: none;
 }
 
-.gl-lane-label.is-head {
+.gl-lane-label {
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.gl-lane-label.is-on {
   color: var(--tron);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--tron) 70%, transparent);
+}
+
+/* HEAD: three dots trailing off the end of main ("more to come"). The button is the hit area. */
+.gl-more {
+  all: unset;
+  position: absolute;
+  z-index: 2;
+  height: 18px;
+  margin-top: -9px;
+  cursor: pointer;
+}
+
+.gl-dot {
+  position: absolute;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--tron);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--tron) 80%, transparent);
+  transition:
+    opacity 0.2s ease,
+    scale 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.gl-dot:nth-child(1) {
+  opacity: 0.85;
+}
+
+.gl-dot:nth-child(2) {
+  opacity: 0.6;
+}
+
+.gl-dot:nth-child(3) {
+  opacity: 0.35;
+}
+
+.gl-more:hover .gl-dot,
+.gl-more:focus-visible .gl-dot,
+.gl-more.is-on .gl-dot {
+  opacity: 1;
+  scale: 1.4;
+  box-shadow:
+    0 0 6px var(--tron),
+    0 0 14px color-mix(in srgb, var(--tron) 60%, transparent);
+}
+
+.gl-more.is-on .gl-dot {
+  animation: gl-dot 1.4s ease-in-out infinite;
+}
+
+.gl-more.is-on .gl-dot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.gl-more.is-on .gl-dot:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes gl-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.gl-more:focus-visible {
+  outline: 1px dashed var(--tron);
+  outline-offset: 2px;
 }
 
 .gl-node {
@@ -723,6 +788,10 @@ html.gridlog-page body {
     padding: 0 0.7rem;
   }
 
+  .gl-bar > .gl-sound {
+    padding: 0 0.6rem;
+  }
+
   .gl-hint {
     display: none;
   }
@@ -730,11 +799,6 @@ html.gridlog-page body {
   .gl-count {
     margin-left: auto;
     border-left: 1px solid var(--line);
-  }
-
-  .gl-cmd {
-    padding: 0.5rem 0.7rem;
-    font-size: 0.68rem;
   }
 
   .gl-panel {
@@ -775,6 +839,10 @@ html.gridlog-page body {
     font-size: 0.84rem;
   }
 
+  .gridlog {
+    --gl-mark-top: 10px;
+  }
+
   .gl-rail {
     flex-basis: 84px;
     margin: 0 14px 18px;
@@ -799,7 +867,7 @@ html.gridlog-page body {
 @media (prefers-reduced-motion: reduce) {
   .gl-floor .grid-floor,
   .gl-caret,
-  .gl-cmd.is-swap {
+  .gl-more.is-on .gl-dot {
     animation: none;
   }
 

@@ -68,7 +68,7 @@ export const ENTRANCES: Record<string, { selectors: string[]; max?: number }[]> 
   ],
   '/journey': [
     { selectors: ['.gl-floor'] },
-    { selectors: ['.gl-bar', '.gl-cmd'] },
+    { selectors: ['.gl-bar'] },
     { selectors: ['.gl-panel.is-cur .gl-body > :not(ul)', '.gl-panel.is-cur .gl-facts > li'], max: 12 },
     { selectors: ['.gl-rail'] },
   ],

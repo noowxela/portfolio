@@ -8,6 +8,7 @@ import { site } from '@/data/site'
 import { Rail, type RailHandle, type RailItem } from './Rail'
 import { createTrack, type Track } from './track'
 import type { MarkField } from './markField'
+import { createBlip, type Blip } from './blip'
 
 type Mode = 'pending' | 'webgl' | 'static'
 
@@ -18,6 +19,7 @@ type Item =
 const REDUCED = '(prefers-reduced-motion: reduce)'
 const SMALL = '(max-width: 767px), (pointer: coarse)'
 const FINE = '(hover: hover) and (pointer: fine)'
+const SOUND_KEY = 'gridlog-sound'
 const PS = 'alex@grid:~$'
 
 const ITEMS: Item[] = [
@@ -26,10 +28,6 @@ const ITEMS: Item[] = [
 ]
 
 const BRANCHES = new Set(ITEMS.map((it) => (it.kind === 'step' ? it.step.branch : HEAD.branch))).size
-
-function command(it: Item) {
-  return it.kind === 'head' ? 'git checkout main && git status' : `git checkout ${it.hash} --detach && git show ${it.hash}`
-}
 
 function canUseWebGL() {
   return typeof window !== 'undefined' && 'WebGLRenderingContext' in window
@@ -176,7 +174,6 @@ export function GridLog({ className }: { className?: string }) {
   const stageRef = useRef<HTMLDivElement>(null)
   const fieldRef = useRef<HTMLDivElement>(null)
   const rowRef = useRef<HTMLOListElement>(null)
-  const cmdRef = useRef<HTMLSpanElement>(null)
   const railRef = useRef<RailHandle>(null)
   const trackRef = useRef<Track | null>(null)
   const markRef = useRef<MarkField | null>(null)
@@ -184,13 +181,16 @@ export function GridLog({ className }: { className?: string }) {
   const shownRef = useRef(0)
   const [cur, setCur] = useState(0)
   const [mode, setMode] = useState<Mode>('pending')
+  const [sound, setSound] = useState(true)
+  const blipRef = useRef<Blip | null>(null)
+  const settledRef = useRef<number | null>(null)
 
   const railItems = useMemo<RailItem[]>(
     () =>
       ITEMS.map((it) =>
         it.kind === 'step'
-          ? { key: it.key, branch: it.step.branch, label: `${it.mark} — ${it.step.title}` }
-          : { key: it.key, branch: HEAD.branch, label: 'HEAD — next commit', head: true },
+          ? { key: it.key, branch: it.step.branch, short: it.step.short, label: `${it.mark} — ${it.step.title}` }
+          : { key: it.key, branch: HEAD.branch, label: 'Next commit — available', head: true },
       ),
     [],
   )
@@ -200,6 +200,36 @@ export function GridLog({ className }: { className?: string }) {
     const html = document.documentElement
     html.classList.add('tron-home', 'gridlog-page')
     return () => html.classList.remove('tron-home', 'gridlog-page')
+  }, [])
+
+  // Arrival blip (Web Audio, armed on the first gesture). Saved preference, default on.
+  useEffect(() => {
+    let saved = true
+    try {
+      saved = localStorage.getItem(SOUND_KEY) !== '0'
+    } catch {
+      /* storage blocked: keep the default */
+    }
+    const blip = createBlip(saved)
+    blipRef.current = blip
+    queueMicrotask(() => setSound(saved))
+    return () => {
+      blip.dispose()
+      blipRef.current = null
+    }
+  }, [])
+
+  const toggleSound = useCallback(() => {
+    setSound((was) => {
+      const next = !was
+      blipRef.current?.setEnabled(next)
+      try {
+        localStorage.setItem(SOUND_KEY, next ? '1' : '0')
+      } catch {
+        /* not persisted */
+      }
+      return next
+    })
   }, [])
 
   // Particles or the static mark; follow reduced-motion changes.
@@ -230,6 +260,9 @@ export function GridLog({ className }: { className?: string }) {
         if (speed) markRef.current?.stir(speed)
       },
       onSettle: (i) => {
+        // A blip when the cycle settles on a new node; not for the first (load / deep-link) settle.
+        if (settledRef.current !== null && settledRef.current !== i) blipRef.current?.play(i, ITEMS[i]?.kind === 'head')
+        settledRef.current = i
         const hash = ITEMS[i]?.hash
         if (hash && location.hash.slice(1) !== hash) history.replaceState(history.state, '', `#${hash}`)
       },
@@ -238,6 +271,7 @@ export function GridLog({ className }: { className?: string }) {
     const fromHash = ITEMS.findIndex((it) => it.hash === location.hash.slice(1))
     if (fromHash > 0) track.go(fromHash, { animate: false })
     else track.refresh()
+    settledRef.current = track.index()
     const onHash = () => {
       const i = ITEMS.findIndex((it) => it.hash === location.hash.slice(1))
       if (i >= 0) track.go(i)
@@ -320,41 +354,14 @@ export function GridLog({ className }: { className?: string }) {
     }
   }, [])
 
-  // On every step change after the first: terminal line, panel glitch-in, counters, particles.
+  // On every step change after the first: panel glitch-in, counters, particles.
   useEffect(() => {
-    const it = ITEMS[cur]
     markRef.current?.setMark(cur)
-    const cmd = cmdRef.current
     // Only real changes (also skips StrictMode's effect replay on mount).
     if (shownRef.current === cur) return
     shownRef.current = cur
-    const timers: number[] = []
     let raf = 0
     const reduced = reducedRef.current
-    if (cmd) {
-      const full = command(it)
-      cmd.parentElement?.classList.remove('is-swap')
-      void cmd.parentElement?.offsetWidth
-      cmd.parentElement?.classList.add('is-swap')
-      if (reduced) cmd.textContent = full
-      else {
-        // Scramble the hash characters in, left to right.
-        const hex = '0123456789abcdef'
-        const positions: number[] = []
-        for (let i = full.indexOf(it.hash); i >= 0; i = full.indexOf(it.hash, i + 1)) positions.push(i)
-        const n = it.hash.length
-        const tick = (k: number) => {
-          let out = full
-          for (const p of positions) {
-            const rnd = Array.from({ length: n - k }, () => hex[Math.floor(Math.random() * 16)]).join('')
-            out = out.slice(0, p) + it.hash.slice(0, k) + rnd + out.slice(p + n)
-          }
-          cmd.textContent = out
-          if (k < n) timers.push(window.setTimeout(() => tick(k + 1), 32))
-        }
-        tick(positions.length ? 0 : n)
-      }
-    }
     const panels = rowRef.current ? (Array.from(rowRef.current.children) as HTMLElement[]) : []
     panels.forEach((p, i) => {
       if (i !== cur) delete p.dataset.swap
@@ -375,9 +382,7 @@ export function GridLog({ className }: { className?: string }) {
       raf = requestAnimationFrame(count)
     }
     return () => {
-      timers.forEach((t) => window.clearTimeout(t))
       cancelAnimationFrame(raf)
-      if (cmd) cmd.textContent = command(it)
       panel?.querySelectorAll<HTMLElement>('[data-count]').forEach((c) => (c.textContent = c.dataset.count ?? ''))
     }
   }, [cur])
@@ -425,14 +430,27 @@ export function GridLog({ className }: { className?: string }) {
         <span className="gl-hint" aria-hidden>
           ← → · drag · scroll
         </span>
+        <button
+          type="button"
+          className="gl-sound"
+          aria-label="Sound effects"
+          aria-pressed={sound}
+          title={sound ? 'Sound on' : 'Sound off'}
+          onClick={toggleSound}
+        >
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+            <path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor" />
+            {sound ? (
+              <path d="M11 5.5c1 .7 1.5 1.5 1.5 2.5s-.5 1.8-1.5 2.5M12.5 3.5c1.6 1.1 2.5 2.7 2.5 4.5s-.9 3.4-2.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
+            ) : (
+              <path d="M11 6l4 4M15 6l-4 4" fill="none" stroke="currentColor" strokeWidth="1.2" />
+            )}
+          </svg>
+        </button>
         <a className="gl-resume" href={site.resume} target="_blank" rel="noreferrer">
           Resume <span aria-hidden>↗</span>
         </a>
       </div>
-
-      <p className="gl-cmd">
-        <span className="gl-ps">{PS}</span> <span ref={cmdRef}>{command(ITEMS[0])}</span>
-      </p>
 
       <div ref={stageRef} className="gl-stage">
         <div ref={fieldRef} className="gl-field" aria-hidden />

@@ -44,6 +44,9 @@ const STAGGER = 0.42
 const OPACITY = 0.78
 const FADE_IN_S = 0.7
 const IDLE_FRAME_MS = 33
+/** Gap (px) between the top of the stage and the top of the years' ink. */
+const MARK_TOP = 12
+const MARK_TOP_SMALL = 10
 
 const vertex = /* glsl */ `
   attribute vec3 aFrom;
@@ -59,7 +62,6 @@ const vertex = /* glsl */ `
   uniform float uPush;
   varying float vAlpha;
   varying float vHot;
-  varying float vEmber;
   varying vec2 vUv;
   void main() {
     float k = clamp((uMix - aSeed * ${STAGGER.toFixed(2)}) / ${(1 - STAGGER).toFixed(2)}, 0.0, 1.0);
@@ -77,7 +79,6 @@ const vertex = /* glsl */ `
     world += d / max(dist, 18.0) * fall * uPush * (16.0 + 30.0 * fract(aSeed * 3.7));
     vHot = clamp(fall * uPush * 1.6 + fly * 0.5, 0.0, 1.0);
     vAlpha = mix(aFrom.z, aTo.z, k);
-    vEmber = step(0.93, fract(aSeed * 13.7));
     vec2 size = vec2(uCell * 0.86, uCell * 0.38) * (1.0 + 0.5 * fly);
     vec2 v = world + position.xy * size;
     vUv = position.xy;
@@ -89,16 +90,14 @@ const fragment = /* glsl */ `
   precision mediump float;
   uniform vec3 uColor;
   uniform vec3 uHot;
-  uniform vec3 uEmberColor;
   uniform float uOpacity;
   varying float vAlpha;
   varying float vHot;
-  varying float vEmber;
   varying vec2 vUv;
   void main() {
     if (vAlpha < 0.02) discard;
     float edge = 1.0 - smoothstep(0.32, 0.5, abs(vUv.x));
-    vec3 c = mix(mix(uColor, uEmberColor, vEmber * 0.85), uHot, vHot);
+    vec3 c = mix(uColor, uHot, vHot);
     gl_FragColor = vec4(c * edge, vAlpha * uOpacity * edge);
   }
 `
@@ -144,7 +143,10 @@ function sampleMarks(marks: string[], fontFamily: string, width: number, height:
     }
     return pts
   })
-  return { cells, cell, fontPx }
+  // Highest ink row over all marks (relative to the raster centre), so the marks share one top line.
+  let inkTop = 0
+  for (const pts of cells) for (let i = 1; i < pts.length; i += 2) inkTop = Math.min(inkTop, pts[i])
+  return { cells, cell, fontPx, inkTop }
 }
 
 /** Spread each mark's cells over `n` particles; spare particles sit on a cell, invisible. */
@@ -205,7 +207,6 @@ export function createMarkField(container: HTMLElement, opts: MarkFieldOptions):
     uPush: { value: 0 },
     uColor: { value: new Color('#5ce1ff') },
     uHot: { value: new Color('#e7fbff') },
-    uEmberColor: { value: new Color('#ff6a2c') },
     uOpacity: { value: 0 },
   }
   const mat = new ShaderMaterial({
@@ -246,9 +247,10 @@ export function createMarkField(container: HTMLElement, opts: MarkFieldOptions):
     if (width < 2 || height < 2) return false
     renderer.setSize(width, height, false)
     uniforms.uRes.value = [width, height]
-    uniforms.uOrigin.value = [width / 2, height * 0.47]
     const sampled = sampleMarks(opts.marks, opts.fontFamily, width, height, opts.small)
     if (!sampled) return false
+    // Top-anchored: the years sit in the band just under the bar, behind the panels' top edge.
+    uniforms.uOrigin.value = [width / 2, (opts.small ? MARK_TOP_SMALL : MARK_TOP) - sampled.inkTop]
     uniforms.uCell.value = sampled.cell
     const budget = opts.small ? 2600 : 6500
     n = Math.min(budget, Math.max(...sampled.cells.map((c) => c.length / 2), 1))
