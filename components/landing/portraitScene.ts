@@ -52,9 +52,9 @@ const PUSH_RADIUS = 120
 const PUSH_GAIN = 2.2
 const TILT_MAX = 0.45
 /** Gap between the front and back particle sheets (portrait height = 1). */
-const LAYER_GAP = 0.12
+const LAYER_GAP = 0.04
 /** Share of a pose's depth used for each sheet's outward relief. */
-const RELIEF = 0.42
+const RELIEF = 0.22
 /** Alpha of the sheet facing away from the camera (no see-through double image head-on). */
 const AWAY_ALPHA = 0.06
 /** Below this the dust is under a pixel and the reveal is invisible. */

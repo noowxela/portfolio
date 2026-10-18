@@ -177,9 +177,6 @@ export function Landing({ className }: { className?: string }) {
       <div className="scene-frame landing-frame" aria-hidden />
 
       <header ref={titleRef} className="landing-title">
-        <p className="landing-role">
-          {site.role} · {site.location}
-        </p>
         <h1 className="landing-name">{site.name.toLowerCase()}</h1>
       </header>
 
