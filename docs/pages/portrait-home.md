@@ -45,7 +45,7 @@ A click, keyboard Enter or the second tap on a phone does not navigate straight 
 | --- | --- |
 | 0 ms | The name glitches (cyan / red split, sliced, then collapses to a bright line like a CRT switching off, 0.62 s). The other corners fade; the chosen one flashes and follows. Floor, haze and frame fade. |
 | 0–720 ms | The particles burst slightly, then stream on curved paths into the clicked corner, brightening to hot cyan with a few embers, and thin out as they arrive (`scene.exit()`, staggered per particle). |
-| 560–720 ms | A dark `#050507` curtain with a cyan scan line covers the screen, header included. |
+| 560–720 ms | A dark `#050507` curtain with a cyan scan line covers the page below the header (`top: var(--site-nav-h)`, 3.5 rem). The header stays visible and clickable throughout; when the route switches its look (Tron on `/` and `/journey`, plain on `/work` and `/about`) it crossfades in 0.26 s with the curtain lift instead of snapping (0.12 s with reduced motion). |
 | 720 ms | `router.push(href)` (the route was prefetched on hover, focus or the first tap). |
 | ~780 ms | The page is there under the curtain; the curtain lifts (0.26 s, the line sweeps up). |
 | ~0.8–1.6 s | The page's blocks come in one after another: fade from bright, a 14 px rise and a top-down wipe, 0.52 s each, staggered (see below). |

@@ -1,7 +1,16 @@
 /* Home -> page hand-off: a dark Tron curtain, then a staggered entrance. */
+:root {
+  /* Height of the site bar (NavPill, h-14). The curtain starts below it. */
+  --site-nav-h: 3.5rem;
+}
+
+/* The curtain covers the page only: it starts under the site bar, which
+   stays visible and clickable through the whole hand-off. Starting below the
+   bar (rather than sliding under it) keeps the bar's translucent, blurred
+   ground showing the page, not the curtain, so it never tints. */
 .route-curtain {
   position: fixed;
-  inset: 0;
+  inset: var(--site-nav-h) 0 0;
   z-index: 80;
   pointer-events: none;
   background:
@@ -61,6 +70,16 @@ html[data-curtain='reveal'] .route-curtain-line {
   }
 }
 
+/* The bar changes look with the route (Tron on / and /journey, plain on
+   /work and /about). Mid hand-off it crossfades with the curtain lift
+   instead of snapping. Scoped to the hand-off: other navigations unchanged. */
+html[data-curtain] .site-nav {
+  transition:
+    background-color 0.26s ease,
+    border-color 0.26s ease,
+    color 0.26s ease;
+}
+
 html.route-enter [data-route-enter] {
   animation-name: var(--route-enter-anims);
   animation-duration: 0.52s;
@@ -108,6 +127,10 @@ html[data-curtain='cover'] [data-route-enter] {
   .route-curtain,
   html[data-curtain='cover'] .route-curtain,
   html[data-curtain='reveal'] .route-curtain {
+    transition-duration: 0.12s;
+  }
+
+  html[data-curtain] .site-nav {
     transition-duration: 0.12s;
   }
 

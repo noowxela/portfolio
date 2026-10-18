@@ -100,7 +100,7 @@ The home → page transition ([portrait-home.md](./pages/portrait-home.md#leavin
 |------|------|
 | `routeTransition.ts` | `beginRouteExit` (sessionStorage flag + curtain), flag helpers, and `ENTRANCES`: per-page selectors in entrance order. Edit this to change what comes in first. |
 | `RouteCurtain.tsx` | Mounted once in `app/layout.tsx`. Dark curtain; on arrival with a fresh flag it tags the page's blocks and plays the staggered entrance, otherwise does nothing. |
-| `route-transition.css` | Curtain, scan line, entrance keyframes (filter / translate / clip-path only), reduced-motion overrides. |
+| `route-transition.css` | Curtain (below the header, `--site-nav-h`), header crossfade during the hand-off, scan line, entrance keyframes (filter / translate / clip-path only), reduced-motion overrides. |
 
 ### `components/home/`
 
