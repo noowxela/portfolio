@@ -1,0 +1,543 @@
+/* `/`: full-screen Tron stage with the particle portrait. */
+
+html.landing-page,
+html.landing-page body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.landing-root {
+  --tron: #5ce1ff;
+  --ember: #ff2b2b;
+  --ember-hot: #ff6a2c;
+  --void: #050507;
+  --corner-x: clamp(1.6rem, 3.2vw, 3rem);
+  --corner-top: calc(3.5rem + clamp(1.6rem, 4.2vh, 2.8rem));
+  --corner-bottom: clamp(1.6rem, 4.6vh, 3rem);
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 38%, color-mix(in srgb, var(--tron) 10%, transparent), transparent 60%),
+    var(--void);
+  color: #e7fbff;
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- Ground and atmosphere ---- */
+
+.landing-floor {
+  pointer-events: none;
+  position: absolute;
+  right: -40%;
+  bottom: 0;
+  left: -40%;
+  height: 46%;
+  overflow: hidden;
+  mask-image: linear-gradient(to top, #000 8%, transparent 78%);
+}
+
+.landing-floor-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--tron) 42%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--tron) 42%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+  transform: perspective(520px) rotateX(78deg) scale(1.1);
+  transform-origin: center top;
+  animation: landing-floor-run 9s linear infinite;
+}
+
+@keyframes landing-floor-run {
+  to {
+    background-position: 0 72px, 0 0;
+  }
+}
+
+.landing-haze {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 22% at 50% 66%, color-mix(in srgb, var(--tron) 12%, transparent), transparent 70%),
+    linear-gradient(to bottom, rgb(5 5 7 / 0.9), transparent 22%);
+}
+
+.landing-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  cursor: grab;
+}
+
+.landing-stage:active {
+  cursor: grabbing;
+}
+
+.landing-stage canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0;
+  transition: opacity 0.7s ease-out;
+}
+
+.landing-root[data-ready='true'] .landing-stage canvas {
+  opacity: 1;
+}
+
+.landing-root .tron-scan {
+  z-index: 3;
+}
+
+.landing-frame {
+  z-index: 4;
+}
+
+/* ---- Name ---- */
+
+.landing-title {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  width: max-content;
+  max-width: 92vw;
+  text-align: center;
+  transform: translate(-50%, -38%);
+}
+
+.landing-role {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-hud), ui-monospace, monospace;
+  font-size: clamp(0.62rem, 0.9vw, 0.76rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--tron);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--tron) 70%, transparent);
+}
+
+.landing-name {
+  margin: 0;
+  font-size: clamp(3.2rem, 10.5vw, 9.5rem);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  color: #effcff;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 16px color-mix(in srgb, var(--tron) 85%, transparent),
+    0 0 48px color-mix(in srgb, var(--tron) 45%, transparent);
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--tron) 60%, transparent);
+}
+
+/* ---- Corner entries ---- */
+
+.landing-entries ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-entry {
+  position: absolute;
+  z-index: 6;
+}
+
+.landing-entry-tl {
+  top: var(--corner-top);
+  left: var(--corner-x);
+}
+
+.landing-entry-tr {
+  top: var(--corner-top);
+  right: var(--corner-x);
+  text-align: right;
+}
+
+.landing-entry-bl {
+  bottom: var(--corner-bottom);
+  left: var(--corner-x);
+}
+
+.landing-entry-br {
+  right: var(--corner-x);
+  bottom: var(--corner-bottom);
+  text-align: right;
+}
+
+.landing-entry-link {
+  position: relative;
+  display: inline-grid;
+  justify-items: inherit;
+  gap: 0.15rem;
+  padding: 0.35rem 0.1rem 0.4rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.landing-entry-tr .landing-entry-link,
+.landing-entry-br .landing-entry-link {
+  justify-items: end;
+}
+
+.landing-entry-link:focus-visible {
+  outline: 1px dashed var(--tron);
+  outline-offset: 6px;
+}
+
+.landing-entry-no {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ember);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--ember) 70%, transparent);
+}
+
+.landing-entry-label {
+  margin-top: 0.35rem;
+  font-family: var(--font-hud), ui-monospace, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--tron) 70%, #8aa);
+}
+
+.landing-entry-title {
+  font-size: clamp(1.5rem, 2.3vw, 2.1rem);
+  font-weight: 500;
+  line-height: 1.05;
+  color: #d7f6ff;
+  transition:
+    color 0.2s ease,
+    text-shadow 0.2s ease;
+}
+
+.landing-entry-enter {
+  justify-self: start;
+  margin-top: 0.35rem;
+  padding: 0.12rem 0.45rem 0.1rem;
+  font-family: var(--font-hud), ui-monospace, monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  color: #041016;
+  background: var(--tron);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--tron) 75%, transparent);
+  opacity: 0;
+  transform: translateY(-4px) scaleX(0.6);
+  transform-origin: left center;
+  transition:
+    opacity 0.18s ease,
+    transform 0.22s ease;
+}
+
+.landing-entry-tr .landing-entry-enter,
+.landing-entry-br .landing-entry-enter {
+  justify-self: end;
+  transform-origin: right center;
+}
+
+.landing-entry[data-active='true'] .landing-entry-title {
+  color: var(--tron);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--tron) 80%, transparent);
+}
+
+.landing-entry[data-active='true'] .landing-entry-enter {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Contact window ---- */
+
+.landing-contact {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  visibility: hidden;
+  transition: visibility 0s linear 0.22s;
+}
+
+.landing-contact[data-open='true'] {
+  visibility: visible;
+  transition: none;
+}
+
+.landing-contact-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(2 4 8 / 0.62);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  cursor: default;
+}
+
+.landing-contact-window {
+  position: relative;
+  width: min(26rem, 100%);
+  border: 1px solid color-mix(in srgb, var(--tron) 70%, transparent);
+  background: color-mix(in srgb, var(--tron) 6%, #06080c);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.6),
+    0 0 32px color-mix(in srgb, var(--tron) 28%, transparent),
+    inset 0 0 28px color-mix(in srgb, var(--tron) 8%, transparent);
+  opacity: 0;
+  transform: translateY(10px) scale(0.97);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.landing-contact[data-open='true'] .landing-contact-backdrop,
+.landing-contact[data-open='true'] .landing-contact-window {
+  opacity: 1;
+  transform: none;
+}
+
+.landing-contact-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 2.1rem;
+  padding: 0 0.4rem 0 0.8rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--tron) 45%, transparent);
+  background: color-mix(in srgb, var(--tron) 14%, transparent);
+  font-family: var(--font-hud), ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--tron);
+}
+
+.landing-contact-close {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid color-mix(in srgb, var(--tron) 40%, transparent);
+  background: none;
+  color: var(--tron);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.landing-contact-close:hover,
+.landing-contact-close:focus-visible {
+  border-color: var(--ember);
+  color: var(--ember);
+  outline: none;
+}
+
+.landing-contact-lead {
+  margin: 0;
+  padding: 1rem 1rem 0.3rem;
+  font-family: var(--font-hud), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--tron) 70%, #8aa);
+}
+
+.landing-contact-links {
+  margin: 0;
+  padding: 0.4rem 0.6rem 0.6rem;
+  list-style: none;
+}
+
+.landing-contact-links a {
+  display: grid;
+  grid-template-columns: 5.2rem 1fr auto;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.7rem 0.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--tron) 14%, transparent);
+  color: #d7f6ff;
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.landing-contact-links li:last-child a {
+  border-bottom: 0;
+}
+
+.landing-contact-links a:hover,
+.landing-contact-links a:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--tron) 16%, transparent);
+  color: #fff;
+}
+
+.landing-contact-key {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.landing-contact-value {
+  overflow: hidden;
+  font-family: var(--font-hud), ui-monospace, monospace;
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--tron) 75%, #9ab);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing-contact-arrow {
+  color: var(--ember);
+}
+
+.landing-contact-foot {
+  padding: 0.45rem 0.8rem;
+  border-top: 1px solid color-mix(in srgb, var(--tron) 22%, transparent);
+  font-family: var(--font-hud), ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--tron) 55%, #678);
+}
+
+/* ---- Static fallback (no WebGL / context lost) ---- */
+
+.landing-fallback {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: min(78vh, 86vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -54%);
+  -webkit-mask-image: radial-gradient(ellipse 50% 52% at 50% 46%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 52% at 50% 46%, #000 62%, transparent 100%);
+}
+
+.landing-fallback img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: grayscale(1) contrast(1.25) brightness(0.85) sepia(1) hue-rotate(150deg) saturate(3.2);
+  opacity: 0.7;
+}
+
+.landing-fallback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(5 5 7 / 0.55) 2px 4px);
+}
+
+/* ---- Mobile: name top, portrait middle, 2x2 entries at the bottom ---- */
+
+@media (max-width: 767px) {
+  .landing-root {
+    --corner-x: 1.1rem;
+  }
+
+  .landing-title {
+    top: calc(3.5rem + 1.6rem);
+    transform: translateX(-50%);
+  }
+
+  .landing-name {
+    font-size: clamp(2.8rem, 15vw, 4.4rem);
+  }
+
+  .landing-role {
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
+  }
+
+  .landing-entries ul {
+    position: absolute;
+    right: 0.9rem;
+    bottom: max(1.1rem, env(safe-area-inset-bottom));
+    left: 0.9rem;
+    z-index: 6;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .landing-entry {
+    position: static;
+    text-align: left;
+  }
+
+  .landing-entry-link,
+  .landing-entry-tr .landing-entry-link,
+  .landing-entry-br .landing-entry-link {
+    display: grid;
+    width: 100%;
+    justify-items: start;
+    padding: 0.55rem 0.7rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--tron) 22%, transparent);
+    background: rgb(5 7 11 / 0.72);
+  }
+
+  .landing-entry[data-active='true'] .landing-entry-link {
+    border-color: var(--tron);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--tron) 30%, transparent);
+  }
+
+  .landing-entry-tr .landing-entry-enter,
+  .landing-entry-br .landing-entry-enter {
+    justify-self: start;
+    transform-origin: left center;
+  }
+
+  .landing-entry-no {
+    font-size: 0.85rem;
+  }
+
+  .landing-entry-label {
+    margin-top: 0.1rem;
+    font-size: 0.6rem;
+  }
+
+  .landing-entry-title {
+    font-size: 1.3rem;
+  }
+
+  .landing-entry-enter {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.6rem;
+    margin: 0;
+  }
+
+  .landing-fallback {
+    top: 47%;
+    width: min(92vw, 52vh);
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-floor-grid {
+    animation: none;
+  }
+
+  .landing-stage canvas,
+  .landing-entry-enter,
+  .landing-contact,
+  .landing-contact-window,
+  .landing-contact-backdrop {
+    transition: none;
+  }
+}
