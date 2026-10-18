@@ -8,7 +8,7 @@ import { site } from '@/data/site'
 import { Rail, type RailHandle, type RailItem } from './Rail'
 import { createTrack, type Track } from './track'
 import type { MarkField } from './markField'
-import { createBlip, type Blip } from './blip'
+import { playArrive } from '@/lib/sound'
 
 type Mode = 'pending' | 'webgl' | 'static'
 
@@ -19,7 +19,6 @@ type Item =
 const REDUCED = '(prefers-reduced-motion: reduce)'
 const SMALL = '(max-width: 767px), (pointer: coarse)'
 const FINE = '(hover: hover) and (pointer: fine)'
-const SOUND_KEY = 'gridlog-sound'
 const PS = 'alex@grid:~$'
 
 const ITEMS: Item[] = [
@@ -181,8 +180,6 @@ export function GridLog({ className }: { className?: string }) {
   const shownRef = useRef(0)
   const [cur, setCur] = useState(0)
   const [mode, setMode] = useState<Mode>('pending')
-  const [sound, setSound] = useState(true)
-  const blipRef = useRef<Blip | null>(null)
   const settledRef = useRef<number | null>(null)
 
   const railItems = useMemo<RailItem[]>(
@@ -200,36 +197,6 @@ export function GridLog({ className }: { className?: string }) {
     const html = document.documentElement
     html.classList.add('tron-home', 'gridlog-page')
     return () => html.classList.remove('tron-home', 'gridlog-page')
-  }, [])
-
-  // Arrival blip (Web Audio, armed on the first gesture). Saved preference, default on.
-  useEffect(() => {
-    let saved = true
-    try {
-      saved = localStorage.getItem(SOUND_KEY) !== '0'
-    } catch {
-      /* storage blocked: keep the default */
-    }
-    const blip = createBlip(saved)
-    blipRef.current = blip
-    queueMicrotask(() => setSound(saved))
-    return () => {
-      blip.dispose()
-      blipRef.current = null
-    }
-  }, [])
-
-  const toggleSound = useCallback(() => {
-    setSound((was) => {
-      const next = !was
-      blipRef.current?.setEnabled(next)
-      try {
-        localStorage.setItem(SOUND_KEY, next ? '1' : '0')
-      } catch {
-        /* not persisted */
-      }
-      return next
-    })
   }, [])
 
   // Particles or the static mark; follow reduced-motion changes.
@@ -261,7 +228,7 @@ export function GridLog({ className }: { className?: string }) {
       },
       onSettle: (i) => {
         // A blip when the cycle settles on a new node; not for the first (load / deep-link) settle.
-        if (settledRef.current !== null && settledRef.current !== i) blipRef.current?.play(i, ITEMS[i]?.kind === 'head')
+        if (settledRef.current !== null && settledRef.current !== i) playArrive(i, ITEMS[i]?.kind === 'head')
         settledRef.current = i
         const hash = ITEMS[i]?.hash
         if (hash && location.hash.slice(1) !== hash) history.replaceState(history.state, '', `#${hash}`)
@@ -430,23 +397,6 @@ export function GridLog({ className }: { className?: string }) {
         <span className="gl-hint" aria-hidden>
           ← → · drag · scroll
         </span>
-        <button
-          type="button"
-          className="gl-sound"
-          aria-label="Sound effects"
-          aria-pressed={sound}
-          title={sound ? 'Sound on' : 'Sound off'}
-          onClick={toggleSound}
-        >
-          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
-            <path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor" />
-            {sound ? (
-              <path d="M11 5.5c1 .7 1.5 1.5 1.5 2.5s-.5 1.8-1.5 2.5M12.5 3.5c1.6 1.1 2.5 2.7 2.5 4.5s-.9 3.4-2.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
-            ) : (
-              <path d="M11 6l4 4M15 6l-4 4" fill="none" stroke="currentColor" strokeWidth="1.2" />
-            )}
-          </svg>
-        </button>
         <a className="gl-resume" href={site.resume} target="_blank" rel="noreferrer">
           Resume <span aria-hidden>↗</span>
         </a>

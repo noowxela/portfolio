@@ -11,7 +11,7 @@ flowchart LR
   gridlog --> track["track.ts (row controller)"]
   gridlog --> rail["Rail.tsx (branch graph)"]
   gridlog -->|dynamic import, when idle| field["markField.ts (three.js particles)"]
-  gridlog --> blip["blip.ts (Web Audio arrival sound)"]
+  gridlog --> sound["lib/sound.ts (site-wide Web Audio, playArrive)"]
   gridlog -.->|staged entrance| transition["components/transition (ENTRANCES['/journey'])"]
 ```
 
@@ -21,7 +21,7 @@ flowchart LR
 | --- | --- |
 | Void + floor | The shared 72 px perspective grid floor (`.grid-pit`) and a faint cyan haze. |
 | Particle mark | One WebGL canvas behind the panels. The current step's `mark` (`2016–20`, `2021–23`, `2023–25`, `2025–26`, `NEXT`) drawn in short dashes, all Tron cyan (`#5ce1ff`; pushed dashes flash cyan-white). It is 0.57 × the original size (`MARK_SCALE`; about 140 px font / 96 px ink on a 1440 px screen, 53 px / 37 px on a 390 px phone) and sits at the top of the stage, the top of its ink 12 px under the bar (10 px on phones, `MARK_TOP` in `markField.ts`), in the band above the current panel's frame. The morph fly-out, scatter and cursor push shrink with it. It morphs to the next mark when the step changes, scatters with wheel / drag speed, and is pushed away by a moving cursor. |
-| Bar | `~/grid / journey.log`, `5 commits · 2 branches`, the input hint, the sound toggle (speaker icon), and the Resume link (`site.resume`). |
+| Bar | `~/grid / journey.log`, `5 commits · 2 branches`, the input hint, and the Resume link (`site.resume`). |
 | Row | Five panels in one horizontal row, oldest first. The current one is centred, framed with corner brackets and lit; the others are dimmed to 20 %. Panel width `clamp(420px, 46vw, 680px)` on desktop, 86vw on phones. |
 | Branch rail | SVG at the bottom: the dashed ember `edu` lane merging into `main`, one node per step labelled underneath `MMU`, `Auronex`, `Oasis`, `Trinergy` (the `short` field in `data/experience.ts`; the current one glows), then three cyan dots trailing off after Trinergy ("more to come"). The dots are the HEAD button. A lit trail follows the row position up to the last step; the light-cycle head follows it continuously (also mid-drag) and rides out onto the dots for HEAD. Nodes are buttons with a years + company tooltip. |
 
@@ -52,14 +52,14 @@ When the Home's Journey corner is clicked, the curtain covers the page below the
 
 ## Arrival sound
 
-When the row settles on a different step (the light cycle arrives at a node), a short blip plays. It is synthesised with the Web Audio API in `blip.ts`; there are no audio files.
+When the row settles on a different step (the light cycle arrives at a node), a short blip plays. It is synthesised with the Web Audio API by `playArrive` in the site-wide `lib/sound.ts` (the same voice the header and home corners use); there are no audio files.
 
 - Voice: a triangle wave that glides down a fifth into the note in 30 ms (the "zap"), plus a sine an octave up at 35 % that dies a little faster (the "chime"), through a 3.2 kHz low-pass. Envelope 6 ms attack, exponential decay to silence in 190 ms. Master volume 0.18.
 - Pitch per node (pentatonic): MMU C5 523 Hz, Auronex D5 587 Hz, Oasis E5 659 Hz, Trinergy G5 784 Hz. HEAD (the dots) plays a two-note rise, G5 then C6 (1047 Hz) 70 ms later.
 - Only on settle, so wheeling or swiping across several steps gives one blip at the end; at most one blip per 120 ms besides.
 - Never on load or on arriving by a deep link (that first settle is skipped). Changing the hash on an open page (back / forward, a link) does play it.
-- Browsers start audio only after a user activation, so the `AudioContext` is created on the first click, tap or key press, and only while `navigator.userActivation.isActive` (no "AudioContext was not allowed to start" warning). A wheel is not an activation: if the visitor only scrolls, the page stays silent until they click, tap or press a key. The context is closed when the page unmounts.
-- Toggle: the speaker icon in the top bar, between the hint and Resume (`aria-label="Sound effects"`, `aria-pressed`). On by default; the choice is saved in `localStorage['gridlog-sound']` (`'0'` / `'1'`).
+- Browsers start audio only after a user activation, so the `AudioContext` is created on the first click, tap or key press, and only while `navigator.userActivation.isActive` (no "AudioContext was not allowed to start" warning). A wheel is not an activation: if the visitor only scrolls, the page stays silent until they click, tap or press a key. The context is shared by the whole site and lives on across client-side route changes, so leaving `/journey` no longer closes it.
+- Toggle: the speaker icon in the site header (before `available`), on every page (`aria-label="Sound effects"`, `aria-pressed`). On by default; the choice is saved in `localStorage['gridlog-sound']` (`'0'` / `'1'`). It used to sit in this page's top bar.
 
 ## Fallbacks
 

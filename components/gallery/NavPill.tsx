@@ -3,10 +3,11 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, type MouseEvent } from 'react'
 import headerNavLinks from '@/data/headerNavLinks'
 import { site } from '@/data/site'
 import { requestHomeExit } from '@/components/transition/routeTransition'
+import { armSound, playClick, playTick, setSoundEnabled, soundEnabled, subscribeSound, targetFor } from '@/lib/sound'
 
 const PAGE_LINKS = headerNavLinks.filter((link) => link.href !== '/')
 
@@ -50,6 +51,20 @@ function normalizePath(pathname: string) {
   return pathname || '/'
 }
 
+/** A plain left click / Enter (not a new tab or window). */
+function plainClick(e: MouseEvent) {
+  return e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey
+}
+
+/** Header link blip: the same note the home corner for that page plays. */
+function clickSound(e: MouseEvent, href: string) {
+  if (!plainClick(e)) return
+  // The home is already leaving (corner or header click); that click had its sound.
+  if (document.querySelector('.landing-root[data-exit]')) return
+  const target = targetFor(href)
+  if (target) playClick(target)
+}
+
 const iconLinks = [
   { href: site.github, Icon: GithubIcon, label: 'GitHub', fill: true },
   { href: site.linkedin, Icon: LinkedInIcon, label: 'LinkedIn', fill: true },
@@ -65,6 +80,9 @@ export function NavPill() {
   const [discsOpen, setDiscsOpen] = useState(false)
   const links = discsOpen ? PAGE_LINKS : PAGE_LINKS.filter((link) => link.href !== '/discs')
 
+  // UI sounds: one AudioContext for the visit, unlocked by the first click / key / tap.
+  useEffect(() => armSound(), [])
+
   return (
     <nav
       className={
@@ -78,6 +96,7 @@ export function NavPill() {
       <div className="flex h-full shrink-0 items-center self-stretch">
         <Link
           href="/"
+          onClick={(e) => clickSound(e, '/')}
           className={`grid h-full shrink-0 place-items-center px-3 text-[0.78rem] font-medium tracking-tight transition-colors duration-150 sm:px-6 ${
             onHome
               ? 'text-white hover:bg-[color-mix(in_srgb,var(--tron,#5ce1ff)_72%,transparent)] hover:text-[#041016] hover:shadow-[inset_0_0_14px_var(--tron,#5ce1ff),0_0_16px_color-mix(in_srgb,var(--tron,#5ce1ff)_75%,transparent)]'
@@ -97,6 +116,8 @@ export function NavPill() {
               onMouseEnter={() => router.prefetch(href)}
               onFocus={() => router.prefetch(href)}
               onClick={(e) => {
+                // Sound first, before any exit transition or navigation.
+                clickSound(e, href)
                 // On the home, Work / Journey / About leave through the home's exit (same as its corners).
                 // New tab / window clicks stay with the browser.
                 if (!onRoot || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
@@ -142,6 +163,8 @@ export function NavPill() {
 
       <div className="flex h-full min-w-0 items-center self-stretch">
         <HeaderRule onHome={onHome} />
+        <SoundToggle onHome={onHome} />
+        <HeaderRule onHome={onHome} />
         <AvailableMenu onHome={onHome} />
         <HeaderRule onHome={onHome} />
         <HeaderClock onHome={onHome} onReveal={() => setDiscsOpen((open) => !open)} />
@@ -156,6 +179,42 @@ function HeaderRule({ onHome }: { onHome: boolean }) {
       className={`w-px self-stretch transition-colors duration-150 ${onHome ? 'bg-white/25' : 'bg-black/15 dark:bg-white/20'}`}
       aria-hidden
     />
+  )
+}
+
+/** Site-wide sound on/off, saved in localStorage (on by default). */
+function SoundToggle({ onHome }: { onHome: boolean }) {
+  const on = useSyncExternalStore(subscribeSound, soundEnabled, () => true)
+  return (
+    <button
+      type="button"
+      className={`sound-toggle grid h-full shrink-0 cursor-pointer place-items-center border-0 bg-transparent px-2.5 transition-colors duration-150 sm:px-3.5 ${
+        onHome
+          ? on
+            ? 'text-[var(--tron,#5ce1ff)] hover:bg-white/8 hover:text-white'
+            : 'text-[#6d8c95] hover:bg-white/8 hover:text-white'
+          : on
+            ? 'text-[#0a9cbf] hover:bg-black/5 dark:text-[#5ce1ff] dark:hover:bg-white/8'
+            : 'text-[#999] hover:bg-black/5 hover:text-[#111] dark:text-[#777] dark:hover:bg-white/8 dark:hover:text-white'
+      }`}
+      aria-label="Sound effects"
+      aria-pressed={on}
+      title={on ? 'Sound on' : 'Sound off'}
+      onClick={() => {
+        setSoundEnabled(!on)
+        // Turning it on answers with a quiet tick.
+        if (!on) playTick()
+      }}
+    >
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+        <path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor" />
+        {on ? (
+          <path d="M11 5.5c1 .7 1.5 1.5 1.5 2.5s-.5 1.8-1.5 2.5M12.5 3.5c1.6 1.1 2.5 2.7 2.5 4.5s-.9 3.4-2.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
+        ) : (
+          <path d="M11 6l4 4M15 6l-4 4" fill="none" stroke="currentColor" strokeWidth="1.2" />
+        )}
+      </svg>
+    </button>
   )
 }
 
@@ -205,7 +264,7 @@ function AvailableMenu({ onHome }: { onHome: boolean }) {
 
 function HeaderClock({ onHome, onReveal }: { onHome: boolean; onReveal: () => void }) {
   const [detailed, setDetailed] = useState(false)
-  const [stamp, setStamp] = useState<{ short: string; full: string; iso: string } | null>(null)
+  const [stamp, setStamp] = useState<{ date: string; time: string; full: string; iso: string } | null>(null)
   const clicks = useRef(0)
   const clickTimer = useRef<number | null>(null)
 
@@ -219,7 +278,8 @@ function HeaderClock({ onHome, onReveal }: { onHome: boolean; onReveal: () => vo
       const mm = String(date.getMinutes()).padStart(2, '0')
       const ss = String(date.getSeconds()).padStart(2, '0')
       return {
-        short: `${day} ${month} · ${hh}:${mm}`,
+        date: `${day} ${month} · `,
+        time: `${hh}:${mm}`,
         full: `${weekday} ${day} ${month} · ${hh}:${mm}:${ss}`,
         iso: date.toISOString(),
       }
@@ -258,7 +318,21 @@ function HeaderClock({ onHome, onReveal }: { onHome: boolean; onReveal: () => vo
         onHome ? 'text-[#b7e7f2]' : 'text-[#555] dark:text-[#aaa]'
       }`}
     >
-      <time dateTime={stamp?.iso}>{stamp ? (detailed ? stamp.full : stamp.short) : '–– ––– · ––:––'}</time>
+      <time dateTime={stamp?.iso} className={detailed ? undefined : 'whitespace-nowrap'}>
+        {stamp ? (
+          detailed ? (
+            stamp.full
+          ) : (
+            <>
+              {/* Phones up to 400 px show just HH:MM, leaving room for the sound toggle. */}
+              <span className="max-[400px]:hidden">{stamp.date}</span>
+              {stamp.time}
+            </>
+          )
+        ) : (
+          '––:––'
+        )}
+      </time>
     </button>
   )
 }

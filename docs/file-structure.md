@@ -15,6 +15,7 @@ portfolio/
 │   ├── journey/              # `/journey` grid.log work-experience page (SDD 030)
 │   └── gallery/              # Gallery-specific components
 ├── data/                     # Static content (demos, nav links, site identity)
+├── lib/                      # Small shared helpers: withBasePath, sound (site-wide Web Audio UI sounds)
 ├── docs/                     # Project documentation
 ├── public/                   # Static assets served at /
 ├── next.config.ts            # Next.js config (images, CSP, headers)
@@ -111,7 +112,7 @@ The `/noelite2` 3D journey ([SDD 028](./sdd/028-journey-home.md)): `Journey.tsx`
 
 ### `components/journey/`
 
-The `/journey` grid.log page ([SDD 030](./sdd/030-journey-gridlog.md), [walkthrough](./pages/journey-gridlog.md)): `GridLog.tsx` (bar with sound toggle, panel row, HEAD panel, count-up, fallbacks), `track.ts` (wheel / drag / swipe / keys / hash row controller), `Rail.tsx` (SVG branch graph: labelled nodes, light cycle, trailing HEAD dots), `markField.ts` (three.js instanced-dash particle mark), `blip.ts` (Web Audio arrival sound), `journey.css`. Content comes from `data/experience.ts`.
+The `/journey` grid.log page ([SDD 030](./sdd/030-journey-gridlog.md), [walkthrough](./pages/journey-gridlog.md)): `GridLog.tsx` (bar, panel row, HEAD panel, count-up, fallbacks), `track.ts` (wheel / drag / swipe / keys / hash row controller), `Rail.tsx` (SVG branch graph: labelled nodes, light cycle, trailing HEAD dots), `markField.ts` (three.js instanced-dash particle mark), `journey.css`; the arrival sound is `playArrive` in `lib/sound.ts`. Content comes from `data/experience.ts`.
 
 ### `components/home/`
 
@@ -126,11 +127,18 @@ These files implement the gallery layout.
 | `GalleryShell.tsx` | **Orchestrator.** Manages selected demo, sidebar collapse (defaults collapsed on small screens), and the project-details overlay. |
 | `DemoSidebar.tsx` | Left column: thumbnail list with titles, selection outline, collapse animation, ⌘+[ shortcut. Title row toggles the details card. |
 | `DemoStage.tsx` | Center: iframe (or fallback card if embedding is blocked), scaled to fit, with an optional name/blurb/Live/GitHub overlay. |
-| `NavPill.tsx` | Fixed top header: alexW, Work, Journey, About (on `/` these three play the home exit via `requestHomeExit`), social icons, an Available status, and the local date and time. On `/` the bar is dark glass and its edge follows `--tron`. |
+| `NavPill.tsx` | Fixed top header: alexW, Work, Journey, About (on `/` these three play the home exit via `requestHomeExit`), social icons, the site-wide sound toggle (speaker, `localStorage['gridlog-sound']`), an Available status, and the local date and time (time only at 400 px or narrower). Header link clicks play their `lib/sound.ts` blip. On `/` the bar is dark glass and its edge follows `--tron`. |
 | `IdentityChip.tsx` | Bottom-left chip with name and role; links to About. Collapses on small screens. |
 | `PillButton.tsx` | Reusable rounded button/link used by the sidebar toggle, header icons, and identity chip. |
 
 **Client vs server:** files marked `'use client'` run in the browser (state, events, theme). `page.tsx` stays a server component and only passes data down.
+
+## `lib/`
+
+| File | Description |
+| --- | --- |
+| `withBasePath.ts` | Prefixes `/portfolio` to asset paths on the GitHub Pages build. |
+| `sound.ts` | Site-wide UI sounds (Web Audio, no files): one lazily created `AudioContext` for the visit, unlocked on the first gesture; `playClick(target)` for header links and home corners, `playClose()` for the contact window, `playTick()`, `playArrive()` for the `/journey` rail; on/off saved in `localStorage['gridlog-sound']`. |
 
 ---
 

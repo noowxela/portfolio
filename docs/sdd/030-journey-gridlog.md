@@ -34,13 +34,13 @@
 **Approach:**
 
 - `data/experience.ts`: typed steps (`branch`, `from` / `to`, particle `mark`, title, role, optional place / link, commit message, facts, tags, optional resume stats) plus `HEAD`. Commit hashes are a 6-hex FNV hash of the id; the duration stat is computed from the dates.
-- `components/journey/GridLog.tsx`: full-height stage under the navbar. Top: a breadcrumb bar (`~/grid / journey.log · 5 commits · 2 branches`, hint, sound toggle, resume link). (A terminal line under it, `alex@grid:~$ git checkout <hash> …` with a scrambling hash, was removed on Alex's review, see section 6.) Middle: a horizontal row of panels; the current one is centred and lit, the others dim. Bottom: the branch rail. The current index is React state (classes, `aria-current`); the row offset is written straight to the DOM.
+- `components/journey/GridLog.tsx`: full-height stage under the navbar. Top: a breadcrumb bar (`~/grid / journey.log · 5 commits · 2 branches`, hint, resume link; the sound toggle moved to the site header, see section 7). (A terminal line under it, `alex@grid:~$ git checkout <hash> …` with a scrambling hash, was removed on Alex's review, see section 6.) Middle: a horizontal row of panels; the current one is centred and lit, the others dim. Bottom: the branch rail. The current index is React state (classes, `aria-current`); the row offset is written straight to the DOM.
 - `components/journey/track.ts`: the row controller. Wheel (either axis) moves the row freely and snaps to the nearest panel 140 ms after the last event (ease-out cubic, 0.45 s). Pointer drag (mouse and touch, dominant axis) with release velocity projects a target and snaps, at most one panel per gesture (a deliberate drag past 16 % of the spacing counts). Arrow keys / Home / End step; clicking a node or a dim panel jumps; focus inside a panel brings it to the centre. `#<hash>` deep links in, and the hash follows the current step (`replaceState`). Reduced motion: no tweens.
 - `components/journey/Rail.tsx`: SVG drawn in pixels from a ResizeObserver: the `edu` lane, the merge, `main`, step nodes labelled `MMU` / `Auronex` / `Oasis` / `Trinergy`, then three dots trailing off that stand for HEAD (and are its button). A lit trail and a light-cycle head follow the row's fractional position, so dragging moves the cycle continuously.
 - `components/journey/markField.ts`: one three.js renderer (orthographic, pixel space), instanced quads drawn as short cyan dashes. Each step's `mark` is rasterised with the page font into a cell grid; particles morph from where they are to the next mark with a per-particle stagger, jitter slightly, scatter with wheel / drag speed, and are pushed away from the cursor (speed-driven, so a resting cursor leaves no hole). DPR ≤ 2, stops drawing when settled or hidden, `forceContextLoss()` on unmount, context loss falls back.
 - Fallbacks: reduced motion or no WebGL show the mark as static outlined neon text; the row still works.
 - Entrance: `ENTRANCES['/journey']` stages the floor, the bar, the current panel's lines, then the rail, only when arriving from home.
-- `components/journey/blip.ts`: a Web Audio blip when the row settles on a new step (see section 6).
+- Arrival sound: `playArrive` from the site-wide `lib/sound.ts` when the row settles on a new step (was `components/journey/blip.ts`; see sections 6 and 7).
 
 **Pros:** readable, light on phones, close to the reference's interaction, reuses the home's particle language and the existing transition.
 
@@ -96,3 +96,12 @@ Alex: the background year was too big. `MARK_SCALE = 0.57` in `markField.ts`: at
 
 The years now end at the panel frame (desktop ink 98–194 px, frame at 195 px; phone ink 96–133 px, frame at 129 px, so only the frame line touches) and no longer sit behind the title, so the current panel's background went back from 58 % to the original 38 %.
 
+## 7. Note (2026-10-18): sound is site-wide
+
+Alex asked for sounds on the header nav, the home corners and the contact window, so the arrival blip moved out of `components/journey/blip.ts` into `lib/sound.ts`, which every page shares:
+
+- One `AudioContext` for the visit, created on the first click / tap / key while `navigator.userActivation.isActive` (the unlock listener is installed once by `NavPill`, capture phase, so it runs before any click handler). It survives client-side route changes and is never closed by a page; a full reload starts over.
+- The voice is unchanged (triangle zap + octave sine chime, 6 ms attack, 190 ms decay, master 0.18, 3.2 kHz low-pass). `playArrive(index, head)` is the old `blip.play`, same notes, same settle-only rule and 120 ms gap, and still only when the context is running. Verified identical: rail click on Oasis plays E5, End → HEAD plays G5 + C6, toggle off silences it, none on load / deep link.
+- The speaker toggle left this page's top bar (and `.gl-sound` CSS is gone) for a single toggle in the site header, same `localStorage['gridlog-sound']` key, default on.
+
+Header and home details are in SDD 029's note of the same date.

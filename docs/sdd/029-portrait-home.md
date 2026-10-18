@@ -136,3 +136,27 @@ Frame timing (rAF gaps, ms): desktop idle median 16.7 / p95 16.7; during the fas
 
 The header gained `Journey` (Work · Journey · About, the corners' order). On `/`, a plain click on one of those three header links plays the corner exit for the matching corner instead of navigating straight away: `Landing` registers `registerHomeExit` (in `components/transition/routeTransition.ts`) while mounted, `NavPill` calls `requestHomeExit(href)` and prevents the default only when the home accepted. Modifier / middle clicks open a new tab untouched; repeat clicks during an exit are swallowed; other pages keep plain navigation. To fit Work · Journey · About beside the clock on phones, the header's link and button padding is tighter below `sm`, and at 400 px or narrower the `available` menu shows only its dot (the word stays for screen readers). Verified at 1440×900 and 390×844 (and 360 px): curtain at the header's bottom edge (56 px) at 650 ms for all three, staged entrance on arrival, corners unchanged, Cmd and middle click open new tabs, `/work` → Journey plain, back to `/` restores the home, reduced motion and no-WebGL hand off; no console errors. Media: `/workspace/portfolio/shots/nav-journey/`.
 
+### Note (2026-10-18): sounds on the header, corners and contact
+
+Alex: header nav clicks, the home corners 01–04 and closing `contact.app` should make a sound. All of it uses the site-wide `lib/sound.ts` (moved out of `/journey`, see SDD 030 section 7): Web Audio only, one `AudioContext` for the visit, created on the first click / tap / key under user activation, alive across route changes.
+
+| Event | Sound |
+| --- | --- |
+| Header `alexW` | blip C5 523 Hz |
+| Header Work / corner 01 | blip D5 587 Hz |
+| Header Journey / corner 02 | blip E5 659 Hz |
+| Header About / corner 03 | blip G5 784 Hz |
+| Corner 04 (contact opens) | blip A5 880 Hz |
+| Hidden Discs link | blip C6 1047 Hz |
+| Contact closes (×, Esc, backdrop) | A5 then E5 60 ms later (second voice at 0.8) |
+| Phone first tap on a corner (select only) | quiet tick: one sine E6 1319 Hz, 4 ms attack, 50 ms decay, 0.3 of the voice level |
+| Sound toggle turned on | the same tick |
+
+The blip is the `/journey` voice: triangle gliding from 1.5× down to the note in 30 ms, plus a sine an octave up at 35 %, 6 ms attack, exponential decay over 190 ms, master gain 0.18, 3.2 kHz low-pass. The header link and the corner for the same page play the same note.
+
+- The sound is scheduled in the click handler itself, before `requestHomeExit` / the corner exit / navigation, so it starts on the click (measured 0–3 ms after the click event).
+- One sound per click: the header plays its note and the home exit it triggers plays none; a header click while the home is already leaving (`.landing-root[data-exit]`) is silent, like the swallowed click itself. `registerHomeExit` closing an open contact window does not play the close sound.
+- Modifier / middle clicks (new tab) are silent. Reduced motion does not mute anything; only the toggle does.
+- Toggle: a speaker icon button in the header's right group, before `available` (`aria-label="Sound effects"`, `aria-pressed`), on every page, Tron and light / dark styling. Saved in `localStorage['gridlog-sound']`, default on. To keep the header on one line at 400 px or narrower, the clock shows only `HH:MM` there (the date returns above 400 px; the triple-click detailed clock is unchanged).
+
+Verified on the static export (headless Chrome, `--autoplay-policy=user-gesture-required`, `AudioContext` instrumented to log every oscillator start): 31 desktop and 12 mobile steps each produced exactly the expected sound (header ×5 targets, corners 01–04, contact close by ×, Esc and backdrop, journey arrival and HEAD, repeat click during exit → one sound, Cmd-click → silent, mobile select tick then open blip); one `AudioContext` across all route changes; none before a gesture or on wheel alone; toggle off silences every source and stays off across routes and a reload; toggle on ticks. Header fits at 1440, 390 and 360 px on `/`, `/work`, `/journey`, `/about` (no overflow, every control hit-tests to itself, clock on one line). No console errors or warnings. Media: `/workspace/portfolio/shots/sounds/`.
