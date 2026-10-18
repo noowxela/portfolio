@@ -1,7 +1,8 @@
 # SDD: Scroll-driven 3D journey home (preview)
 
 - **Repo:** `01_project/o000o_active/portfolio`
-- **Status:** `implemented` (preview at `/journey`; `/` unchanged at the time)
+- **Status:** `implemented` (preview at `/journey`, now `/noelite2`; `/` unchanged at the time)
+- **Moved (2026-10-18):** this journey now lives at **`/noelite2`** (`app/noelite2/page.tsx`, `components/noelite2/`). `/journey` is a temporary Tron "coming soon" stub (`components/journey/JourneySoon.tsx`) that links to `/noelite2` until the work-experience journey replaces it. Where this SDD says `/journey` or `components/journey/`, read `/noelite2` and `components/noelite2/`.
 - **Note (2026-10-18):** `/` has since moved: the scroll story this SDD calls "the home" now lives at `/noelite`, and `/` is the particle-portrait stage ([SDD 029](./029-portrait-home.md)).
 - **Date:** 2026-10-17
 - **Related:** [001-tron-home.md](./001-tron-home.md), [002-mosaic-float.md](./002-mosaic-float.md), [023-disc-versions.md](./023-disc-versions.md), [026-disc-tilt-70.md](./026-disc-tilt-70.md), [027-grid-discs-3d.md](./027-grid-discs-3d.md)

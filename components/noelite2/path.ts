@@ -1,5 +1,5 @@
 /**
- * The fixed camera path for /journey. Scroll progress p (0..1) maps to a
+ * The fixed camera path for /noelite2. Scroll progress p (0..1) maps to a
  * camera position and look target through C1 Hermite splines over keyframes
  * placed at p values, so the ride never stops between acts.
  *

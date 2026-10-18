@@ -29,5 +29,6 @@ Read this index, then follow one feature file. Drive only the verification serve
 - [Work](./work.md) — gallery layouts, including Grid.
 - [About](./about.md) — name, focus, and toolkit.
 - [Discs](./discs.md) — version board, including 02 v3 3D.
-- [Journey](./journey.md) — scroll ride at `/journey/`.
+- [Journey](./journey.md) — temporary coming-soon stub at `/journey/`.
+- [Noelite 2](./noelite2.md) — scroll-driven 3D ride at `/noelite2/` (was `/journey/`).
 - [Noelite](./noelite.md) — previous scroll home at `/noelite/`.

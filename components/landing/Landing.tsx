@@ -46,7 +46,7 @@ export function Landing({ className }: { className?: string }) {
   const [exit, setExit] = useState<{ id: EntryId; dx: number; dy: number } | null>(null)
   const exitingRef = useRef(false)
 
-  // The Tron void ground (shared with /noelite and /journey).
+  // The Tron void ground (shared with /noelite, /noelite2 and /journey).
   useEffect(() => {
     const html = document.documentElement
     html.classList.add('tron-home', 'landing-page')

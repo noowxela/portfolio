@@ -1,10 +1,10 @@
 # Journey
 
-Journey is a scroll-driven ride from a desk, through a grid, and back. It is linked from the Home corner labeled Journey.
+`/journey/` is a temporary Tron "coming soon" page until the work-experience journey lands. The 3D scroll ride moved to `/noelite2/`. The Home corner labeled Journey still links here.
 
 ## Sub-features
 
-- `journey-open` shows the page and its accessible name.
+- `journey-open` shows the stub, its heading, and the link to `/noelite2/`.
 
 ## How to get to it (user POV)
 
@@ -17,11 +17,9 @@ Preconditions:
 
 - Doctor passes against `http://127.0.0.1:3100`.
 
-- **Open Journey.** Go to `/journey/`. Run `node .cursor/skills/verify-portfolio/verify.mjs drive journey`. A level-1 heading reads `Alex Woon`.
-- **Proof.** `artifacts/journey/page.png` shows the ride. `artifacts/journey/main.aria.txt` includes that heading. `artifacts/journey/meta.json` records `/journey/`.
+- **Open Journey.** Go to `/journey/`. Run `node .cursor/skills/verify-portfolio/verify.mjs drive journey`. A level-1 heading reads `Journey` and a link reads `Ride the 3D journey`.
+- **Proof.** `artifacts/journey/page.png` shows the stub. `artifacts/journey/main.aria.txt` includes the heading and link. `artifacts/journey/meta.json` records `/journey/`.
 
 ## Gotchas
 
-- The HUD is hidden from assistive tech. Do not assert its act label.
-- The heading is visually hidden on the WebGL path. It is still in the accessibility tree.
-- This recipe does not scroll the ride. Opening the page is the proof.
+- This page is replaced when the work-experience journey is built; update this file then.

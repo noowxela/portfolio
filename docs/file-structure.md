@@ -10,7 +10,9 @@ portfolio/
 ├── components/               # React UI components
 │   ├── landing/              # `/` stage: corner entries, particle portrait, contact window
 │   ├── transition/           # Home → page hand-off: curtain + staggered entrance
-│   ├── home/                 # `/noelite` scroll story (+ tron.css shared with about/journey)
+│   ├── home/                 # `/noelite` scroll story (+ tron.css shared with about/journey/noelite2)
+│   ├── noelite2/             # `/noelite2` scroll-driven 3D journey (SDD 028, was /journey)
+│   ├── journey/              # `/journey` placeholder (coming-soon stub)
 │   └── gallery/              # Gallery-specific components
 ├── data/                     # Static content (demos, nav links, site identity)
 ├── docs/                     # Project documentation
@@ -57,7 +59,8 @@ flowchart TD
 |------|------|
 | `page.tsx` | Home route (`/`). Loads Oxanium + Share Tech Mono and renders `Landing`. |
 | `noelite/page.tsx` | `/noelite`: the previous home, the scroll story (`TronHome`). |
-| `journey/page.tsx` | `/journey` preview (SDD 028). |
+| `noelite2/page.tsx` | `/noelite2`: the scroll-driven 3D journey preview (SDD 028), moved from `/journey`. |
+| `journey/page.tsx` | `/journey`: temporary Tron "coming soon" stub linking to `/noelite2`, until the work-experience journey lands. |
 | `work/page.tsx` | Gallery route (`/work`). Passes `demos` to `GalleryShell`. |
 | `about/page.tsx` | About route (`/about`). Bio, focus, and contact links. |
 | `layout.tsx` | Root HTML shell: Inter font, metadata, `ThemeProviders`, `NavPill`, and `RouteCurtain` (home → page transition). |
@@ -101,6 +104,14 @@ The home → page transition ([portrait-home.md](./pages/portrait-home.md#leavin
 | `routeTransition.ts` | `beginRouteExit` (sessionStorage flag + curtain), flag helpers, and `ENTRANCES`: per-page selectors in entrance order. Edit this to change what comes in first. |
 | `RouteCurtain.tsx` | Mounted once in `app/layout.tsx`. Dark curtain; on arrival with a fresh flag it tags the page's blocks and plays the staggered entrance, otherwise does nothing. |
 | `route-transition.css` | Curtain (below the header, `--site-nav-h`), header crossfade during the hand-off, scan line, entrance keyframes (filter / translate / clip-path only), reduced-motion overrides. |
+
+### `components/noelite2/`
+
+The `/noelite2` 3D journey ([SDD 028](./sdd/028-journey-home.md)): `Journey.tsx` (fixed WebGL stage over a scroll track, HUD), `journeyScene.ts` + `scene/*` (desk, Grid, city, portal, name), `path.ts` (camera path and acts), `JourneyFallback.tsx` (2D poster / reduced-motion fallback), `journey.css`. CSS classes keep their `journey-*` names.
+
+### `components/journey/`
+
+`JourneySoon.tsx` + `journey-soon.css`: the temporary `/journey` page (title, status line, link to `/noelite2`). The home's 02 Journey corner still points here.
 
 ### `components/home/`
 

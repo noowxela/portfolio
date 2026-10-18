@@ -17,7 +17,7 @@ function canUseWebGL() {
 }
 
 /**
- * /journey: a fixed WebGL stage over a tall scroll track. Scroll progress
+ * /noelite2: a fixed WebGL stage over a tall scroll track. Scroll progress
  * (gsap ScrollTrigger, scrubbed) drives the camera path and every scene
  * transition; the HUD is plain DOM written straight from the same progress.
  */

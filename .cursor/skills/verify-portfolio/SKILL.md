@@ -20,6 +20,7 @@ node .cursor/skills/verify-portfolio/verify.mjs drive work
 node .cursor/skills/verify-portfolio/verify.mjs drive discs
 node .cursor/skills/verify-portfolio/verify.mjs drive journey
 node .cursor/skills/verify-portfolio/verify.mjs drive noelite
+node .cursor/skills/verify-portfolio/verify.mjs drive noelite2
 node .cursor/skills/verify-portfolio/verify.mjs cleanup
 ```
 

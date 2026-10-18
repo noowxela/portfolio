@@ -181,9 +181,16 @@ async function drive(feature) {
     }
     if (feature === 'journey') {
       await page.goto(`${base}/journey/`, { waitUntil: 'networkidle' })
+      await page.getByRole('heading', { level: 1, name: 'Journey' }).waitFor()
+      await page.getByRole('link', { name: /Ride the 3D journey/ }).waitFor()
+      await proof('journey', page, page.locator('main'))
+      return
+    }
+    if (feature === 'noelite2') {
+      await page.goto(`${base}/noelite2/`, { waitUntil: 'networkidle' })
       const heading = page.getByRole('heading', { level: 1, name: 'Alex Woon' })
       await heading.waitFor()
-      await proof('journey', page, page.locator('main'))
+      await proof('noelite2', page, page.locator('main'))
       return
     }
     if (feature === 'noelite') {
@@ -215,7 +222,7 @@ async function drive(feature) {
       await proof('discs', page, side)
       return
     }
-    throw new Error(`unknown feature ${feature}. Use about, home, work, discs, journey, or noelite.`)
+    throw new Error(`unknown feature ${feature}. Use about, home, work, discs, journey, noelite, or noelite2.`)
   } finally {
     await session.close()
   }

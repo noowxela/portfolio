@@ -57,7 +57,8 @@ The page entrance only plays when the page finds a fresh flag (`sessionStorage['
 | Page | Entrance order |
 | --- | --- |
 | `/work` | View switcher row, then each block of the current view (album stage, caption / sidebar). Single albums are not faded on their own (their discs would show before the sleeves). |
-| `/journey` | The stage (poster / canvas), then the HUD, meter and skip button. |
+| `/journey` | Temporary stub (2026-10-18): the grid floor, then the label, title, status line and link to `/noelite2`. |
+| `/noelite2` | The stage (poster / canvas), then the HUD, meter and skip button (not linked from the home; kept for when the 3D journey is opened via a home hand-off). |
 | `/about` | Hex field, then the intro line by line (name, role, bio, focus, toolkit rows), the hobbies marquee, the footer columns. |
 
 Reduced motion: no exit animation; the home fades out in 0.12 s, the curtain drops at once, the route changes after 130 ms and the page just appears as the curtain fades. No WebGL: the static duotone portrait shrinks into the clicked corner and burns out (CSS), with the same name glitch and curtain.
