@@ -29,10 +29,13 @@ function fill(html, route) {
     'twitter:image': image,
     robots,
   }
-  return html.replace(/<(title|meta|link)\b[^>]*data-shell="([^"]+)"[^>]*>/g, (tag, element, key) => {
+  const withTitle = html.replace(
+    /<title\b[^>]*data-shell="title"[^>]*>[\s\S]*?<\/title>/,
+    `<title data-shell="title">${fields.title}</title>`,
+  )
+  return withTitle.replace(/<(meta|link)\b[^>]*data-shell="([^"]+)"[^>]*>/g, (tag, element, key) => {
     const value = fields[key]
     if (value == null) return tag
-    if (element === 'title') return `<title data-shell="title">${value}</title>`
     if (tag.includes('content="')) return tag.replace(/content="[^"]*"/, `content="${value.replaceAll('"', '&quot;')}"`)
     return tag.replace(/href="[^"]*"/, `href="${value}"`)
   })

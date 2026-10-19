@@ -1,6 +1,7 @@
 # Risks
 
 - Route HTML shells have the right title and Open Graph tags, but the body is empty until JavaScript runs. Crawlers that do not execute JS see no page text.
+- The first-visit loading screen gives up after 8 seconds, so a portrait that is still loading can appear late. Clearing site data plays the screen again. A first visit that opens a page other than `/` does not wait for the home portrait.
 - Particle text now uses the real family names Oxanium and Inter Variable. Compare the journey year and the noelite2 name with the Next baseline if a glyph looks off.
 - Pin plus the mobile browser chrome can jump if a scene height is tied to `100vh`. Scenes use `100dvh`. `normalizeScroll` is not on until a real jump shows up.
 - The home scene ignores the light theme. The header on `/` uses its own dark glass and a `--tron` edge. Gallery and About still follow the theme toggle.

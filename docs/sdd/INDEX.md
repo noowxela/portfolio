@@ -33,3 +33,5 @@
 | [029-portrait-home.md](./029-portrait-home.md) | implemented | Full-screen home with a particle portrait; old home moves to /noelite |
 | [030-journey-gridlog.md](./030-journey-gridlog.md) | implemented | Work-experience journey "grid.log" at /journey |
 | [031-vite-migration.md](./031-vite-migration.md) | implemented | Next.js static export to Vite + React Router |
+| [032-user-site-root.md](./032-user-site-root.md) | draft | Serve the portfolio at noowxela.github.io |
+| [033-first-load.md](./033-first-load.md) | implemented | First-visit loading screen until home assets are ready |

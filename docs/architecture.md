@@ -32,6 +32,8 @@ About is written up the same way in [tron-about.md](./pages/tron-about.md). ф╕нц
 
 ## Home stage (`/`)
 
+The first visit in a browser paints a static loading screen from `index.html` before the bundle runs (`#boot`, class `booting` on `html`, remembered as `localStorage['portfolio-booted']`). `src/boot.ts` keeps it up until Oxanium 600 is ready and, on `/`, the portrait sets `data-ready` (or the fallback photo settles). Other first URLs wait until that route has rendered. It fades in 0.4s, or drops immediately when `prefers-reduced-motion` is set, and gives up after 8s. Later visits skip it. See [SDD 033](./sdd/033-first-load.md).
+
 `Landing` is a client component. It renders the DOM (name, corner entries, contact window, static fallback) and lazy-loads `portraitScene.ts`, which owns the page's single `WebGLRenderer`. Photos are sampled into instanced line-segment particles (`sampler.ts`), each entry has a pose in `poses.ts`, and the render loop runs only while something moves (idle sway renders at ~30 fps; with reduced motion nothing renders at rest). Details in [SDD 029](./sdd/029-portrait-home.md).
 
 Clicking Work, Journey or About plays an exit on the home (name glitch, particles stream into the corner), drops the global `RouteCurtain` (mounted in `app/layout.tsx`), and `router.push`es after 720 ms. The destination plays a staggered entrance only when it finds the home's fresh `sessionStorage['route-enter']` flag for its own path, so direct visits, reloads and back / forward are untouched. See [portrait-home.md](./pages/portrait-home.md#leaving-for-a-page-work-journey-about).

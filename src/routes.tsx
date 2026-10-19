@@ -1,5 +1,6 @@
-import type { ComponentType } from 'react'
+import { useEffect, type ComponentType } from 'react'
 import { createBrowserRouter } from 'react-router'
+import { noteRoutePainted } from './boot'
 import { RootLayout } from './RootLayout'
 
 type PageModule = { default: ComponentType }
@@ -29,7 +30,14 @@ export function preloadRoute(href: string) {
 function lazyPage(load: () => Promise<PageModule>) {
   return async () => {
     const mod = await load()
-    return { Component: mod.default }
+    const Page = mod.default
+    function PaintedPage() {
+      useEffect(() => {
+        noteRoutePainted()
+      }, [])
+      return <Page />
+    }
+    return { Component: PaintedPage }
   }
 }
 

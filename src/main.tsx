@@ -4,6 +4,7 @@ import interUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.w
 import oxaniumUrl from '@fontsource/oxanium/files/oxanium-latin-600-normal.woff2?url'
 import './fonts.css'
 import './globals.css'
+import { startBoot } from './boot'
 import { router } from './routes'
 
 for (const href of [interUrl, oxaniumUrl]) {
@@ -19,3 +20,4 @@ for (const href of [interUrl, oxaniumUrl]) {
 const root = document.getElementById('root')
 if (!root) throw new Error('missing #root')
 createRoot(root).render(<RouterProvider router={router} />)
+startBoot()

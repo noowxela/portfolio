@@ -25,6 +25,57 @@
     <meta data-shell="twitter:description" name="twitter:description" content="Portfolio of Alex Woon, a full stack developer in Malaysia. A particle portrait home, a live gallery of games and web apps, and work experience as a git log." />
     <meta data-shell="twitter:image" name="twitter:image" content="https://noowxela.github.io/portfolio/og.png" />
     <meta data-shell="robots" name="robots" content="index,follow" />
+    <style>
+      html.booting,
+      html.booting body {
+        background: #050507 !important;
+      }
+      html.booting #root {
+        visibility: hidden;
+      }
+      html.booting.boot-out #root {
+        visibility: visible;
+      }
+      #boot {
+        display: none;
+      }
+      html.booting #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        background: #050507;
+        color: #5ce1ff;
+        font-family: ui-monospace, 'SFMono-Regular', monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.42em;
+        text-indent: 0.42em;
+        text-transform: lowercase;
+      }
+      html.booting #boot i {
+        display: block;
+        width: 7rem;
+        height: 1px;
+        background: #5ce1ff;
+      }
+      html.boot-out #boot {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+      }
+      html.booting .landing-stage canvas {
+        transition: none !important;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html.boot-out #boot {
+          transition: none;
+        }
+      }
+    </style>
     <script>
       ;(function () {
         try {
@@ -34,11 +85,16 @@
           root.classList.toggle('dark', dark)
           root.classList.toggle('light', !dark)
           root.style.colorScheme = dark ? 'dark' : 'light'
+          if (localStorage.getItem('portfolio-booted') !== '1') root.classList.add('booting')
         } catch (e) {}
       })()
     </script>
   </head>
   <body class="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-[rgb(13,13,13)] dark:text-white">
+    <div id="boot" role="status">
+      <i aria-hidden="true"></i>
+      loading
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
