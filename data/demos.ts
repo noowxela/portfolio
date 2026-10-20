@@ -29,6 +29,30 @@ export function demoThumb(demo: Demo) {
 
 export const demos: Demo[] = [
   {
+    name: 'Bukit Jalil Sports City',
+    slug: 'bukitjalil-pavilion-infographic',
+    thumb: '/thumbs/bukitjalil-pavilion-infographic.svg',
+    shot: '/thumbs/bukitjalil-pavilion-infographic.webp',
+    embedUrl: 'https://noowxela.github.io/bukitjalil-pavilion-infographic/#00',
+    repoUrl: 'https://github.com/noowxela/bukitjalil-pavilion-infographic',
+    blurb: 'A 3D scrollytelling infographic of Bukit Jalil Sports City: Pavilion, the National Sports Complex and Bukit Jalil City.',
+    tags: ['Three.js', 'TypeScript', 'Infographic'],
+    isNew: true,
+    note: 'Ten chapters walk from the overview orbit through landmarks, LRT Line 4, roads, massing, walking routes and weather, in English, Chinese and Malay. The map comes from OpenStreetMap.',
+  },
+  {
+    name: 'GLB Viewer',
+    slug: 'glb-viewer',
+    thumb: '/thumbs/glb-viewer.svg',
+    shot: '/thumbs/glb-viewer.webp',
+    embedUrl: 'https://noowxela.github.io/glb-viewer/',
+    repoUrl: 'https://github.com/noowxela/glb-viewer',
+    blurb: 'A local browser viewer for .glb and .gltf models, built with Three.js and React.',
+    tags: ['Three.js', 'React', 'TypeScript'],
+    isNew: true,
+    note: 'Drop in a model and orbit it in the browser. The default is a transformed Porsche 911 Carrera 4S by Karol Miklas (CC BY-SA 4.0).',
+  },
+  {
     name: 'Mount Replay',
     slug: 'mount-replay',
     thumb: '/thumbs/mount-replay.svg',

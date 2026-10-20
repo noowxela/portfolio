@@ -35,3 +35,4 @@
 | [031-vite-migration.md](./031-vite-migration.md) | implemented | Next.js static export to Vite + React Router |
 | [032-user-site-root.md](./032-user-site-root.md) | draft | Serve the portfolio at noowxela.github.io |
 | [033-first-load.md](./033-first-load.md) | implemented | First-visit loading screen until home assets are ready |
+| [034-glb-viewer.md](./034-glb-viewer.md) | implemented | Add GLB Viewer and Bukit Jalil to the gallery |

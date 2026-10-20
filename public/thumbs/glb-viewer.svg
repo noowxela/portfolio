@@ -1,0 +1,7 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#111827"/>
+  <polygon points="640,180 860,520 420,520" fill="#374151" stroke="#f59e0b" stroke-width="8"/>
+  <polygon points="640,260 760,480 520,480" fill="#1f2937"/>
+  <text x="80" y="80" fill="#f3f4f6" font-size="32" font-family="Inter, Arial, sans-serif" font-weight="600">GLB Viewer</text>
+  <text x="80" y="120" fill="#9ca3af" font-size="20" font-family="Inter, Arial, sans-serif">Three.js · React</text>
+</svg>

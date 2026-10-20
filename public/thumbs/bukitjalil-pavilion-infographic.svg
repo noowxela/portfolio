@@ -1,0 +1,11 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#111827"/>
+  <ellipse cx="640" cy="430" rx="340" ry="120" fill="#14532d" opacity="0.85"/>
+  <rect x="520" y="250" width="240" height="90" rx="6" fill="#d6d3d1"/>
+  <rect x="430" y="300" width="70" height="160" fill="#78716c"/>
+  <rect x="780" y="280" width="90" height="180" fill="#a8a29e"/>
+  <circle cx="640" cy="390" r="54" fill="#1c1917" stroke="#fafaf9" stroke-width="6"/>
+  <path d="M220 560 Q640 500 1060 570" stroke="#721422" stroke-width="10" fill="none"/>
+  <text x="80" y="80" fill="#fafaf9" font-size="32" font-family="Inter, Arial, sans-serif" font-weight="600">Bukit Jalil Sports City</text>
+  <text x="80" y="120" fill="#a8a29e" font-size="20" font-family="Inter, Arial, sans-serif">Three.js · Infographic</text>
+</svg>
