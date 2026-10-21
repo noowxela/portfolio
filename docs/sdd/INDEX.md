@@ -36,3 +36,4 @@
 | [032-user-site-root.md](./032-user-site-root.md) | draft | Serve the portfolio at noowxela.github.io |
 | [033-first-load.md](./033-first-load.md) | implemented | First-visit loading screen until home assets are ready |
 | [034-glb-viewer.md](./034-glb-viewer.md) | implemented | Add GLB Viewer and Bukit Jalil to the gallery |
+| [035-toolbox.md](./035-toolbox.md) | implemented | Add Toolbox to the gallery |

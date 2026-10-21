@@ -1,0 +1,9 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#111827"/>
+  <rect x="430" y="180" width="140" height="140" rx="16" fill="#1f2937" stroke="#38bdf8" stroke-width="8"/>
+  <rect x="610" y="180" width="140" height="140" rx="16" fill="#1f2937" stroke="#a78bfa" stroke-width="8"/>
+  <rect x="430" y="360" width="140" height="140" rx="16" fill="#1f2937" stroke="#34d399" stroke-width="8"/>
+  <rect x="610" y="360" width="140" height="140" rx="16" fill="#1f2937" stroke="#f59e0b" stroke-width="8"/>
+  <text x="80" y="80" fill="#f3f4f6" font-size="32" font-family="Inter, Arial, sans-serif" font-weight="600">Toolbox</text>
+  <text x="80" y="120" fill="#9ca3af" font-size="20" font-family="Inter, Arial, sans-serif">React · TypeScript · Python</text>
+</svg>

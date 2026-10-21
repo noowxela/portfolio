@@ -29,6 +29,18 @@ export function demoThumb(demo: Demo) {
 
 export const demos: Demo[] = [
   {
+    name: 'Toolbox',
+    slug: 'toolbox',
+    thumb: '/thumbs/toolbox.svg',
+    shot: '/thumbs/toolbox.webp',
+    embedUrl: 'https://noowxela.github.io/toolbox/',
+    repoUrl: 'https://github.com/noowxela/toolbox',
+    blurb: 'Small tools on one static site. PDF to Markdown uses an API; the rest stay in the browser.',
+    tags: ['React', 'TypeScript', 'Python'],
+    isNew: true,
+    note: 'QR codes, image compress and convert, JSON formatting, timestamps, and text diff run locally. PDF to Markdown sends the file to a Python API for that request. The tool list is #/.',
+  },
+  {
     name: 'Bukit Jalil Sports City',
     slug: 'bukitjalil-pavilion-infographic',
     thumb: '/thumbs/bukitjalil-pavilion-infographic.svg',
