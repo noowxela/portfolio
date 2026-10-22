@@ -29,6 +29,18 @@ export function demoThumb(demo: Demo) {
 
 export const demos: Demo[] = [
   {
+    name: 'Shichen',
+    slug: 'shichen',
+    thumb: '/thumbs/shichen.svg',
+    shot: '/thumbs/shichen.webp',
+    embedUrl: 'https://noowxela.github.io/shichen/',
+    repoUrl: 'https://github.com/noowxela/shichen',
+    blurb: 'A 3D clock for the twelve Chinese double-hours, with notes beside the wheel.',
+    tags: ['Three.js', 'React', 'TypeScript'],
+    isNew: true,
+    note: 'The wheel follows local time. Drag or tap a wedge to open that 时辰. 子 straddles midnight.',
+  },
+  {
     name: 'Toolbox',
     slug: 'toolbox',
     thumb: '/thumbs/toolbox.svg',

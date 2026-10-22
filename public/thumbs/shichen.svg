@@ -1,0 +1,8 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#8ea3c4"/>
+  <circle cx="430" cy="360" r="210" fill="#6b5344"/>
+  <path d="M430 360 L430 150 A210 210 0 0 1 612 465 Z" fill="#8a3d32"/>
+  <circle cx="430" cy="360" r="16" fill="#f3e6d0"/>
+  <text x="720" y="330" fill="#1c1917" font-size="64" font-family="Georgia, serif">Shichen</text>
+  <text x="720" y="390" fill="#44403c" font-size="28" font-family="Georgia, serif">AŒö°</text>
+</svg>
