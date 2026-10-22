@@ -64,9 +64,9 @@ Shichen’s own Pages deploy is a separate spec in the shichen repo. This spec s
 - [x] Shichen is the first item in `data/demos.ts`, with the live URL and GitHub repo above
 - [x] `public/thumbs/shichen.svg` and `public/thumbs/shichen.webp` exist. The WebP shows the clock, not a blank frame.
 - [x] `/work` shows the Shichen card. The iframe loads `https://noowxela.github.io/shichen/`. Live and GitHub links match. `/noelite` featured cards stay Phaser Examples, My Reborn Car, and Interactive Experiences.
-- [ ] `https://noowxela.github.io/portfolio/work` shows the same card after the portfolio Pages deploy.
+- [x] `https://noowxela.github.io/portfolio/work` shows the same card after the portfolio Pages deploy.
 
-Verified 2026-10-22 on `http://localhost:3001/portfolio/work?v=list`: Shichen is the selected card, the iframe `src` is `https://noowxela.github.io/shichen/`, and the details panel Live and GitHub links match. The shelf (`?v=shelf`) opens on album 1 of 15, Shichen, with `public/thumbs/shichen.webp` (1440×900) loaded. The screenshot shows the clock at 未时, not a blank frame. `/noelite` selected work stays Phaser Examples, My Reborn Car, and Interactive Experiences. The live gallery check waits on the portfolio Pages deploy.
+Verified 2026-10-22 on `http://localhost:3001/portfolio/work?v=list`: Shichen is the selected card, the iframe `src` is `https://noowxela.github.io/shichen/`, and the details panel Live and GitHub links match. The shelf (`?v=shelf`) opens on album 1 of 15, Shichen, with `public/thumbs/shichen.webp` (1440×900) loaded. The screenshot shows the clock at 未时, not a blank frame. `/noelite` selected work stays Phaser Examples, My Reborn Car, and Interactive Experiences. After the Pages deploy, `https://noowxela.github.io/portfolio/work/?v=list` shows the same card, iframe, and links.
 
 ## 6. Status history
 
@@ -74,4 +74,4 @@ Verified 2026-10-22 on `http://localhost:3001/portfolio/work?v=list`: Shichen is
 | --- | --- | --- |
 | 2026-10-22 | draft | Split from the Pages deploy. Starts after that URL is live. |
 | 2026-10-22 | approved | Pages is live. Add the card at the top of the gallery. |
-| 2026-10-22 | implemented | Shichen is first in the local gallery; live gallery follows the Pages deploy |
+| 2026-10-22 | implemented | Shichen is first in the local gallery and on the live work page |
