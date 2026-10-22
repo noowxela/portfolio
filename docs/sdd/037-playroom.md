@@ -63,13 +63,13 @@ The work gallery reads `data/demos.ts`. Newest items sit at the top of the `demo
 - [x] Playroom is the first item in `data/demos.ts`, with the live URL and GitHub repo above
 - [x] `public/thumbs/playroom.svg` and `public/thumbs/playroom.webp` exist. The WebP shows the hardware, not a loading line.
 - [x] `/work` shows the Playroom card. The iframe loads `https://noowxela.github.io/playroom/`. Live and GitHub links match. `/noelite` featured cards stay Phaser Examples, My Reborn Car, and Interactive Experiences.
-- [ ] `https://noowxela.github.io/portfolio/work` shows the same card after the portfolio Pages deploy.
+- [x] `https://noowxela.github.io/portfolio/work` shows the same card after the portfolio Pages deploy.
 
-Verified 2026-10-22 on `http://localhost:3001/portfolio/work?v=list`: Playroom is the selected card, the iframe `src` is `https://noowxela.github.io/playroom/`, and the details panel Live and GitHub links match. The shelf (`?v=shelf`) opens on album 1 of 16, Playroom, with the 1440×900 WebP. The screenshot shows the CRT and deck, not a loading line. `/noelite` selected work stays Phaser Examples, My Reborn Car, and Interactive Experiences. The live gallery check waits on the portfolio Pages deploy.
+Verified 2026-10-22 on `http://localhost:3001/portfolio/work?v=list`: Playroom is the selected card, the iframe `src` is `https://noowxela.github.io/playroom/`, and the details panel Live and GitHub links match. The shelf (`?v=shelf`) opens on album 1 of 16, Playroom, with the 1440×900 WebP. The screenshot shows the CRT and deck, not a loading line. `/noelite` selected work stays Phaser Examples, My Reborn Car, and Interactive Experiences. After the Pages deploy, `https://noowxela.github.io/portfolio/work/?v=list` shows the same card, iframe, and links.
 
 ## 6. Status history
 
 | Date | Status | Note |
 | --- | --- | --- |
 | 2026-10-22 | approved | User asked to add Playroom to the work gallery |
-| 2026-10-22 | implemented | Playroom is first in the local gallery; live gallery follows the Pages deploy |
+| 2026-10-22 | implemented | Playroom is first in the local gallery and on the live work page |
