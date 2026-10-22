@@ -38,3 +38,4 @@
 | [034-glb-viewer.md](./034-glb-viewer.md) | implemented | Add GLB Viewer and Bukit Jalil to the gallery |
 | [035-toolbox.md](./035-toolbox.md) | implemented | Add Toolbox to the gallery |
 | [036-shichen.md](./036-shichen.md) | implemented | Add Shichen to the gallery |
+| [037-playroom.md](./037-playroom.md) | implemented | Add Playroom to the gallery |

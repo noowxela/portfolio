@@ -1,0 +1,7 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#e6e1d6"/>
+  <rect x="250" y="180" width="280" height="220" rx="8" fill="#8d8d8d"/>
+  <rect x="270" y="200" width="240" height="150" fill="#1c1c1c"/>
+  <rect x="560" y="250" width="220" height="90" rx="6" fill="#d9d4c8" stroke="#8a857a"/>
+  <text x="80" y="620" fill="#1c1917" font-size="64" font-family="Georgia, serif">Playroom</text>
+</svg>

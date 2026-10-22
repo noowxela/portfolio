@@ -29,6 +29,18 @@ export function demoThumb(demo: Demo) {
 
 export const demos: Demo[] = [
   {
+    name: 'Playroom',
+    slug: 'playroom',
+    thumb: '/thumbs/playroom.svg',
+    shot: '/thumbs/playroom.webp',
+    embedUrl: 'https://noowxela.github.io/playroom/',
+    repoUrl: 'https://github.com/noowxela/playroom',
+    blurb: 'A late-80s hardware arcade. Power on to play Snake, Breakout, or Blocks.',
+    tags: ['Three.js', 'React', 'TypeScript'],
+    isNew: true,
+    note: 'The CRT, deck, pad, and carts are Blender models. Best scores stay in this browser.',
+  },
+  {
     name: 'Shichen',
     slug: 'shichen',
     thumb: '/thumbs/shichen.svg',
